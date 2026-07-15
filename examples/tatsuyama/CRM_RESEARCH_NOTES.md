@@ -20,6 +20,8 @@
 
 4. **混合状態prior と観測量ごとのprior選択**: CRMのpriorは推定量に $\langle P\rangle_\sigma$ としてしか入らないため、(i) **混合状態でもpriorにできる**(回転平均UHFはその実例)、(ii) **priorは古典後処理なので、同一の測定データに対し観測量ごとに最適なpriorを選べる**。いずれも追加測定コストゼロ。
 
+5. **最適係数CRM(損をしないCRM)**: CRMは制御変量法のβ=1特殊例であり、係数を同一データから $\hat\beta = \widehat{\mathrm{Cov}}(m_\rho,Y)/\widehat{\mathrm{Var}}(Y)$ とプラグイン推定すると理論利得 $G=1/(1-\mathrm{corr}^2)\ge 1$ で**priorがどれほど悪くても漸近的に損をしない**(β=1で G<1 だった全ケースが修復、達成Gは理論とy=x一致)。複数priorは回帰に一般化され、**タダのprior集合 {UHF, UHF-sym} の回帰だけで χ=32 MPS prior 相当**に達する例(二重占有)もある(§3.7)。
+
 ---
 
 ## 1. 背景と問い
@@ -155,6 +157,15 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 - **対称性回復UHF(回転平均、混合状態prior)**: サイト間スピン相関を**全て修復**(U=4: ZZ x隣 0.83→8.69 でχ=64の8.57と同等、SzSz x 0.81→6.11、他同様)。オンサイト・運動項は回転不変で厳密に不変(理論予言通り)。全体として **χ=16 MPS 相当を O(N³)+1次元求積で達成**。
 - **退行が1つ**: 二重占有 6.6→3.4 (U=4)。演算子はSU(2)不変で合計Δは両priorで同一だが、**χ=192のDMRG参照自体がNéel対称性を破っており**、項ごとの $\langle Z_q\rangle$ は共線UHFの方が合う。→ 項ごとΔの効果(§2.2注意)の実証例であり、「priorの対称性を実験状態の対称性に合わせる」「観測量ごとにpriorを選ぶ」という設計指針につながる。
 
+### 3.7 最適係数CRMと多prior回帰 — `crm_optbeta.png`
+
+CRM推定量を制御変量法の一般形 $\hat o(\beta) = \bar m_\rho - \beta(\bar Y_\sigma - \mathrm{Tr}[O\sigma])$ に拡張し、βを同一データからプラグイン推定($n_u{=}50$ 設定から共分散を推定)。W=4×8シリンダーで検証(既存runと同一seed=同一測定データ):
+
+- **保険としての最適β**: β=1 で損をしていた全ケースが修復される。U=8のUHF priorで ZZ y2: 0.70→**13.95**、ZZ x1: 1.14→**18.59**、SzSz x: 1.02→**15.06**。達成利得は理論 $1/(1-\mathrm{corr}^2)$ と y=x で一致。プラグインバイアスは検出限界以下(全法・全観測量で |mean−true|/SE ≤ 2.6)。
+- **単一Pauli列では最適βの利得がprior非依存になる**(理論的必然): $Y_p(u) = \mathbf{1}[\text{基底一致}]\cdot 3^{|A|}\langle P\rangle_{\sigma_p}$ はpriorごとにスカラー倍しか違わず、その定数はβに吸収される。系として、**単一Pauli列にはpriorなしの「一致インジケータ制御変量」($Y=\mathbf{1}[\text{match}]$、係数はデータから学習)が定義できる** — self-calibrating shadow ともいうべき推定器で、prior構築コストゼロ。
+- **β=1 と最適βのトレードオフ**: priorが優秀な場合はβ=1が勝つ(U=8 ZZ onsite: 241 vs 141; hop y-bond: 9.3 vs 3.2)。原因は $\hat\beta$ の推定ノイズで、特に基底一致が稀な観測量(hop, |A|=3, 一致率1/27 → 50設定中約2回)で顕著。**「信頼できるpriorはβ=1、不確かなpriorは最適β」**という運用指針が定量化された。
+- **多prior回帰**: 二重占有で multi(free: UHF+UHF-sym)=**98**(U=8)。単一のタダprior(UHF 15.9 / UHF-sym 6.3)を桁で超え、χ=32 MPS prior(101)とほぼ同等。**MPSを一切使わずにMPS級の利得**に到達。priorが冗長な場合(純Pauli列)は擬似逆行列で自動的に単一prior相当へ退化。
+
 ---
 
 ## 4. 論文化に向けて
@@ -165,7 +176,8 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 2. 「利得=priorの局所誤差」原理による、グローバル忠実度崩壊下での利得残存の実証(L=32)
 3. Wick閉形式による**MPS不要の平均場prior**(サイズ非依存コスト)と、2DでのMPS priorとの定量比較
 4. **混合状態prior**の導入と対称性回復UHFによる弱点修復
-5. 窓サンプリング(副産物、シミュレーション手法)
+5. 最適係数・多prior回帰CRM: 「損をしない」保証、priorなしの一致インジケータ制御変量、タダのprior回帰でMPS級利得(§3.7)
+6. 窓サンプリング(副産物、シミュレーション手法)
 
 ### 想定される査読コメントと対応
 
@@ -206,6 +218,7 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 | `crm_2d_cylinder.jl` | W=4×8シリンダー。UHF vs 切断MPS prior | 約25分 |
 | `crm_2d_symuhf.jl` | 同上 + 対称性回復UHF prior | 約30分 |
 | `crm_matchgate.jl` | matchgateシャドウ×CRM。4×2シリンダー、Pauli vs MG × 標準 vs CRM | 約8分 |
+| `crm_optimal_beta.jl` | 最適係数CRM・多prior回帰。W=4×8シリンダー | 約15分 |
 | `crm_paper_figures.jl` | 上記TSVから清書図 Fig 1–3 を生成 | 数十秒 |
 
 実行方法(MPS系スクリプト):
@@ -215,7 +228,7 @@ JULIA_LOAD_PATH="@:@v#.#:@stdlib" julia --project=Hubbard_MPS_Env_v2 <script>.jl
 ```
 (`Hubbard_MPS_Env_v2` に ITensors/ITensorMPS、デフォルト環境に Plots。初回は `Pkg.instantiate()`)
 
-データ: `crm_mps_scaling_results.tsv`, `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`, `crm_matchgate_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
+データ: `crm_mps_scaling_results.tsv`, `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`, `crm_matchgate_results.tsv`, `crm_optbeta_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
 
 ## 付録B: 主要参考文献
 
