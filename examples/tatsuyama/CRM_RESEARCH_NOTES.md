@@ -171,7 +171,7 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 
 - **「単一の局所観測量なら該当基底の直接測定が最強では」** → その通り。本手法の土俵は「同一データから多数の観測量を同時に」(全相関関数、構造因子)。論文では derandomization / Pauli grouping を比較対象に入れ、多観測量同時推定の総コストで比較する構成にする(**未実施・要追加実験**)。
 - **「参照状態(χ=192)は収束していない」** → 手法の主張は「固定参照に対する推定分散」なので自己無撞着。ただし物理量の議論をする場合はχ収束を確認する。参照の対称性破れの定量化(⟨Z_q⟩ρの出力)も追加すべき(**要追加**)。
-- **「JW弦のせいで2Dの横ボンド運動項が測れない」** → 本研究はスネーク順序で局所になる縦ボンドのみ扱った。横ボンドは $3^{O(W)}$ で破綻するのは事実で、matchgateシャドウとの結合(将来課題)が正道。
+- **「JW弦のせいで2Dの横ボンド運動項が測れない」** → 事実であり、§3.5でmatchgateシャドウにより解消できることを実証済み(x-bondがy-bondと同精度、エネルギー誤差13分の1)。あわせて「CRMの利得はアンサンブル依存(Pauliで大、matchgateでは小)」という効果範囲の切り分けも提示できる。
 - **「忠実度でのCRMの意味は」** → 小さい系では有効(L=8でG≈15)だが、局所シャドウの忠実度推定自体が指数的に破綻するため主戦場ではない、と明示する。
 - **統計**: 分散比のエラーバー(n_repeat=50–200によるブートストラップCI)を最終図には付けること(**要追加**)。
 
@@ -190,7 +190,7 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 2. 分散比のブートストラップCI付き最終図
 3. 参照状態の対称性破れの定量化と、対称性を破らない参照(SU(2) DMRG or 大χ)での再確認
 4. ドープ2Dシリンダー(ストライプUHF prior)
-5. matchgateシャドウ × CRM(Slater prior の古典側が厳密計算できる構造的相性; 2D横ボンド問題の解)
+5. ~~matchgateシャドウ × CRM~~ → **実施済み**(§3.5)。残り: (a) matchgateでCRM利得が現れうる大 n_m 領域の掃引とmatchgate版分散理論の導出、(b) 相関状態に対するmatchgateシャドウの大規模シミュレーション法(現状は16量子ビット密ベクトルが上限)
 6. 忠実度CRMのprior側厳密化(χ²-MPO縮約 $q_\sigma^T W q_\sigma$)— 現状は安価な過剰サンプリングで代用
 7. QSE行列要素($H_{ij}, S_{ij}$)へのCRM適用(ブランチ名 `qse-debug` の元テーマとの接続)
 
@@ -205,6 +205,7 @@ W=4×8 シリンダー(64量子ビット、half-filling、参照=DMRG χ=192):
 | `crm_param_sweep.jl` | nm掃引(L=8)と U・ドーピング掃引(L=16) | 約40分 |
 | `crm_2d_cylinder.jl` | W=4×8シリンダー。UHF vs 切断MPS prior | 約25分 |
 | `crm_2d_symuhf.jl` | 同上 + 対称性回復UHF prior | 約30分 |
+| `crm_matchgate.jl` | matchgateシャドウ×CRM。4×2シリンダー、Pauli vs MG × 標準 vs CRM | 約8分 |
 | `crm_paper_figures.jl` | 上記TSVから清書図 Fig 1–3 を生成 | 数十秒 |
 
 実行方法(MPS系スクリプト):
@@ -214,12 +215,12 @@ JULIA_LOAD_PATH="@:@v#.#:@stdlib" julia --project=Hubbard_MPS_Env_v2 <script>.jl
 ```
 (`Hubbard_MPS_Env_v2` に ITensors/ITensorMPS、デフォルト環境に Plots。初回は `Pkg.instantiate()`)
 
-データ: `crm_mps_scaling_results.tsv`, `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
+データ: `crm_mps_scaling_results.tsv`, `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`, `crm_matchgate_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
 
 ## 付録B: 主要参考文献
 
 - B. Vermersch et al., *Enhanced estimation of quantum observables with common randomized measurements*, PRX Quantum **5**, 010352 (2024) — CRMの原論文
 - H.-Y. Huang, R. Kueng, J. Preskill, *Predicting many properties of a quantum system from very few measurements*, Nat. Phys. **16**, 1050 (2020) — 古典シャドウ
 - H.-Y. Huang, R. Kueng, J. Preskill, PRL **127**, 030503 (2021) — derandomization(比較対象)
-- Z. Zhao, N. C. Rubin, A. Miyake, PRL **127**, 110504 (2021) / K. Wan et al. (2023) — フェルミオン/matchgateシャドウ(将来課題)
+- Z. Zhao, N. C. Rubin, A. Miyake, PRL **127**, 110504 (2021) / K. Wan et al., Commun. Math. Phys. (2023) — フェルミオン/matchgateシャドウ(§3.5で実装)
 - M. Fishman, S. R. White, PRB **92**, 075132 (2015) — Slater行列式のMPS変換(UHFをMPS化する場合の標準法)
