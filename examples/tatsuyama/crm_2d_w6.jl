@@ -532,7 +532,7 @@ function main()
         BLAS.set_num_threads(parse(Int, get(ENV, "DMRG_BLAS", "16")))
         E, ψ = ground_state_cyl(LX, W, t, U, U/2; chi_max=CHI_EXP, nsweeps=14)
         BLAS.set_num_threads(1)
-        @printf("  DMRG(chi=192): E0=%.6f  maxlinkdim=%d  (%.0fs)\n", E, maxlinkdim(ψ), time()-tstart)
+        @printf("  DMRG(chi=%d): E0=%.6f  maxlinkdim=%d  (%.0fs)\n", CHI_EXP, E, maxlinkdim(ψ), time()-tstart)
         flush(stdout)
 
         uhf = solve_uhf(LX, W, t, U; Nup, Ndn)
