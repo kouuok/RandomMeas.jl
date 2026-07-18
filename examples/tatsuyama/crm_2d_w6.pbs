@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N crm_w6
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -o crm_w6.log
+
+# 使い方: qsub -v UVAL=4.0 crm_2d_w6.pbs  /  qsub -v UVAL=8.0 crm_2d_w6.pbs
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+
+export CHI_EXP="${CHI_EXP:-512}"
+export DMRG_BLAS="${DMRG_BLAS:-16}"
+export JULIA_NUM_THREADS=1        # サンプリングは1スレッド (小行列はBLASスレッド化が逆効果)
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+
+echo "host=$(hostname) UVAL=${UVAL} CHI_EXP=${CHI_EXP} DMRG_BLAS=${DMRG_BLAS} start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_2d_w6.jl
+echo "end=$(date)"
