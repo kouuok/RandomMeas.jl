@@ -4,79 +4,296 @@
 
 **一言でいうと**: 「量子実験の測定コストは、手元の安い理論近似で大幅に値切れる。しかも近似は下手でよく、測りたい量の近くだけ合っていればよい」ことを、理論式と数値実験(最大96量子ビット)の両方で示しました。
 
-詳細な研究ノート(論文構成・数式・査読対応まで): **[CRM_RESEARCH_NOTES.md](CRM_RESEARCH_NOTES.md)**
+論文構成での整理(主張の骨子・数式・検証一覧・査読対応): **[CRM_RESEARCH_NOTES.md](CRM_RESEARCH_NOTES.md)**
 
 ---
 
-## 主要な結果
+## 0. 全実験に共通するセットアップ
 
-### 1. 利得は「priorの局所誤差」だけで決まる(理論式を5桁で検証)
+### 模型と量子ビットへの写像
 
-CRMの分散削減率(利得 G)は閉形式
+ハバード模型
 
-$$G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s}, \qquad \Delta = \langle P\rangle_\rho - \langle P\rangle_\sigma$$
+$$H = -t\sum_{\langle ij\rangle\sigma}(c^\dagger_{i\sigma}c_{j\sigma} + \mathrm{h.c.}) + U\sum_i n_{i\uparrow}n_{i\downarrow} - \mu\sum_{i\sigma} n_{i\sigma}$$
 
-で書け、**priorのグローバル忠実度は登場しない**。1D鎖・ショット配分掃引・2Dシリンダーの全データ(218点)が理論線 y=x に乗る。
+を $t=1$、$\mu=U/2$(half-filling、粒子数はDMRGの量子数保存で固定)で扱う。Jordan-Wigner (JW) 変換の順序は $1\uparrow, 1\downarrow, 2\uparrow, 2\downarrow, \dots$(サイト $s$ の↑が qubit $2s-1$、↓が $2s$)。サイト数 $N_s$ に対して量子ビット数は $N = 2N_s$。
 
-![gain law](crm_fig1_gainlaw.png)
+- 密度・スピンz型の観測量($n, n n, S^zS^z$)はJW後もZ列のままで、**距離によらず台のサイズ $|A|=1{-}2$**。
+- ホッピング $c^\dagger_a c_b + \mathrm{h.c.}$ は $(X Z \cdots Z X + Y Z \cdots Z Y)/2$ となり、**JW順序上の距離だけ台が伸びる**(1Dの最近接で $|A|=3$、2Dのx方向ボンドで $|A|=2W+1$)。これが後の実験5の主役になる。
 
-### 2. グローバル忠実度が崩壊しても局所観測量の利得は生き残る
+### 「実験」と「prior」
 
-L=32鎖で忠実度 **F=0.007**(ほぼ直交)の粗いpriorでも、局所観測量の測定コストは10分の1以上節約できる(左)。CRMを使うなら「少ない測定設定×多ショット」の配分が得(右、飽和則も理論と一致)。
+- **参照状態(擬似実験)ρ**: DMRG(ITensorMPS、`Fermion` サイトタイプ + 量子数保存。JW符号はOpSumが自動処理)の基底状態。ここで重要なのは、**ρは厳密な基底状態である必要はない**こと。手法の主張は「固定された状態ρに対する推定の分散」なので、χが有限でも自己無撞着な設定になる(ただし物理量の議論をする場合は別途収束が必要。実験8の解釈で実際に効いてくる)。
+- **prior σ**: (a) ρを小さいボンド次元χに切断したMPS(priorの品質を連続的に振る「ダイヤル」)、(b) UHF平均場(実験4以降)、(c) その回転平均(混合状態prior、実験4b)。
 
-![locality](crm_fig2_locality.png)
+### 測定プロトコルとCRM推定器
 
-### 3. 2Dでは「タダの平均場prior」が高価なMPS priorに匹敵する
+1つの「設定」$u$ で各量子ビットの測定基底をX/Y/Zから独立一様に選び、$n_m$ ショット測定する。これを $n_u$ 設定繰り返す(総ショット数 $n_u \times n_m$)。Pauli列 $P$(台 $A$)のスナップショット推定値は「基底が $A$ 上で全一致したときだけ $3^{|A|}\times(\pm1)$、不一致なら厳密に0」という形になる。
 
-W=4シリンダー(64量子ビット)では切断MPS priorが急劣化(χ=8で忠実度0.055)する一方、$O(N^3)$ のUHF平均場は**Wickの定理だけで**prior側を厳密計算でき、オンサイト量でχ=32–64のMPS並みの利得(U=8で G=241)。弱点だったサイト間スピン相関は、スピン回転平均した**混合状態prior(対称性回復UHF)**で修復。
+CRMは各設定で prior 側の条件付き期待値を**厳密に**引き、最後に厳密値を足し戻す:
 
-![2d priors](crm_2d_symuhf.png)
+$$\hat o_{\rm CRM} = \frac{1}{n_u}\sum_u \Bigl[\bar X_\rho(u) - E[X_\sigma|u]\Bigr] + \mathrm{Tr}[O\sigma], \qquad E[X_\sigma|u] = \sum_t c_t\,\mathbf{1}[\text{基底一致}]\,3^{|A_t|}\langle P_t\rangle_\sigma$$
 
-**W=6(96量子ビット、研究室クラスターでのPBS計算)**では、MPS priorの劣化がさらに加速(χ=8で0.018)する一方UHFは持ちこたえ、**安いpriorの相対優位は幅とともに拡大**することを確認。
+つまり実装上priorに要求されるのは**項ごとの期待値 $\langle P_t\rangle_\sigma$ だけ**であり、これが「MPSでなくてもWickの定理で書ける状態なら何でもpriorになる」「混合状態でもよい」という後の展開の鍵になる。
 
-![w6](crm_2d_w6.png)
+### 測定のシミュレーション方法
 
-### 4. 「損をしないCRM」— 最適係数と多prior回帰
+- ρからのサンプリング: 回転をMPSテンソルに吸収し、right-canonical形式から逐次条件付きサンプリング($O(N\chi^2)$/ショット)。
+- **窓サンプリング**(本研究で導入した高速化): 観測量の台が載る連続窓 $[q_1,q_2]$ だけをサンプルする。直交中心を $q_1$ に置くと左環境が恒等になるので、左Schmidt指標 $l$ を回転に依存しない確率 $p(l)$ で先に引き、$v_0=e_l$ から通常の逐次サンプリングをすればよい。**コストが窓幅のみに依存し、系サイズLに依存しない**。
+- 正しさの検証: 各パイプラインは密行列ED(8-16量子ビット)との突き合わせをスクリプト内のassertで実施(エネルギー・JW符号・Wick式・サンプラーのBorn分布・Pfaffian等、多くは機械精度)。一覧は[ノート§2.5](CRM_RESEARCH_NOTES.md)。
 
-CRMは統計学の制御変量法のβ=1特殊例。係数βを同じデータから推定すると $G = 1/(1-\mathrm{corr}^2) \geq 1$ となり、**priorがどんなに悪くても損をしない**(β=1で損をしていた全ケースが修復)。複数priorの回帰では、**タダのprior2つだけでχ=32 MPS相当**の利得に達する例も(二重占有: G=98 vs 101)。
+### 統計プロトコル
 
-![opt beta](crm_optbeta.png)
-
-### 5. matchgate(フェルミオン)シャドウ: JW弦問題の解消と、CRMの適用範囲
-
-2次元をJordan-Wigner変換するとx方向ホッピングに長い演算子の弦が付き、Pauliシャドウでは**事実上測定不能**(5000設定で一度もサンプルされない)。matchgateシャドウ(ランダムGauss回転)ならx-bondもy-bondと同精度で測れ、エネルギー誤差は約13分の1。一方、**CRMはmatchgateにはほぼ効かない**(nm=3000でも~2倍止まり): Gauss測定は自己平均的で「打ち消すべき設定間揺らぎ」自体が小さい。**CRMの価値は測定アンサンブル依存**という重要な知見。
-
-![matchgate](crm_matchgate.png)
-
-### 6. 正直なベースライン比較: 貪欲derandomizationとの守備範囲分け
-
-既知の固定観測量リストに対しては貪欲derandomization(決定論的な測定計画)が最強。ただしCRMはシャドウの不利をほぼ埋め(構造化23観測量で中央値誤差 0.059→0.012、derandは0.0085)、**測定後に任意の観測量を選べる柔軟性**を保つ。ランダム150観測量ではCRMが**最悪誤差を半減**(誤差の大きい観測量を自動的に狙い撃つ)。→ 「リスト既知ならderandomize、事後選択・多目的ならシャドウ+CRM」。
+利得は $G = \mathrm{Var}[\text{標準シャドウ}]/\mathrm{Var}[\text{CRM}]$。分散は実験全体を `n_repeat` 回独立に繰り返した推定値のばらつきから求める。分散比の相対誤差は約 $2\sqrt{2/n_{\rm repeat}}$ で、n_repeat=200なら±14%、50なら±28%、30なら±37%程度(1σ)。**表の個々のGはこの精度で読む**こと(例: G=0.9とG=1.1の差は無意味、G=1とG=10の差は有意)。
 
 ---
 
-## 経緯として重要だった発見
+## 1. 推定器の修正と利得法則の検証(8量子ビットED系)
 
-- **出発点のバグ**: 既存実装([CRM_Hubbard.ipynb](CRM_Hubbard.ipynb)系列)ではprior側も有限ショットでサンプルしており、その独立ノイズのせいで「CRMが標準シャドウに負ける」結果になっていた。**prior側は厳密計算する**のが正しく、修正後はCRMが理論通り勝つ([crm_gain_verification.jl](crm_gain_verification.jl))。
-- **Pauli+CRMの隠れバイアス**: 実質測定不能な項(JW弦付きx-bond)のCRM推定は「priorの値そのもの」を返すため、一見精度が良くてもpriorの誤差ぶんバイアスする。
-- **多項観測量の利得は項ごとのΔで決まる**: 参照状態が対称性を破っている場合、対称化priorは合計Δ不変でも損をしうる(→観測量ごとのprior選択、最適βが保険)。
+スクリプト: [crm_gain_verification.jl](crm_gain_verification.jl) / 図: [crm_gain_verification.png](crm_gain_verification.png)
 
-## ファイル一覧(実験の実行順)
+### セットアップ
 
-| スクリプト | 内容 | 主要な出力 |
+- 系: 4サイトプラケット(リング、$t_L=1, t_S=0.5$ と二量体化して縮退を回避)、8量子ビット、U ∈ {1, 8}、μ=U/2。ρ=ED基底状態(密ベクトル)、σ=UHF Slater行列式。
+- 観測量: 純Z列($|A|=1,2,4$)、二重占有、$S^zS^z$、忠実度 $\langle\psi_\sigma|\rho|\psi_\sigma\rangle$。
+- 測定: $n_u=50$、$n_m\in\{10,100,1000\}$、n_repeat=200。3推定器を**同一データ**で比較: 標準 / CRM旧実装(prior側もサンプル) / CRM修正版(prior側厳密)。
+
+### 結果
+
+- **旧実装はCRMを系統的に損なう**: prior側を$n_m$ショットでサンプルすると、その独立ノイズ $V_s^{(\sigma)}/n_m$ が上乗せされ、ショットノイズ支配域ではCRMが標準に負ける。これが研究開始時の「CRMが効かない」謎([crm_fidelity_comparison.png](crm_fidelity_comparison.png))の正体だった。修正版は例えばU=1の忠実度推定で分散を最大80分の1にする。
+- **利得法則**: 純Pauli列に対して
+
+$$G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s}, \quad v_s = \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}, \quad \Delta = \langle P\rangle_\rho - \langle P\rangle_\sigma$$
+
+  が **G ≈ 0.005 から ≈ 1000 まで約5桁で経験値と一致**。
+- 副産物: U=8では忠実度が0.35に落ちたpriorでも局所ZZの利得は約950倍。逆に、粒子・正孔対称性で $\langle Z\rangle=0$ が厳密な観測量では、UHFが対称性を破って $\Delta$ を作るためCRMが**損**をする(G=0.05)— これも理論式の予言通り。
+
+### 解釈
+
+利得の源泉は「ランダムに選んだ基底が当たるか外れるか」による**設定間の揺らぎ** $(3^{|A|}-1)\langle P\rangle^2$ で、priorはこれを $\Delta^2$ に置き換える。ショットノイズ $v_s$ は打ち消せない床。式に**priorのグローバル忠実度が一切現れない**ことがこの研究全体の主軸で、「CRMが得か損か」は観測量ごとに $\Delta$ と $\langle P\rangle$ の比で決まる。損をするケースの存在は後の「最適係数CRM」(実験6)の動機になる。
+
+---
+
+## 2. 局所性: グローバル忠実度が崩壊しても利得は生き残る(1D鎖 L=8–32)
+
+スクリプト: [crm_mps_scaling.jl](crm_mps_scaling.jl) / 図: [crm_mps_scaling.png](crm_mps_scaling.png), 清書 [crm_fig2_locality.png](crm_fig2_locality.png)
+
+### セットアップ
+
+- 系: 1D鎖 L=8/16/32(16–64量子ビット)、U=4、half-filling。ρ=DMRG(χ=64–96)。σ=ρのχ切断(χ_p ∈ {2,4,8,16,32})— priorの品質を連続的に振る。
+- 観測量: 鎖中央の onsite ZZ、距離r=1,2,4,8のZZ(密度型なので全て$|A|=2$)、二重占有、SzSz、ホッピングボンド($|A|=3$)、忠実度(L=8のみ)。
+- 測定: $n_u=50, n_m=100$、n_repeat=100。窓サンプリング(17量子ビット窓)により計算コストはLに依存しない。
+
+### 結果
+
+| L | 忠実度F(χ=2) | G: ZZ r=1 (χ=2) | G: SzSz r=1 (χ=2) | G: onsite ZZ (χ=16) |
+|---|---|---|---|---|
+| 8 | 0.35 | 12.1 | 6.1 | 36.7 |
+| 16 | 0.097 | 11.6 | 13.9 | 41.0 |
+| 32 | **0.0069** | **13.3** | **12.2** | **56.7** |
+
+- priorのグローバル忠実度は $F \sim f^L$ で指数的に崩壊するのに、**局所観測量の利得はLに対して平坦**。
+- 忠実度推定そのものはL=8(16量子ビット)で既に標準シャドウの誤差±0.43(5000ショット)と破綻気味。
+- 利得はχ_p ≥ 8で頭打ち(飽和則 $G_{\max} = 1 + n_m\frac{(3^{|A|}-1)\langle P\rangle^2}{3^{|A|}(1-\langle P\rangle^2)}$ の予言値51に対し観測56)。
+- 相関距離rを伸ばすと利得は1に向かう(r=8でG≈1.3)。
+
+### 解釈
+
+グローバル忠実度は「全サイトの誤差の積」なので必ず指数的に死ぬが、局所観測量の $\Delta$ は**その観測量の周辺の縮約密度行列の誤差**だけで決まり、Lに依存しない。「大きい系では近似が悪くなるから無意味では?」という当初の疑問への答えがこれで、**手法の適用対象を局所観測量に絞れば、系を大きくしても利得は保たれる**。r依存については、priorが悪くなるのではなく、$\langle P\rangle$ 自体が距離とともに小さくなり「打ち消すべき揺らぎ」が元々なくなるため(理論式で定量的に説明できる)。χ_pに対する飽和はショットノイズ床の現れで、「priorをこれ以上良くしても無駄になる点」が測定予算($n_m$)で決まることを意味する。
+
+---
+
+## 3. ショット配分と相図(U・ドーピング依存)
+
+スクリプト: [crm_param_sweep.jl](crm_param_sweep.jl) / 図: [crm_param_sweep.png](crm_param_sweep.png)
+
+### セットアップ
+
+- 実験A(配分): L=8、U=4で $n_m \in \{10,30,100,300,1000\}$($n_u=50$固定、n_repeat=100/nm≥1000は50)。
+- 実験B(相図): L=16で U ∈ {1,4,8}(half-filling)+ U=4ドープ(電子数14、n=7/8)。χ_exp=96、n_repeat=60。
+
+### 結果
+
+- **A**: 飽和則(Gの上限が$n_m$に線形)を理論曲線ごと確認。CRMの利得は「少ない設定×多ショット」で最大化される — **標準シャドウの直感(設定を多く)と逆**の実務指針。
+- **B**(χ=8 priorでのG):
+
+| 領域 | prior忠実度 | onsite ZZ | 二重占有 | ホッピング |
+|---|---|---|---|---|
+| U=1(弱結合) | 0.81 | 2.8 | 2.1 | **45.8** |
+| U=4 | 0.95 | 44.2 | 22.5 | 23.8 |
+| U=8(Mott) | 0.98 | **466.7** | 160.5 | 9.5 |
+| U=4 doped | 0.80 | 15.6 | 18.7 | 43.4 |
+
+### 解釈
+
+利得の観測量マップは物理そのもの。弱結合(金属的)では運動エネルギーが大きな期待値=大きな打ち消し対象を持ち、強結合(Mott)では密度・スピンが主役になる。またU=1やドープ系では基底状態のエンタングルメントが大きく、同じχの切断priorの忠実度が下がる(0.81, 0.80)ことも見える。**「どの物理領域で・どの観測量に・どれだけ得か」が理論式と2つの入力($\langle P\rangle, \Delta$)から読める**、というのがこの実験の要点。
+
+---
+
+## 4. 2Dシリンダー: タダの平均場priorはMPS priorに代われるか(W=4、64量子ビット)
+
+スクリプト: [crm_2d_cylinder.jl](crm_2d_cylinder.jl), [crm_2d_symuhf.jl](crm_2d_symuhf.jl) / 図: [crm_2d_cylinder.png](crm_2d_cylinder.png), [crm_2d_symuhf.png](crm_2d_symuhf.png), 清書 [crm_fig3_priors2d.png](crm_fig3_priors2d.png)
+
+### セットアップ
+
+- 系: 4×8シリンダー(y方向周期・x方向開放)、64量子ビット、U ∈ {4, 8}、half-filling。スネーク順にJW。ρ=DMRG χ=192。
+- prior:
+  - **UHF**: Néel初期値からの自己無撞着共線平均場(副格子磁化 m=0.34/0.45)。Slater行列式なので相関行列 $C=\Phi\Phi^\dagger$ から**Wickの定理で** $\langle Z\rangle, \langle ZZ\rangle, \langle\text{hop}\rangle$ が閉形式になり、**MPS表現が一切不要・コスト$O(N^3)$**。
+  - **UHF-sym**(対称性回復): スピン回転で平均した混合状態 $\bar\sigma = \int d\Omega\, R|{\rm UHF}\rangle\langle{\rm UHF}|R^\dagger$。回転後も一般化Slater行列式なので、フル$2n\times2n$相関行列 $C(\theta)$ に対する同じWick式で厳密計算(共線秩序のz軸対称性により極角の1次元求積・64点)。**CRMのpriorは $\langle P\rangle_\sigma$ しか要らないので混合状態でも使える**ことの実例。
+  - 比較対象: ρのχ切断MPS(χ ∈ {8,16,32,64})。
+- 観測量: 中央サイト周りの onsite ZZ / ZZ(y隣・y距離2・x隣) / 二重占有 / SzSz(y,x) / yボンドホッピング。窓10量子ビット。$n_u=50, n_m=100$、n_repeat=50。UHF系とMPS系は**同一の測定データ**で後処理だけ変えて比較。
+- 検証: 4×2シリンダー(16量子ビット、χ=256でMPS表現が厳密)でエネルギー・全Wick式をDMRGと機械精度(~1e-13)で照合。一般化Wickはθ=0で共線と一致(1e-16)、U=0一重項で回転平均不変(1e-16)。
+
+### 結果
+
+前提の確認として、2DではMPS priorが急劣化する(U=4: χ=8で F=0.055。1D L=16の同じχは0.95)。そのうえで:
+
+| U=4 | G(UHF) | G(UHF-sym) | G(χ=16) | G(χ=64) |
+|---|---|---|---|---|
+| onsite ZZ | **44.0** | 44.0 | 13.9 | 44.5 |
+| 二重占有 | 6.6 | 3.4 | 10.5 | 34.2 |
+| ホッピング | **11.8** | 11.8 | 15.4 | 15.4 |
+| ZZ x隣 | 0.83 | **8.69** | 5.8 | 8.6 |
+| SzSz x | 0.81 | **6.11** | 3.9 | 6.9 |
+
+(U=8ではさらに顕著: onsite ZZ で UHF G=241 vs χ=64 の 243)
+
+- **オンサイト量と運動項ではタダのUHFがχ=32–64のMPS priorと同等**。
+- **サイト間スピン相関では素のUHFは失敗**(G≤3、時に<1): 凍結したNéel秩序は量子揺らぎを含まず $|\langle S^zS^z\rangle|$ を過大評価する($\Delta\approx0.2{-}0.4$)。
+- **対称性回復UHFが弱点を全て修復**: 回転不変な観測量(onsite・hop・docc)は厳密に不変のまま(理論予言と一致)、スピン相関はχ=16–64 MPS相当まで改善。
+- 唯一の退行: 二重占有 6.6→3.4。演算子はSU(2)不変で観測量全体のΔは両priorで同一なのにGが変わる — **多項観測量の利得は「項ごとのΔ」に依存**し、χ=192の参照状態自体がNéel対称性を破っているため、項ごとの $\langle Z_q\rangle$ は共線UHFの方が合う。
+
+### 解釈
+
+2Dはこの手法の本命の適用先で、結論は「**幅広な系では、DMRGを回さなくてもWickで書ける平均場が測定効率化のpriorとして十分機能する**」。対称性回復の成功は、(i) 混合状態priorという概念的拡張が実際に役立つこと、(ii) priorの誤差の物理的起源(凍結秩序)を特定すれば安価に直せることを示す。二重占有の退行は一見バグに見えるが、「priorの対称性は実験状態の対称性(破れの程度)に合わせるべき」「priorは古典後処理なので観測量ごとに使い分ければよい(追加測定ゼロ)」という2つの実務指針に変換できる。
+
+---
+
+## 5. matchgate(フェルミオンGauss)シャドウ: JW弦問題と、CRMの適用範囲
+
+スクリプト: [crm_matchgate.jl](crm_matchgate.jl), [crm_matchgate_nm.jl](crm_matchgate_nm.jl) / 図: [crm_matchgate.png](crm_matchgate.png)
+
+### セットアップ
+
+- 系: 4×2シリンダー(8サイト、16量子ビット)。**x方向ボンドがJW上で$|A|=9$の弦付きになる最小の2D系**で、$2^{16}$次元の密ベクトルにより測定を厳密シミュレーションできる。ρ=DMRG基底状態を密ベクトル化。U ∈ {4,8}。
+- matchgateシャドウ: Haar一様な $Q\in SO(2n)$($n=16$モード、QR分解で生成)を隣接Givens回転列(=Z回転とXX回転のゲート列、約500個)に分解して状態に適用し、占有数基底で測定。推定量はMajorana単項式ごとに $X_S(b) = \lambda_{2k}^{-1}\sum_{S'}\det(Q[S,S'])\,\langle b|\Gamma_{S'}|b\rangle$、チャネル係数 $\lambda_{2k} = \binom{n}{k}/\binom{2n}{2k}$。
+- **CRMのprior側(UHF)はPfaffianで厳密**: 回転後の2点関数 $K' = Q^T K Q$ の部分Pfaffianで $E[X_\sigma|u]$ が閉形式になる(Slater priorとmatchgate測定の構造的な相性)。
+- 観測量: yボンドhop($|A|=3$相当)、**xボンドhop(Pauliでは$|A|=9$)**、二重占有、SzSz、全エネルギー(運動項+U×二重占有)。$n_u=50, n_m=100$、n_repeat=40。Pauliシャドウ(±CRM)と同一予算で比較。
+- 検証: ゲート列が $U\gamma_\mu U^\dagger = \sum_\nu Q_{\mu\nu}\gamma_\nu$ を実現(1e-15)、Majorana展開係数=密行列(1e-10; この検証が実装中の符号ミスを2件検出した)、推定量の不偏性(統計)、Pfaffian=全数和(1e-8)、エネルギー真値=DMRGの$E_0+\mu N$(1e-6)。
+
+### 結果
+
+| 推定誤差(U=4) | Pauli標準 | Pauli+CRM | MG標準 | MG+CRM |
+|---|---|---|---|---|
+| hop yボンド | 0.211 | 0.052 | 0.098 | 0.096 |
+| hop **xボンド** | **測定不能** | prior値を返すだけ | **0.095** | 0.076 |
+| 全エネルギー | 11.5 | 0.88(要注意) | **0.87** | 1.01 |
+
+- xボンドのPauli基底一致確率は $3^{-9}\approx1/2$万で、5000設定では**一度もサンプルされない**(推定値恒等0)。matchgateでは演算子の"次数"(2次Majorana)だけが効くので、xボンドもyボンドと同精度。全エネルギーの誤差はPauli標準の約13分の1。
+- **Pauli+CRMの隠れバイアス**: 測定されない項のCRM推定はpriorの値をそのまま返すため、誤差0.88に見えて平均が−5.35と真値−5.95からズレる(UHFのxボンド誤差ぶん)。有限予算では実質バイアス推定量。
+- **CRMはmatchgateにはほぼ効かない**: G≈0.5–1.6。$n_m$ を3000まで増やしても(ショットノイズ床をほぼ消しても)エネルギーで最大~1.9倍、最適βでも~1.5–2.6倍止まり。
+
+### 解釈
+
+PauliシャドウのCRM利得の源泉は「基底一致/不一致」がつくる巨大な設定間揺らぎだが、Haar的なGauss回転は**自己平均的**(どの設定もすべての2次観測量を少しずつ測る)で、priorが打ち消すべき揺らぎがそもそも小さい。つまり **CRMの価値は測定アンサンブルに依存する**: 「JW弦問題はmatchgateで解く、ランダムPauliデータの分散はCRMで削る」— 両者は同じ問題の別のボトルネックに対する道具であり、「matchgate×CRMで二重の得」という単純な加算は成立しない。この切り分け自体が論文の独立した貢献になる(そして「priorに合わせて測定アンサンブルの局所性を設計する」という理論課題を開く)。
+
+---
+
+## 6. 最適係数CRMと多prior回帰: 「損をしないCRM」
+
+スクリプト: [crm_optimal_beta.jl](crm_optimal_beta.jl) / 図: [crm_optbeta.png](crm_optbeta.png)
+
+### セットアップ
+
+CRMは統計学の**制御変量法**のβ=1特殊例と見なせる:
+
+$$\hat o(\beta) = \bar m_\rho - \beta\,(\bar Y_\sigma - \mathrm{Tr}[O\sigma]), \qquad Y_\sigma(u)=E[X_\sigma|u]$$
+
+最適係数 $\beta^* = \mathrm{Cov}(m_\rho,Y)/\mathrm{Var}(Y)$ を**同じ$n_u=50$設定のデータからプラグイン推定**すると、理論上 $G = 1/(1-\mathrm{corr}^2)\ge1$。複数prior $\{Y_i\}$ は回帰(擬似逆行列で退化も自動処理)に一般化。実験4と同一の系・同一乱数シード(=同一測定データ)で、prior {UHF, UHF-sym, χ8, χ32}、多prior集合 {UHF+UHF-sym}(タダのみ)と{全4つ}を比較。n_repeat=50。
+
+### 結果と解釈
+
+- **保険が効く**: β=1で損をしていた全ケースが修復(U=8のUHFで ZZ y2: 0.70→14.0、ZZ x隣: 1.1→18.6)。達成Gは理論 $1/(1-\mathrm{corr}^2)$ とy=xで一致し、プラグインによるバイアスは検出限界以下。
+- **理論的副産物**: 単一Pauli列では $Y_p = \mathbf{1}[\text{一致}]\cdot3^{|A|}\langle P\rangle_{\sigma_p}$ がpriorごとにスカラー倍しか違わず、βに吸収される → 最適β利得は**prior非依存**。系として「一致インジケータを制御変量にし係数をデータから学習する」**priorフリーの自己校正推定器**が存在する。
+- **β=1との使い分け**: priorが優秀ならβ=1が勝つ(onsite ZZ: 241 vs 141)。原因は$\hat\beta$の推定ノイズで、基底一致が稀な観測量(hop、一致率1/27)で特に不利。**「信頼できるpriorはβ=1、不確かなpriorは最適βで保険」**。
+- **多prior回帰**: 二重占有でタダのprior2つの回帰が G=98(U=8)— 単独(15.9/6.3)を桁で超え、χ=32 MPS(101)と同等。回帰が「共線UHFの対称性破れ情報」と「回転平均の揺らぎ情報」を観測量ごとに最適配合した結果で、**MPSなしでMPS級**に到達。
+
+---
+
+## 7. 正直なベースライン: 貪欲derandomizationとの比較(多観測量同時推定)
+
+スクリプト: [crm_derand_benchmark.jl](crm_derand_benchmark.jl) / データ: [crm_derand_results.tsv](crm_derand_results.tsv)
+
+### セットアップ
+
+「単一観測量なら該当基底の直接測定が最強では?」という(正しい)批判に答えるため、**同一総ショット数**(50設定×100ショット)で多数の観測量を同時推定する誤差を比較。1D L=16(窓18量子ビット)、prior=χ32切断(F=0.9998)。
+
+- セットA(構造化): 物理観測量23個(二重占有×7、SzSz×6、hop×6、距離別ZZ×4)= ユニークPauli列60本。
+- セットB(非構造): 窓内のランダムな2–3局所Pauli列150本。
+- 手法: ランダムシャドウ / +CRM / **貪欲derandomization**(HKP型: 命中回数に指数減衰重みを付けたカバレッジ最大化で50設定の基底を決定論的に構築。逆チャネル係数$3^{|A|}$が不要)。
+
+### 結果
+
+| 誤差(中央値/最悪値) | shadow標準 | shadow+CRM | 貪欲derand |
+|---|---|---|---|
+| セットA(構造化23個) | 0.059 / 0.351 | 0.012 / 0.054 | **0.0085 / 0.028** |
+| セットB(ランダム150個) | 0.058 / 0.208 | 0.057 / **0.096** | **0.044 / 0.067** |
+
+### 解釈
+
+- **既知の固定リストにはderandomizationが最強**(全60列をカバーし、命中率1・係数増幅なしで測るため)。これは隠さず認める。
+- ただし**CRMはシャドウの不利をほぼ帳消しにする**(構造化セットで中央値4.8倍改善、derandとの残差1.5倍)うえ、シャドウ+CRMは**測定後に任意の観測量を選べる**(derandはリストの事前確定が必須)。
+- 非構造セットではCRMの中央値利得は消える($\langle P\rangle\approx0$の列に打ち消す揺らぎがない)が、**最悪誤差は半減**: CRMは誤差バジェットを支配する大$\langle P\rangle$の観測量を自動的に狙い撃つ。
+- 決定論的設定には(揺らぎがないので)CRMの原理自体が適用不能 — CRMとderandは**相補的**で、「priorで測定計画も設計する」統合(prior-informed derandomization)が次の理論課題。
+
+---
+
+## 8. スケールアップ: W=6シリンダー(96量子ビット、クラスター計算)
+
+スクリプト: [crm_2d_w6.jl](crm_2d_w6.jl) + [crm_2d_w6.pbs](crm_2d_w6.pbs) / 図: [crm_2d_w6.png](crm_2d_w6.png)
+
+### セットアップ
+
+- 系: 6×8シリンダー(48サイト、96量子ビット)、U ∈ {4,8}。ρ=DMRG χ=512(14スイープ)。prior: UHF / UHF-sym / χ切断 {8,16,32,64,128}。$n_u=40, n_m=100$、n_repeat=30。
+- 実行: 研究室クラスター(clara)のPBSジョブ(U別に2本、各16コア・約40分)。パラメータは環境変数(UVAL/CHI_EXP/NU/NM/NREP等)で外から与えるスモークテスト対応の設計。
+- 検証で2つ問題を発見・解決: (i) 6×2検証系はU=0のフェルミ準位が縮退し基底状態が非一意 → 副格子ポテンシャルでギャップを開けRHF厳密の閉殻に変更。(ii) CDW自由フェルミオンのDMRG収束が遅い(40スイープ/χ=400で7e-5)ため、検証の許容値は「符号バグならO(0.1)ずれる」検出目的に合わせ5e-4に設定(巻き付きボンドの符号は独立診断で正しさを確認)。
+
+### 結果
+
+- **MPS priorの崩壊が加速**(U=4): χ=8の忠実度 0.055(W=4)→**0.018**、χ=32: 0.57→**0.22**、χ=128でも0.74。
+- **UHFは持ちこたえる**: U=4のonsite ZZで G(UHF)=19.2 ≈ G(χ=32)=18.2、二重占有で G(UHF)=14.3 > G(χ=16)=11.8。U=8のonsite ZZで G(UHF)=157 > G(χ=32)=96。
+- **W=4からの逆転**: 共線UHFがサイト間スピン相関でも機能し(ZZ x隣 0.83→7.7)、UHF-sym(4.5)を上回る。
+
+### 解釈
+
+幅Wを増やすと、面積則により同じ忠実度に必要なχが指数的に増える一方、UHFのコストは$O(N^3)$のまま — **「タダのpriorの相対優位は、まさにMPSが苦しくなる領域で拡大する」**という主張3の最も強い実証。逆転現象の原因は参照状態側にある: 96量子ビットに対しχ=512は未収束で、参照自体がW=4のときより強くNéel対称性を破っており、凍結共線秩序が項ごとの構造に合う。これは欠陥ではなく教訓の再確認 — 有限χの参照(や実験の状態)がどれだけ対称性を破っているかで最適priorは変わるので、**観測量ごとのprior選択と最適β(実験6)が実務上の保険**になる。
+
+---
+
+## 経緯として重要だった発見(時系列)
+
+1. **出発点のバグ**: 既存実装([CRM_Hubbard.ipynb](CRM_Hubbard.ipynb)系列)はprior側を有限ショットでサンプルしており「CRMが負ける」結果に。厳密計算への修正が全ての出発点。
+2. **利得はグローバル忠実度でなく局所誤差Δで決まる** → 大きい系でも手法は有効(実験2)。
+3. **Wick閉形式により平均場がMPS不要のpriorになる** → 2Dへの道(実験4)。
+4. **混合状態でもpriorになれる** → 対称性回復(実験4b)。
+5. **CRMは制御変量法として一般化でき、損をしなくできる**(実験6)。
+6. **CRMの価値はアンサンブル依存**(実験5)/ **derandとは相補的**(実験7)。
+
+## ファイル一覧(実行順)
+
+| スクリプト | 内容 | 実行時間の目安 |
 |---|---|---|
-| [crm_gain_verification.jl](crm_gain_verification.jl) | 8量子ビットED系。推定器修正と理論式検証 | [crm_gain_verification.png](crm_gain_verification.png) |
-| [crm_mps_scaling.jl](crm_mps_scaling.jl) | 1D鎖 L=8/16/32。局所性の実証(窓サンプリング導入) | [crm_mps_scaling.png](crm_mps_scaling.png) |
-| [crm_param_sweep.jl](crm_param_sweep.jl) | nm掃引とU・ドーピング掃引 | [crm_param_sweep.png](crm_param_sweep.png) |
-| [crm_2d_cylinder.jl](crm_2d_cylinder.jl) | W=4シリンダー。UHF vs MPS prior (Wick閉形式) | [crm_2d_cylinder.png](crm_2d_cylinder.png) |
-| [crm_2d_symuhf.jl](crm_2d_symuhf.jl) | +対称性回復UHF(混合状態prior) | [crm_2d_symuhf.png](crm_2d_symuhf.png) |
-| [crm_optimal_beta.jl](crm_optimal_beta.jl) | 最適係数CRM・多prior回帰 | [crm_optbeta.png](crm_optbeta.png) |
-| [crm_matchgate.jl](crm_matchgate.jl) | matchgateシャドウ×CRM (Pfaffian厳密prior側) | [crm_matchgate.png](crm_matchgate.png) |
-| [crm_matchgate_nm.jl](crm_matchgate_nm.jl) | matchgateのショット数掃引 | [crm_matchgate_nm.tsv](crm_matchgate_nm.tsv) |
-| [crm_derand_benchmark.jl](crm_derand_benchmark.jl) | 多観測量同時推定 vs 貪欲derandomization | [crm_derand_results.tsv](crm_derand_results.tsv) |
-| [crm_2d_w6.jl](crm_2d_w6.jl) + [crm_2d_w6.pbs](crm_2d_w6.pbs) | W=6×8(96量子ビット)。クラスターPBS実行 | [crm_2d_w6.png](crm_2d_w6.png) |
-| [crm_paper_figures.jl](crm_paper_figures.jl) | 保存済みTSVから清書図 Fig1–3 を再生成 | crm_fig1–3 |
-
-すべての数値実験は自己完結スクリプトで、規約(JW符号・Wick式・サンプラー等)は密行列との突き合わせで機械精度のassert検証済み(検証一覧は[ノート§2.5](CRM_RESEARCH_NOTES.md)参照)。
+| [crm_gain_verification.jl](crm_gain_verification.jl) | 8量子ビットED。推定器修正・理論式検証 | 30秒 |
+| [crm_mps_scaling.jl](crm_mps_scaling.jl) | 1D L=8–32。局所性(窓サンプリング導入) | 25分 |
+| [crm_param_sweep.jl](crm_param_sweep.jl) | ショット配分・U/ドーピング掃引 | 40分 |
+| [crm_2d_cylinder.jl](crm_2d_cylinder.jl) | W=4。UHF vs MPS prior | 25分 |
+| [crm_2d_symuhf.jl](crm_2d_symuhf.jl) | +対称性回復UHF | 30分 |
+| [crm_optimal_beta.jl](crm_optimal_beta.jl) | 最適係数・多prior回帰 | 15分 |
+| [crm_matchgate.jl](crm_matchgate.jl) | matchgate×CRM(Pfaffian prior側) | 8分 |
+| [crm_matchgate_nm.jl](crm_matchgate_nm.jl) | matchgateのショット数掃引 | 15分 |
+| [crm_derand_benchmark.jl](crm_derand_benchmark.jl) | vs 貪欲derandomization | 15分 |
+| [crm_2d_w6.jl](crm_2d_w6.jl) / [.pbs](crm_2d_w6.pbs) | W=6(96量子ビット)クラスター実行 | 40分/U(16コア) |
+| [crm_paper_figures.jl](crm_paper_figures.jl) | TSVから清書図 Fig1–3 再生成 | 数十秒 |
 
 ## 再現方法
 
@@ -86,7 +303,7 @@ cd examples/tatsuyama
 JULIA_LOAD_PATH="@:@v#.#:@stdlib" julia --project=Hubbard_MPS_Env_v2 <script>.jl
 ```
 
-W=6のクラスター実行(PBS):
+クラスター(PBS):
 
 ```bash
 qsub -v UVAL=4.0 crm_2d_w6.pbs
@@ -95,4 +312,4 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 
 ## 今後の課題
 
-[ノート§5](CRM_RESEARCH_NOTES.md)参照。主要な残り: prior-informed derandomization(priorで測定計画自体を設計する統合)、最終図のブートストラップCI、ドープ2D(ストライプUHF)、動力学・有限温度Gauss prior、matchgate版分散理論。
+[ノート§5](CRM_RESEARCH_NOTES.md)参照。主要な残り: prior-informed derandomization(priorで測定計画自体を設計)、最終図のブートストラップCI、ドープ2D(ストライプUHF)、動力学・有限温度Gauss prior、matchgate版の分散理論。
