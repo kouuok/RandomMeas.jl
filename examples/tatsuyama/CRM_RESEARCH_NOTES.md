@@ -145,7 +145,7 @@ L=16、χ=8 prior、G の代表値:
 
 - **matchgateはJW弦問題を実際に解消**: x-bondがy-bondと同じ精度で測れる(演算子の台によらず2次Majorana)。エネルギー全体の誤差はPauli標準の**約13分の1**。
 - **注意(Pauli+CRMの隠れバイアス)**: Pauli+CRMのエネルギー誤差0.88は一見良いが、一度も測定されないx-bond項のCRM推定は「priorの値そのもの」を返すため、UHFのx-bond誤差ぶん(約0.6)**バイアスする**(平均 −5.35 vs 真値 −5.95)。有限予算では実質バイアス推定量。
-- **CRMはmatchgateには効かない(この予算では)**: G_MG ≈ 0.5–1.6。Pauliの利得源は「基底一致/不一致」による巨大な設定間揺らぎ(それをpriorが打ち消す)だが、Haar的Gauss回転では全設定が全2次観測量を少しずつ測るため設定間揺らぎが小さく、分散はCRMが打ち消せないショットノイズが支配する。**CRMの価値はアンサンブル依存**という重要な知見。
+- **CRMはmatchgateにはほぼ効かない**: nm=100でG_MG ≈ 0.5–1.6。nm掃引(30–3000, `crm_matchgate_nm.tsv`)でも、ショット豊富極限でβ=1利得はエネルギーで最大~1.9倍、個別観測量は≈1に留まる(最適βで~1.5–2.6倍)。Pauliの利得源は「基底一致/不一致」による巨大な設定間揺らぎだが、Haar的Gauss回転は自己平均的で打ち消すべき揺らぎ自体が小さい。**CRMの価値はアンサンブル依存**という重要な知見(アンサンブル設計=方向性の理論課題につながる)。
 - 検証: ゲート列とSO(2n)回転の対応(1e-15)、Majorana展開(1e-10)、推定量の不偏性(統計)、Pfaffian古典側=全数和(1e-8)、エネルギー真値=DMRG E0+μN(1e-6)。
 
 ### 3.6 2D: 安価な prior は MPS に代われるか — Fig 3 (`crm_fig3_priors2d.png`)
@@ -219,6 +219,7 @@ CRM推定量を制御変量法の一般形 $\hat o(\beta) = \bar m_\rho - \beta(
 | `crm_2d_symuhf.jl` | 同上 + 対称性回復UHF prior | 約30分 |
 | `crm_matchgate.jl` | matchgateシャドウ×CRM。4×2シリンダー、Pauli vs MG × 標準 vs CRM | 約8分 |
 | `crm_optimal_beta.jl` | 最適係数CRM・多prior回帰。W=4×8シリンダー | 約15分 |
+| `crm_matchgate_nm.jl` | matchgateのnm掃引 (CRM利得のショット数依存) | 約15分 |
 | `crm_paper_figures.jl` | 上記TSVから清書図 Fig 1–3 を生成 | 数十秒 |
 
 実行方法(MPS系スクリプト):
