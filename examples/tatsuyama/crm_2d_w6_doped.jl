@@ -49,6 +49,7 @@ const W  = 6
 const LX = 8
 const CHI_EXP = parse(Int, get(ENV, "CHI_EXP", "512"))
 const NHOLE = parse(Int, get(ENV, "NHOLE", "6"))
+const X0 = parse(Int, get(ENV, "X0", "0"))   # 観測窓の中心列 (0=Lx/2)
 sidx(x, y) = (x - 1) * W + y
 qup(s) = 2s - 1
 qdn(s) = 2s
@@ -389,7 +390,7 @@ end
 term_matrixdict(t::Term) = Dict{Int,Matrix{ComplexF64}}(q => SIGMA[a] for (q,a) in t.sup)
 
 function build_observables_2d(Lx, W)
-    s0 = sidx(Lx ÷ 2, W ÷ 2)
+    s0 = sidx(X0 == 0 ? Lx ÷ 2 : X0, W ÷ 2)
     sy1 = s0 + 1          # y方向隣 (同列)
     sy2 = s0 + 2          # y方向距離2 (リング対面)
     sx1 = s0 + W          # x方向隣 (次列)
@@ -659,7 +660,7 @@ function main()
     end
 
     utag = uenv == "" ? "both" : replace(uenv, "."=>"p")
-    out = joinpath(@__DIR__, "crm_2d_w6_doped_results_U$(utag).tsv")
+    out = joinpath(@__DIR__, "crm_2d_w6_doped_results_U$(utag)_x$(X0).tsv")
     open(out, "w") do io
         println(io, "U\tprior\tobservable\tpure\ttrue\tDelta\tprior_fid\tG_emp\tG_theo")
         for r in rows; println(io, join(r, "\t")); end
