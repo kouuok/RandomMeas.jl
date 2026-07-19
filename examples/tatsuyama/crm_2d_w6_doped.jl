@@ -389,8 +389,8 @@ end
 
 term_matrixdict(t::Term) = Dict{Int,Matrix{ComplexF64}}(q => SIGMA[a] for (q,a) in t.sup)
 
-function build_observables_2d(Lx, W)
-    s0 = sidx(X0 == 0 ? Lx ÷ 2 : X0, W ÷ 2)
+function build_observables_2d(Lx, W; x0=X0)
+    s0 = sidx(x0 == 0 ? Lx ÷ 2 : x0, W ÷ 2)
     sy1 = s0 + 1          # y方向隣 (同列)
     sy2 = s0 + 2          # y方向距離2 (リング対面)
     sx1 = s0 + W          # x方向隣 (次列)
@@ -522,7 +522,7 @@ function validate_u0()
     # U=0(+副格子場)ではUHF(=RHF)が厳密 → Wick期待値 vs DMRG期待値
     uhf = solve_uhf(Lxv, W, t, 0.0; Nup, Ndn, stagger=stg)
     tens = extract_tensors(ψ)
-    obs = build_observables_2d(Lxv, W)
+    obs = build_observables_2d(Lxv, W; x0=0)   # 検証格子は小さいので常にデフォルト窓
     maxdiff = 0.0
     for o in obs
         v_dmrg = sum(tm.coeff * product_op_expect(tens, term_matrixdict(tm)) for tm in o.terms)
