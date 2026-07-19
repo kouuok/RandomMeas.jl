@@ -554,7 +554,8 @@ function main()
     validate_u0()
 
     rows = []
-    for U in [parse(Float64, get(ENV, "UVAL", "8.0"))]
+    U_first = parse(Float64, get(ENV, "UVAL", "8.0"))
+    for U in [U_first]
         println("\n", "="^70)
         @printf("W=%d x Lx=%d cylinder (N=%d qubits), U=%.1f, doping=%d/%d holes (Nel=%d)\n",
                 W, LX, 2n, U, NHOLE, n, n - NHOLE)
@@ -641,7 +642,8 @@ function main()
         flush(stdout)
     end
 
-    out = joinpath(@__DIR__, "crm_2d_doped_results.tsv")
+    utag = replace(string(U_first), "." => "p")
+    out = joinpath(@__DIR__, "crm_2d_doped_results_U$(utag).tsv")
     open(out, "w") do io
         println(io, "U\tprior\tobservable\tpure\ttrue\tDelta\tprior_fid\tG_emp\tG_theo")
         for r in rows; println(io, join(r, "\t")); end

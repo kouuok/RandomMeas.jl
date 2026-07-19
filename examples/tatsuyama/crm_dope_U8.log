@@ -1,0 +1,67 @@
+/home/tatsuyama/.bashrc: line 36: ulimit: stack size: cannot modify limit: Operation not permitted
+host=prokofiev UVAL=8.0 CHI_EXP=512 start=Sun Jul 19 10:47:35 JST 2026
+=== validation (U=0, 4x2 cylinder, exact MPS) ===
+  [check] free-fermion E = -12.00000000  (gap at Fermi level: 2.0000)
+  [check] E_DMRG(U=0) = -12.00000000  (diff 1.24e-14)
+  [check] ZZ onsite    DMRG= -0.00000  Wick=  0.00000  (diff 3.6e-16)
+  [check] ZZ up-up y1  DMRG= -0.25000  Wick= -0.25000  (diff 3.6e-14)
+  [check] ZZ up-up y2  DMRG= -0.00000  Wick= -0.00000  (diff 3.5e-16)
+  [check] ZZ up-up x1  DMRG= -0.25000  Wick= -0.25000  (diff 1.5e-13)
+  [check] DoubleOcc    DMRG=  0.25000  Wick=  0.25000  (diff 0.0e+00)
+  [check] SzSz y-bond  DMRG= -0.03125  Wick= -0.03125  (diff 2.7e-15)
+  [check] SzSz x-bond  DMRG= -0.03125  Wick= -0.03125  (diff 9.2e-15)
+  [check] hop y-bond   DMRG=  0.50000  Wick=  0.50000  (diff 3.6e-14)
+  [check] n(site 2)    DMRG=  1.00000  Wick=  1.00000  (diff 0.0e+00)
+  [check] n(site 6)    DMRG=  1.00000  Wick=  1.00000  (diff 1.1e-15)
+  [check] all U=0 validations passed (maxdiff 1.5e-13)
+  [check] generalized Wick vs collinear Wick at theta=0: maxdiff 3.3e-16
+  [check] rotation-average invariance at U=0 (singlet): maxdiff 2.2e-16
+  [check] symmetry-restoration checks passed
+
+======================================================================
+W=4 x Lx=8 cylinder (N=64 qubits), U=8.0, doping=4/32 holes (Nel=28)
+  DMRG(chi=192): E0=-23.290955  maxlinkdim=512  (525s)
+  UHF init=neel    E=-17.972289
+  UHF init=stripe  E=-17.824734
+  UHF init=random  E=-17.966412
+  -> selected init=neel (E=-17.972289)
+  col x=1: <n>=1.000  m_stag=+0.459
+  col x=2: <n>=1.000  m_stag=+0.447
+  col x=3: <n>=0.997  m_stag=+0.446
+  col x=4: <n>=0.966  m_stag=+0.430
+  col x=5: <n>=0.754  m_stag=+0.311
+  col x=6: <n>=0.560  m_stag=-0.234
+  col x=7: <n>=0.758  m_stag=+0.314
+  col x=8: <n>=0.965  m_stag=+0.443
+  UHF: E=-17.972289  (E_UHF - E_DMRG = 5.3187, staggered m=0.430)
+  sampling window: qubits [27, 36] (10 of 64)
+  MPS prior fidelities: chi=8: 0.0258,  chi=16: 0.1572,  chi=32: 0.4700,  chi=64: 0.7601,  chi=128: 0.9082
+  local-observable run: 640s
+
+  observable        true |   G(UHF) G(UHF-sym) G(chi=8) G(chi=16) G(chi=32) G(chi=64) G(chi=128)
+  ZZ onsite      -0.6286 |    27.77    27.77    11.76    43.22    57.32    70.54    71.71
+  ZZ up-up y1    -0.3489 |     0.60    11.99     1.59     4.49     9.40    13.76    14.81
+  ZZ up-up y2     0.1854 |     0.13     1.81     0.89     1.29     2.24     2.53     2.66
+  ZZ up-up x1    -0.2567 |     0.22     6.55     6.69     6.69     6.74     6.74     6.75
+  DoubleOcc       0.0419 |     1.03    21.25     9.92    35.46    71.31    70.85    64.12
+  SzSz y-bond    -0.0828 |     0.69    10.52     2.12     7.94    19.35    25.27    25.55
+  SzSz x-bond    -0.0613 |     0.35     5.38     4.66     4.92     5.09     5.05     5.04
+  hop y-bond      0.2911 |     5.82     5.82     7.76     7.73     7.84     7.85     7.82
+  n(site 14)      0.8981 |     0.05     1.17     0.68     2.35     6.98     8.14     8.02
+  n(site 18)      0.8979 |     0.08     0.92     0.55     1.96     4.61     5.06     4.90
+
+  Delta        |      UHF  UHF-sym    chi=8   chi=16   chi=32   chi=64  chi=128
+  ZZ onsite    |   0.1084   0.1084   0.1846   0.0744   0.0508   0.0227   0.0095
+  ZZ up-up y1  |   0.4362  -0.0560   0.2568   0.1319   0.0635   0.0228   0.0096
+  ZZ up-up y2  |  -0.4904  -0.0607  -0.1430  -0.0993  -0.0340  -0.0158  -0.0069
+  ZZ up-up x1  |   0.5634  -0.0230  -0.0146  -0.0147  -0.0092  -0.0089  -0.0052
+  DoubleOcc    |  -0.0067  -0.0067   0.0133   0.0076   0.0075   0.0031   0.0012
+  SzSz y-bond  |   0.1077  -0.0153   0.0622   0.0303   0.0144   0.0061   0.0025
+  SzSz x-bond  |   0.0806  -0.0093   0.0016   0.0002  -0.0005  -0.0007  -0.0005
+  hop y-bond   |   0.0718   0.0718   0.0201  -0.0060   0.0017   0.0033  -0.0004
+  n(site 14)   |  -0.0675  -0.0675  -0.0656  -0.0220  -0.0103  -0.0052  -0.0024
+  n(site 18)   |   0.1440   0.1440  -0.0514  -0.0237  -0.0132  -0.0059  -0.0019
+
+results saved: /home/tatsuyama/RandomMeas.jl/examples/tatsuyama/crm_2d_doped_results.tsv
+done (doped, NHOLE=4, CHI_EXP=512)
+end=Sun Jul 19 11:11:28 JST 2026
