@@ -1,6 +1,6 @@
 # CRMシャドウによるハバード模型の測定効率化 — 研究ノート
 
-*最終更新: 2026-07-16 / ブランチ: `qse-debug` / 数値実験はすべて `examples/tatsuyama/` の自己完結Juliaスクリプトで再現可能*
+*最終更新: 2026-07-19 / ブランチ: `qse-debug` / 数値実験はすべて `examples/tatsuyama/` の自己完結Juliaスクリプトで再現可能*
 
 ---
 
@@ -21,6 +21,10 @@
 4. **混合状態prior と観測量ごとのprior選択**: CRMのpriorは推定量に $\langle P\rangle_\sigma$ としてしか入らないため、(i) **混合状態でもpriorにできる**(回転平均UHFはその実例)、(ii) **priorは古典後処理なので、同一の測定データに対し観測量ごとに最適なpriorを選べる**。いずれも追加測定コストゼロ。
 
 5. **最適係数CRM(損をしないCRM)**: CRMは制御変量法のβ=1特殊例であり、係数を同一データから $\hat\beta = \widehat{\mathrm{Cov}}(m_\rho,Y)/\widehat{\mathrm{Var}}(Y)$ とプラグイン推定すると理論利得 $G=1/(1-\mathrm{corr}^2)\ge 1$ で**priorがどれほど悪くても漸近的に損をしない**(β=1で G<1 だった全ケースが修復、達成Gは理論とy=x一致)。複数priorは回帰に一般化され、**タダのprior集合 {UHF, UHF-sym} の回帰だけで χ=32 MPS prior 相当**に達する例(二重占有)もある(§3.7)。
+
+6. **CRMの価値は測定アンサンブル依存**: matchgateシャドウはJW弦問題を解消し2Dの全エネルギー測定を可能にする(誤差13分の1)が、Gauss回転アンサンブルは自己平均的で、CRMの利得はショット豊富極限でも~2倍に留まる(§3.5)。また既知の固定観測量リストには貪欲derandomizationが最強で、CRMはシャドウの柔軟性(事後選択)を保ったままその差をほぼ埋める(§3.8)。CRM・matchgate・derandomizationは同じ問題の**異なるボトルネックへの相補的な道具**である。
+
+7. **安いpriorの相図**: 平均場系priorの有効領域は「秩序が強く(ほぼ)一様な状態」— half-fillingは任意の幅で共線UHF、ドープ強結合のスピンセクターはドメイン内で対称性回復UHFが機能する。**破綻は広幅ドープ系の電荷テクスチャ(ストライプの形)に局在**し、そこではχ≥32のMPSか平均場超のpriorが必要(§3.9–3.10)。運動項はどの領域でも平均場で十分。
 
 ---
 
@@ -95,6 +99,20 @@ $$\langle(XZX+YZY)/2\rangle_{\rm JW隣接} = 2\,\mathrm{Re}\,C_{ab}.$$
 | 2D: 厳密MPS | 4×2シリンダー(χ=256で厳密)でエネルギー・全Wick式 vs DMRG | 〜1e-13 |
 | 一般化Wick | θ=0 で共線Wickと一致 / U=0一重項で回転平均不変 | 〜1e-16 |
 | 分散理論 | 経験G vs 理論G、全実験・全設定 | Fig 1 (y=x) |
+| matchgate | ゲート列⇔SO(2n)回転 / Majorana展開=密行列 / 不偏性 / Pfaffian古典側=全数和 / エネルギー真値=DMRGのE0+μN | 1e-15 / 1e-10 / 統計 / 1e-8 / 1e-6 |
+| ドープ系 | 検証は常にhalf-filling・デフォルト窓で実施(X0/NHOLEノブの漏れをスモークテストで検出・修正) | — |
+
+### 2.6 matchgateシャドウの定式化(結果は§3.5)
+
+測定アンサンブルはフェルミオンGaussユニタリ $U_Q$($Q\in SO(2n)$ Haar、$U_Q^\dagger\gamma_\mu U_Q = \sum_\nu Q_{\mu\nu}\gamma_\nu$)+占有数測定。実装は $Q$ をQR分解で生成し、隣接Givens回転列に分解して各回転をJW表現のゲート($\gamma_{2j-1}\gamma_{2j}=iZ_j$ → Z回転、$\gamma_{2j}\gamma_{2j+1}=iX_jX_{j+1}$ → XX回転)として状態に適用する。次数 $2k$ のMajorana単項式 $\Gamma_S$ のスナップショット推定量は
+
+$$X_S(b) = \lambda_{2k}^{-1}\sum_{S'\text{対角}}\det(Q[S,S'])\,\langle b|\Gamma_{S'}|b\rangle,\qquad \lambda_{2k}=\binom{n}{k}\Big/\binom{2n}{2k},\qquad \langle b|\Gamma_T|b\rangle = i^{|T|}\prod_{j\in T}(1-2b_j)$$
+
+**CRMのprior側はPfaffianで厳密**: Slater(一般にGauss)状態の2点関数 $K_{\mu\nu}=\langle\gamma_\mu\gamma_\nu\rangle$ は回転後 $K'=Q^TKQ$ となり、$E[X_S|u]=\lambda^{-1}\sum_{S'}\det(Q[S,S'])\,\mathrm{Pf}(K'[S'])$。UHF priorとmatchgate測定は構造的に相性が良い(ただし§3.5の通りCRM利得自体は小さい)。符号・順序の規約はすべて8モード密行列で機械精度検証(この検証が実装中の符号ミス2件を検出)。
+
+### 2.7 制御変量法としての一般化(結果は§3.7)
+
+CRMは制御変量法のβ=1特殊例: $\hat o(\beta) = \bar m_\rho - \beta(\bar Y_\sigma - \mathrm{Tr}[O\sigma])$、$Y_\sigma(u)=E[X_\sigma|u]$。最適係数 $\beta^*=\mathrm{Cov}(m_\rho,Y)/\mathrm{Var}(Y)$ をプラグイン推定すれば $G=1/(1-\mathrm{corr}^2)\ge1$(漸近的に損をしない)。複数prior $\{Y_i\}$ は回帰 $\beta = \Sigma_{YY}^{+}\,c_{Y\rho}$ に一般化(擬似逆行列でpriorの冗長性も自動処理)。注意点: (i) $\hat\beta$ の推定ノイズにより優秀なpriorにはβ=1が勝つ(特に基底一致が稀な観測量)。(ii) 決定論的測定(derandomization)には揺らぎがなく適用不能。
 
 ---
 
@@ -241,7 +259,7 @@ U=8とU=4、電子28個(4ホール)、参照=DMRG χ=512。UHFは複数初期値
 1. ~~多観測量ベンチマーク~~ → **実施済み**(§3.8)。残り: prior-informed derandomization(priorを測定計画の設計に使う統合)
 2. 分散比のブートストラップCI付き最終図
 3. 参照状態の対称性破れの定量化と、対称性を破らない参照(SU(2) DMRG or 大χ)での再確認
-4. ドープ2Dシリンダー(ストライプUHF prior)
+4. ~~ドープ2Dシリンダー(ストライプUHF prior)~~ → **実施済み**(§3.10、W=4/W=6+窓位置比較)。残り: 電荷テクスチャを捉える中間コストprior(電荷分布を拘束した平均場、Gutzwiller/DMET的)
 5. ~~matchgateシャドウ × CRM~~ → **実施済み**(§3.5)。残り: (a) matchgateでCRM利得が現れうる大 n_m 領域の掃引とmatchgate版分散理論の導出、(b) 相関状態に対するmatchgateシャドウの大規模シミュレーション法(現状は16量子ビット密ベクトルが上限)
 6. 忠実度CRMのprior側厳密化(χ²-MPO縮約 $q_\sigma^T W q_\sigma$)— 現状は安価な過剰サンプリングで代用
 7. QSE行列要素($H_{ij}, S_{ij}$)へのCRM適用(ブランチ名 `qse-debug` の元テーマとの接続)
