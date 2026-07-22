@@ -12,4 +12,6 @@ lualatex crm_hubbard.tex
 
 LuaLaTeX + luatexja(Harano Aji フォント同梱、TeX Live に標準)で日本語をコンパイルする。生成物 `crm_hubbard.pdf`(12ページ)もコミット済み。
 
+`crm_tutorial.tex` — 前提知識を最小限にした自習用の詳細解説。物性の用語(第二量子化・ハバード模型・Mott絶縁体・平均場・Slater行列式・Wickの定理・DMRG/MPS・JW変換)を数式で導入し、古典シャドウの分散〜CRMの利得法則・制御変量・Wick prior・matchgateまでを一から導出する。同じく `lualatex crm_tutorial.tex` を2回でPDF化(12ページ)。
+
 内容の対応: 詳細な実験記録は `../README.md`、論文の主張構成・査読対応は `../CRM_RESEARCH_NOTES.md`。

@@ -1,0 +1,436 @@
+\documentclass[11pt,a4paper]{ltjsarticle}
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=25mm]{geometry}
+\usepackage{mdframed}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\allowdisplaybreaks
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\braket}[2]{\langle #1|#2\rangle}
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Pf}{\operatorname{Pf}}
+\newcommand{\cd}{c^\dagger}
+\newcommand{\updn}{\uparrow\downarrow}
+\newcommand{\up}{\uparrow}
+\newcommand{\dn}{\downarrow}
+
+\newmdenv[linecolor=gray!60,linewidth=0.6pt,backgroundcolor=gray!6,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{keybox}
+
+\title{\bfseries 自習用詳細解説\\[2pt] \large CRM シャドウによるハバード模型の測定効率化\\— 物性の用語と本研究の数式を一から追う —}
+\author{}
+\date{2026年7月}
+
+\begin{document}
+\maketitle
+\vspace{-2.2em}
+\begin{center}\small （本文書は研究本体 \texttt{crm\_hubbard.tex} / \texttt{README.md} の理解を補う自習用ノート。前提知識を最小限にし、必要な物性・量子情報の用語を数式で導入しながら、本研究の主要な式を導出する。）\end{center}
+
+\tableofcontents
+
+\bigskip
+\begin{keybox}
+\textbf{この文書の読み方.} 第\ref{part:cmp}部は物性物理の言葉(第二量子化・ハバード模型・平均場・DMRG など)を数式で導入する。第\ref{part:meas}部は量子測定・古典シャドウを導入し、分散の式を導出する。第\ref{part:crm}部で本研究の中心結果(利得法則・制御変量・Wick prior・matchgate)を導く。既に物性の基礎がある読者は第\ref{part:meas}部から読んでよい。
+\end{keybox}
+
+% =====================================================================
+\part{物性物理の基礎(数式で)}
+\label{part:cmp}
+% =====================================================================
+
+\section{第二量子化:多数の電子を扱う言葉}
+
+電子は\emph{フェルミオン}であり、同じ状態に 2 個は入れない(パウリの排他律)。多数の電子を扱うには、状態ごとに「電子がいる/いない」を管理する\emph{第二量子化}が便利である。1 電子状態(軌道)$\phi_q$($q$ はサイトとスピンの組)に対し、電子を 1 個生成する演算子 $\cd_q$ と消滅させる演算子 $c_q$ を導入する。これらは反交換関係
+\begin{equation}
+  \{c_p, \cd_q\} \equiv c_p\cd_q + \cd_q c_p = \delta_{pq},\qquad
+  \{c_p,c_q\}=\{\cd_p,\cd_q\}=0
+  \label{eq:anticomm}
+\end{equation}
+に従う。$\{\cd_q,\cd_q\}=0$ すなわち $(\cd_q)^2=0$ が排他律そのもの(同じ軌道に 2 個は作れない)である。粒子数演算子 $n_q \equiv \cd_q c_q$ は固有値 $0,1$ を持ち、その軌道の占有数を数える。真空 $\ket{0}$(電子ゼロ)から任意の状態が $\cd$ を作用させて作れる:例えば $\cd_1\cd_2\ket{0}$ は軌道 $1,2$ に 1 個ずつ電子がある状態である。反交換のため順序を変えると符号がつく($\cd_1\cd_2 = -\cd_2\cd_1$)。この符号が後の Jordan--Wigner 変換(第\ref{sec:jw}節)で本質的役割を果たす。
+
+\begin{keybox}
+\textbf{要点.} $\cd_q,c_q$ は「軌道 $q$ の電子を 1 個増やす/減らす」。反交換関係\eqref{eq:anticomm}が排他律とフェルミ統計を符号化する。$n_q=\cd_q c_q$ は占有数(0 か 1)。
+\end{keybox}
+
+\section{ハバード模型}
+\label{sec:hubbard}
+
+固体中の電子は、格子点(原子)間を飛び移りつつ、互いにクーロン反発する。この最も単純化した模型が\emph{ハバード模型}である:
+\begin{equation}
+  H = \underbrace{-t\!\!\sum_{\langle ij\rangle,\sigma}\!\!\bigl(\cd_{i\sigma}c_{j\sigma}+\text{h.c.}\bigr)}_{\text{運動エネルギー }H_t}
+    + \underbrace{U\sum_i n_{i\up}n_{i\dn}}_{\text{相互作用 }H_U}
+    - \mu\sum_{i\sigma} n_{i\sigma}.
+  \label{eq:hubbard}
+\end{equation}
+ここで $i,j$ は格子点、$\sigma\in\{\up,\dn\}$ はスピン、$\langle ij\rangle$ は隣接対、h.c.\ はエルミート共役。各項の意味は次の通り。
+\begin{itemize}
+  \item \textbf{ホッピング $H_t$}:$\cd_{i\sigma}c_{j\sigma}$ は「サイト $j$ の電子を消しサイト $i$ に作る」=電子が $j\to i$ に飛び移る。振幅 $t$ が大きいほど電子は動きやすい(金属的)。
+  \item \textbf{オンサイト反発 $H_U$}:同一サイト $i$ に $\up$ と $\dn$ の電子が\emph{両方}いるとき($n_{i\up}n_{i\dn}=1$)だけエネルギー $U$ を払う。$U$ が大きいほど二重占有を嫌う。
+  \item \textbf{化学ポテンシャル $\mu$}:全電子数を調整するつまみ。$\mu=U/2$ は粒子・正孔対称な\emph{half-filling}(1 サイトあたり平均 1 電子)に対応する。
+\end{itemize}
+無次元パラメータは $U/t$ ひとつ(本研究では $t=1$)。$U/t$ が小さいと電子はほぼ自由に動く金属、大きいと動けない絶縁体(次節)になる。ハバード模型は高温超伝導・量子磁性の最小模型として物性理論の中心にある。
+
+\subsection{Mott 絶縁体と超交換相互作用}
+half-filling で $U/t\gg1$ の極限を考える。二重占有はエネルギー $U$ を要するので抑制され、各サイトはちょうど 1 電子で埋まる。電子は動くと必ず二重占有を作る($j$ から $i$ へ飛ぶと $i$ が 2 重占有)ため、運動が凍結し\emph{絶縁体}になる。これはバンドが埋まって生じる通常の絶縁体と違い、\emph{相互作用}が電子を局在させる\emph{Mott 絶縁体}である。電荷ギャップは $\sim U$。
+
+各サイトに 1 電子が残ると、その\emph{スピン}の自由度が残る。2 次摂動論(仮想的に電子が隣へ飛んで戻る過程)で有効ハミルトニアン
+\begin{equation}
+  H_{\rm eff} = J\sum_{\langle ij\rangle}\Bigl(\vec S_i\cdot\vec S_j - \tfrac14 n_i n_j\Bigr),\qquad
+  J = \frac{4t^2}{U}
+  \label{eq:heisenberg}
+\end{equation}
+が得られる(ハイゼンベルク模型)。$J>0$ は隣り合うスピンを\emph{反平行}に揃えたい(反強磁性)ことを意味する。すなわち Mott 絶縁体では、$\up\dn\up\dn$ と交互に並ぶ\emph{Néel 秩序}が基底状態に近くなる。本研究の $U=8$ はこの領域で、密度・スピン型の観測量が大きな期待値を持つ理由がここにある。
+
+\subsection{磁気秩序の記号:スタッガード磁化とストライプ}
+2 次元正方格子を A/B の 2 副格子(市松模様)に分ける。Néel 反強磁性の秩序パラメータは\emph{スタッガード磁化}
+\begin{equation}
+  m_{\rm stag} = \frac{1}{N_s}\sum_i (-1)^{i}\,\ev{S^z_i},\qquad
+  S^z_i = \tfrac12\bigl(n_{i\up}-n_{i\dn}\bigr),
+\end{equation}
+で、$(-1)^i$ は A 副格子で $+$、B で $-$。$m_{\rm stag}\neq0$ が反強磁性秩序を表す。
+
+ドープ(電子を抜く)すると、抜けた「ホール」が集まって\emph{電荷の川}を作り、その両側で反強磁性の位相が反転する\emph{ストライプ秩序}が現れることがある(高温超伝導体で観測される)。これは列 $x$ ごとの平均密度 $\ev{n_x}$ が変調し、$m_{\rm stag}$ が壁で符号反転するパターンで、本研究の第\ref{part:crm}部・ドープ系実験の主役になる。
+
+\section{平均場近似(Hartree--Fock)}
+\label{sec:hf}
+
+相互作用 $H_U$ は 4 つの演算子の積($\cd\cd cc$ 型)を含み、そのままでは解けない。最も基本的な近似は、各電子が他の電子の作る\emph{平均場}だけを感じるとみなすことである。$n_{i\up}n_{i\dn}$ を、揺らぎ $\delta n = n-\ev{n}$ の 2 次を無視して線形化する:
+\begin{align}
+  n_{i\up}n_{i\dn}
+  &= (\ev{n_{i\up}}+\delta n_{i\up})(\ev{n_{i\dn}}+\delta n_{i\dn})\notag\\
+  &\approx \ev{n_{i\up}}n_{i\dn} + n_{i\up}\ev{n_{i\dn}} - \ev{n_{i\up}}\ev{n_{i\dn}}.
+  \label{eq:mfdecouple}
+\end{align}
+これを\eqref{eq:hubbard}に代入すると、ハミルトニアンは 1 体(2 次)になる:
+\begin{equation}
+  H_{\rm HF} = \sum_\sigma \cd_\sigma\,\bigl(T + U\,\mathrm{diag}(\ev{n_{\bar\sigma}})\bigr)\,c_\sigma + \text{const},
+\end{equation}
+ここで $T$ はホッピング行列、$\bar\sigma$ は反対スピン。$\up$ の電子は $\dn$ の平均密度 $\ev{n_{i\dn}}$ が作るポテンシャルを感じる(逆も同様)。$\ev{n}$ は解いて得られる固有ベクトルから再計算するので、\emph{自己無撞着}に反復して解く(下から $N_\sigma$ 個の軌道を占有):
+\begin{equation}
+  H_\sigma \phi^{(\sigma)}_k = \varepsilon^{(\sigma)}_k \phi^{(\sigma)}_k,\qquad
+  \ev{n_{i\sigma}} = \sum_{k=1}^{N_\sigma} |\phi^{(\sigma)}_{k}(i)|^2.
+\end{equation}
+$\up$ と $\dn$ で密度が異なることを許す(スピン対称性を破る)ので\emph{非制限} Hartree--Fock (UHF) と呼ぶ。Néel 初期値から解くと、$m_{\rm stag}\neq0$ の反強磁性平均場解が得られる。コストは行列の対角化で $O(N_s^3)$ と安価である。
+
+\begin{keybox}
+\textbf{要点.} 平均場近似 = 相互作用項\eqref{eq:mfdecouple}を「相手スピンの平均密度が作る 1 体ポテンシャル」に置き換えること。得られる状態は次節の Slater 行列式で、安価($O(N_s^3)$)。本研究ではこれを CRM の prior に使う。
+\end{keybox}
+
+\section{Slater 行列式と相関行列}
+\label{sec:slater}
+
+平均場ハミルトニアンのように 1 体(2 次)の $H=\sum_{pq}h_{pq}\cd_p c_q$ の固有状態は、下から $N$ 個の軌道 $\{\phi_k\}$ を埋めた\emph{Slater 行列式}
+\begin{equation}
+  \ket{\Psi} = \Bigl(\textstyle\sum_p \phi_{1}(p)\cd_p\Bigr)\cdots\Bigl(\sum_p \phi_{N}(p)\cd_p\Bigr)\ket{0}
+\end{equation}
+である。これは\emph{自由フェルミオン状態}(相互作用のない電子の状態)で、その性質は\emph{相関行列}
+\begin{equation}
+  C_{pq} \equiv \ev{\cd_p c_q} = \sum_{k=1}^{N}\phi_k(p)^*\phi_k(q) = (\Phi\Phi^\dagger)_{qp}
+  \label{eq:corrmat}
+\end{equation}
+($\Phi$ は占有軌道を並べた行列)に\emph{すべて}含まれる。$C$ は $N_{\rm orb}\times N_{\rm orb}$ のエルミート行列で、$C^2=C$(射影子)を満たす。次節の Wick の定理により、任意の多体期待値が $C$ だけから計算できる。これが「Slater 行列式は安く扱える」ことの数学的な理由である。
+
+\section{Wick の定理}
+\label{sec:wick-tutorial}
+
+自由フェルミオン状態(Slater 行列式や熱的 Gauss 状態)では、多体の期待値が 2 体の期待値(相関行列 $C$)の\emph{積の和}に分解する。これが\emph{Wick の定理}である。数保存する状態では $\ev{\cd\cd}=\ev{cc}=0$ で、基本の縮約は
+\begin{equation}
+  \ev{\cd_p c_q}=C_{pq},\qquad \ev{c_p \cd_q}=\delta_{pq}-C_{qp}.
+\end{equation}
+例えば 4 演算子は(異なる軌道 $a\ne b$ で)
+\begin{equation}
+  \ev{\cd_a c_a \cd_b c_b} = \ev{\cd_a c_a}\ev{\cd_b c_b} + \ev{\cd_a c_b}\ev{c_a \cd_b}
+  = C_{aa}C_{bb} - C_{ab}C_{ba}.
+  \label{eq:wick4}
+\end{equation}
+第 2 項の符号はフェルミオンの入れ替えから来る。この式が第\ref{sec:wickderive}節で「密度$\times$密度相関」の閉形式を与える。
+
+\section{エンタングルメント・行列積状態・DMRG}
+\label{sec:mps}
+
+量子多体状態 $\ket{\Psi}$ を系 $A$ と補系 $B$ に分けると、\emph{Schmidt 分解}
+\begin{equation}
+  \ket{\Psi} = \sum_{\alpha=1}^{\chi} \lambda_\alpha \ket{\alpha}_A\otimes\ket{\alpha}_B,\qquad \sum_\alpha\lambda_\alpha^2=1
+\end{equation}
+が書ける。項数(Schmidt ランク)$\chi$ と重み $\lambda_\alpha$ が $A$--$B$ 間の\emph{量子もつれ}(エンタングルメント)を測る。エンタングルメント・エントロピー $S=-\sum_\alpha\lambda_\alpha^2\log\lambda_\alpha^2$ が大きいほど、状態を古典的に表現するのに大きな $\chi$ が要る。
+
+\emph{行列積状態} (MPS) は、1 次元に並べた各サイトに行列 $A^{[s_i]}$ を割り当て、
+\begin{equation}
+  \ket{\Psi} = \sum_{\{s_i\}} A^{[s_1]}A^{[s_2]}\cdots A^{[s_N]}\,\ket{s_1\cdots s_N}
+\end{equation}
+と表す表現で、行列サイズ(\emph{ボンド次元})$\chi$ が各カットの Schmidt ランクに対応する。$\chi$ を上げるほど正確だが、計算コストは $O(N\chi^3)$ 程度で増える。\emph{DMRG}(密度行列繰り込み群)は、この MPS 表現の下で基底状態を変分的に求める強力なアルゴリズムである。
+
+\begin{keybox}
+\textbf{面積則と 1D/2D の違い.} ギャップのある基底状態のエンタングルメントは、境界の「面積」に比例する(\emph{面積則})。1 次元では境界は点なので $S=$ 一定 $\Rightarrow$ $\chi=$ 一定で済み DMRG は非常に効率的。2 次元の幅 $W$ のシリンダーでは境界は長さ $W$ なので $S\propto W$、したがって $\chi\sim e^{cW}$ と\emph{指数的}に増える。これが「2 次元では MPS が高くつく」ことの本質であり、本研究で安価な平均場 prior が効く理由(第\ref{sec:wickderive}節)でもある。
+\end{keybox}
+
+状態 $\rho$ の近似 $\sigma=\ket{\psi_\sigma}\bra{\psi_\sigma}$ の良さの大域的指標が\emph{忠実度}
+\begin{equation}
+  F = \ev{\psi_\sigma|\rho|\psi_\sigma}\quad(\text{純粋状態なら }|\braket{\psi_\sigma}{\psi_\rho}|^2)
+\end{equation}
+である。$0\le F\le1$ で、$F=1$ が完全一致。本研究の核心は「$F$ は CRM の利得を決めない」ことなので、この量は\emph{参照}として重要になる。
+
+\section{Jordan--Wigner 変換:電子を量子ビットに写す}
+\label{sec:jw}
+
+量子コンピュータ・量子情報の言葉は量子ビット(スピン $1/2$、パウリ演算子 $X,Y,Z$)である。フェルミオンを量子ビットに写すのが\emph{Jordan--Wigner (JW) 変換}である。軌道に一列に番号 $1,2,\dots$ を振り、
+\begin{equation}
+  c_j = \Bigl(\prod_{k<j} Z_k\Bigr)\,\frac{X_j+iY_j}{2},\qquad
+  \cd_j = \Bigl(\prod_{k<j} Z_k\Bigr)\,\frac{X_j-iY_j}{2}
+  \label{eq:jw}
+\end{equation}
+とする。$\prod_{k<j}Z_k$(\emph{JW 弦})が、\eqref{eq:anticomm}のフェルミオン反交換符号を量子ビット演算子の非可換性で再現する。占有数は $n_j=\cd_j c_j=(1-Z_j)/2$、すなわち $Z_j=1-2n_j$(空なら $+1$、占有なら $-1$)。この変換から、観測量の\emph{台のサイズ}が次のように決まる:
+\begin{itemize}
+  \item 密度・スピン型($n_j$ や $S^z_i$)は $Z_j$ の積になり、JW 弦が\emph{相殺}して短い(台 $|A|=1$--$2$)。
+  \item ホッピング $\cd_a c_b+\text{h.c.}$ は $a<b$ のとき $\tfrac12(X_a Z_{a+1}\cdots Z_{b-1}X_b + Y_a Z\cdots Z Y_b)$ となり、間の JW 弦が残るため台が\emph{距離だけ伸びる}($|A|=b-a+1$)。
+\end{itemize}
+2 次元をスネーク状に 1 次元へ並べると、$x$ 方向ボンドの JW 距離は $\sim2W$ になり台が $|A|=2W+1$ と大きくなる。第\ref{sec:matchgate-t}節の matchgate シャドウはこの問題を回避する。
+
+% =====================================================================
+\part{量子測定と古典シャドウ}
+\label{part:meas}
+% =====================================================================
+
+\section{測定・期待値・ショットノイズ}
+
+観測量 $O$ の期待値は $\ev{O}=\Tr[O\rho]$。量子測定は確率的で、$O$ の固有値のいずれかがランダムに得られる。$M$ 回測定して平均すると、その標準誤差は $\sim\sigma_O/\sqrt{M}$($\sigma_O^2=\ev{O^2}-\ev{O}^2$)で減る。精度 $\epsilon$ には $M\sim\sigma_O^2/\epsilon^2$ 回必要 — これが\emph{ショットノイズ}であり、測定回数がコストを支配する理由である。
+
+パウリ演算子 $X,Y,Z$ は固有値 $\pm1$ を持つ。多体のパウリ列 $P=\bigotimes_{i\in A}\sigma_{a_i}$($A$ が\emph{台}、$a_i\in\{x,y,z\}$)を測るには、各量子ビットを対応する基底で測り、結果 $s_i\in\{\pm1\}$ の積 $\prod_i s_i$ を取ればよく、その平均が $\ev{P}$ になる。密度・スピン・エネルギーなどの物理量はパウリ列の和で書ける。
+
+\section{古典シャドウ}
+\label{sec:shadow-t}
+
+多数のパウリ列を\emph{一組の測定データ}から推定するのが古典シャドウである。手順は次の通り。
+\begin{enumerate}
+  \item 各量子ビット $i$ で測定基底 $b_i\in\{X,Y,Z\}$ を独立一様にランダムに選ぶ(この組を\emph{設定} $u=(b_1,\dots,b_N)$ と呼ぶ)。
+  \item その基底で測定し、結果 $s_i\in\{\pm1\}$ を得る。
+  \item 古典スナップショット $\hat\rho_u = \bigotimes_i \hat\rho_i$、$\hat\rho_i = 3\ket{s_i}_{b_i}\!\bra{s_i}_{b_i} - I$ を(概念的に)構成する。係数 $3$ は 1 量子ビットの逆測定チャネルから来る。
+\end{enumerate}
+このスナップショットは $\mathbb E[\hat\rho_u]=\rho$ を満たす(不偏)。パウリ列 $P$ の\emph{スナップショット推定値}は
+\begin{equation}
+  X(P;u,s)=\Tr[P\,\hat\rho_u]=\prod_{i\in A}\Tr\bigl[\sigma_{a_i}(3\ket{s_i}_{b_i}\!\bra{s_i}_{b_i}-I)\bigr].
+\end{equation}
+1 量子ビットの因子を計算する。$\Tr[\sigma_a]=0$ で、$\Tr[\sigma_a\ket{s}_b\!\bra{s}_b]=\bra{s}_b\sigma_a\ket{s}_b$ は $a=b$ のとき $s$、$a\neq b$ のとき $0$。よって
+\begin{equation}
+  \Tr\bigl[\sigma_a(3\ket{s}_b\!\bra{s}_b-I)\bigr]=3\,s\,\delta_{a,b},
+\end{equation}
+したがって
+\begin{equation}
+  \boxed{\;X(P;u,s)=3^{|A|}\Bigl(\prod_{i\in A}s_i\Bigr)\,\mathbf 1[\,\forall i\in A:\ b_i=a_i\,]\;}
+  \label{eq:snapshot}
+\end{equation}
+となる。\textbf{基底が台の上で全一致したときだけ}値 $3^{|A|}\cdot(\pm1)$ を返し、一致しなければ厳密に $0$。基底が全一致する確率は $3^{-|A|}$ である。「当たれば $3^{|A|}$ 倍に増幅、外れれば $0$」というこの構造が、次節の分散(古典シャドウの弱点)と、それを打ち消す CRM(第\ref{part:crm}部)の鍵になる。
+
+\section{古典シャドウの分散}
+\label{sec:shadowvar}
+
+以後、1 設定あたり $n_m$ ショット、$n_u$ 設定を使う(総ショット $n_u n_m$)。推定量は設定平均・ショット平均である。分散を「設定の選び方による揺らぎ」と「ショットノイズ」に分解する。設定 $u$ を固定した条件付き期待値は、\eqref{eq:snapshot}でショット平均を取り、一致時に $\mathbb E[\prod s_i]=\ev{P}$ となることから
+\begin{equation}
+  \mathbb E[X\,|\,u] = 3^{|A|}\,\mathbf 1[\text{一致}]\,\ev{P}.
+  \label{eq:condmean}
+\end{equation}
+これを $u$ で平均すると $3^{|A|}\cdot3^{-|A|}\ev{P}=\ev{P}$、すなわち\emph{不偏}である。分散を全分散の公式 $\Var(X)=\Var_u(\mathbb E[X|u])+\mathbb E_u[\Var(X|u)]$ で 2 つに分ける。
+
+\paragraph{(i) 設定間揺らぎ.}\eqref{eq:condmean}より
+\begin{align}
+  V_u \equiv \Var_u\bigl(\mathbb E[X|u]\bigr)
+  &= \mathbb E_u\bigl[(3^{|A|}\mathbf 1[\text{一致}]\ev{P})^2\bigr]-\ev{P}^2\notag\\
+  &= 3^{2|A|}\ev{P}^2\cdot 3^{-|A|}-\ev{P}^2 = (3^{|A|}-1)\,\ev{P}^2.
+  \label{eq:Vu}
+\end{align}
+
+\paragraph{(ii) 条件付きショットノイズ.}一致した設定では $X=3^{|A|}\prod s_i$、$\prod s_i\in\{\pm1\}$ は平均 $\ev{P}$・分散 $1-\ev{P}^2$。不一致では $X=0$。よって
+\begin{equation}
+  \mathbb E_u[\Var(X|u)] = 3^{-|A|}\cdot 3^{2|A|}\bigl(1-\ev{P}^2\bigr) = 3^{|A|}\bigl(1-\ev{P}^2\bigr).
+  \label{eq:vs}
+\end{equation}
+$n_u$ 設定・$n_m$ ショットで平均した推定量の分散は
+\begin{equation}
+  \Var[\text{標準}] = \frac{1}{n_u}\Bigl[\underbrace{(3^{|A|}-1)\ev{P}^2}_{V_u} + \frac{1}{n_m}\underbrace{3^{|A|}(1-\ev{P}^2)}_{\text{ショットノイズ}}\Bigr].
+  \label{eq:varstd}
+\end{equation}
+台 $|A|$ が大きいほど $3^{|A|}$ の因子で分散が急増する — これが古典シャドウが長い演算子(2 次元の $x$ ボンドなど)に弱い理由である。
+
+% =====================================================================
+\part{CRM と本研究の理論}
+\label{part:crm}
+% =====================================================================
+
+\section{CRM 推定器と不偏性}
+
+CRM は、実験状態 $\rho$ の古典近似 $\sigma$(prior)を用意し、実験と\emph{同一の設定} $u$ での prior 側の予測を差し引く。本研究では prior 側の条件付き期待値を\emph{厳密に}計算する。\eqref{eq:condmean}より
+\begin{equation}
+  Y(u)\equiv\mathbb E[X_\sigma\,|\,u] = 3^{|A|}\,\mathbf 1[\text{一致}]\,\ev{P}_\sigma
+  \label{eq:priorcond}
+\end{equation}
+であり、実装上必要なのは prior の期待値 $\ev{P}_\sigma$ だけである。CRM 推定量は
+\begin{equation}
+  \hat o_{\rm CRM} = \frac{1}{n_u}\sum_u\bigl[\overline{X_\rho(u)}-Y(u)\bigr] + \Tr[O\sigma].
+\end{equation}
+$\mathbb E_u[Y(u)]=\ev{P}_\sigma=\Tr[O\sigma]$ なので足し戻しにより\emph{不偏}($\mathbb E[\hat o_{\rm CRM}]=\ev{P}_\rho$)である。
+
+\section{利得法則の導出}
+\label{sec:gainderive}
+
+CRM の分散を標準\eqref{eq:varstd}と同様に評価する。実験側と prior 側は同一 $u$ を共有するので、条件付き期待値の差は\eqref{eq:condmean},\eqref{eq:priorcond}より
+\begin{equation}
+  \mathbb E[X_\rho-X_\sigma\,|\,u] = 3^{|A|}\,\mathbf 1[\text{一致}]\,\bigl(\ev{P}_\rho-\ev{P}_\sigma\bigr)
+  = 3^{|A|}\,\mathbf 1[\text{一致}]\,\Delta,
+\end{equation}
+ここで \emph{prior の局所誤差}
+\begin{equation}
+  \boxed{\ \Delta \equiv \ev{P}_\rho - \ev{P}_\sigma\ }
+\end{equation}
+を定義した。設定間揺らぎ\eqref{eq:Vu}は $\ev{P}\to\Delta$ に置き換わる:$V_u^{\rm CRM}=(3^{|A|}-1)\Delta^2$。一方 prior 側は厳密計算でノイズを持たないので、ショットノイズ\eqref{eq:vs}は実験側の $3^{|A|}(1-\ev{P}_\rho^2)$ のまま残る。したがって
+\begin{equation}
+  \Var[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\ev{P}^2)}{n_m}\Bigr].
+\end{equation}
+利得 $G=\Var[\text{標準}]/\Var[\text{CRM}]$ は
+\begin{equation}
+  \boxed{\;G = \frac{(3^{|A|}-1)\ev{P}^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s},\qquad v_s=\frac{3^{|A|}(1-\ev{P}^2)}{n_m}\;}
+  \label{eq:gain-t}
+\end{equation}
+となる($\ev{P}\equiv\ev{P}_\rho$)。
+
+\begin{keybox}
+\textbf{解釈.} 標準シャドウの「打ち消したい揺らぎ」は $(3^{|A|}-1)\ev{P}^2$。CRM はこれを $(3^{|A|}-1)\Delta^2$ に減らす。式には prior の\emph{局所}誤差 $\Delta$ しか現れず、\emph{グローバル忠実度 $F$ は登場しない}。
+\begin{itemize}
+  \item $\Delta\ll\ev{P}$(prior がその観測量を正確に予言)$\Rightarrow$ $G\gg1$(大きな利得)。
+  \item $\Delta\sim\ev{P}$(prior が下手)$\Rightarrow$ $G\approx1$(得も損もしない)。
+  \item $\Delta>\ev{P}$(prior が誤った偏りを持つ)$\Rightarrow$ $G<1$(損)。第\ref{sec:cv-t}節で解消。
+\end{itemize}
+$\Delta\to0$ の極限で\emph{飽和則}
+\begin{equation}
+  G_{\max}(n_m)=\lim_{\Delta\to0}G = 1 + n_m\,\frac{(3^{|A|}-1)\ev{P}^2}{3^{|A|}(1-\ev{P}^2)}
+  \label{eq:sat-t}
+\end{equation}
+が得られ、$G$ の上限が $n_m$ に比例する。ゆえに「設定を少なく・1 設定あたりのショットを多く」が最適配分になる。
+\end{keybox}
+
+\paragraph{なぜ $F$ でなく $\Delta$ か.}忠実度は全パウリ成分にわたる大域量で、$N$ 量子ビット系では $F\sim f^N$ と指数的に $0$ へ向かう。一方 $\Delta=\ev{P}_\rho-\ev{P}_\sigma$ は、$P$ の台 $A$ 周辺の\emph{縮約密度行列}の誤差だけで決まり、系サイズ $N$ に依存しない。これが「グローバル忠実度が崩壊しても局所観測量の利得は生き残る」(本研究の主要結果)の数学的な理由である。
+
+\section{制御変量法としての一般化:損をしない CRM}
+\label{sec:cv-t}
+
+$G<1$(損)の可能性は、CRM を統計学の\emph{制御変量法}として捉え直すと解消できる。設定 $u$ ごとに $m_\rho(u)$(実験側ショット平均)と厳密な $Y(u)$ が得られる。係数 $\beta$ を導入した推定量
+\begin{equation}
+  \hat o(\beta)=\bar m_\rho - \beta\bigl(\bar Y - \Tr[O\sigma]\bigr),\qquad
+  \bar m_\rho=\tfrac1{n_u}\!\sum_u m_\rho(u),\ \ \bar Y=\tfrac1{n_u}\!\sum_u Y(u)
+\end{equation}
+は $\mathbb E[\bar Y]=\Tr[O\sigma]$ より\emph{任意の $\beta$ で不偏}。分散は
+\begin{equation}
+  \Var[\hat o(\beta)] = \Var(\bar m_\rho) - 2\beta\,\Cov(\bar m_\rho,\bar Y) + \beta^2\Var(\bar Y)
+\end{equation}
+で $\beta$ の 2 次式。最小は
+\begin{equation}
+  \beta^\ast=\frac{\Cov(\bar m_\rho,\bar Y)}{\Var(\bar Y)},\qquad
+  \Var_{\min}=\Var(\bar m_\rho)\bigl(1-\mathrm{corr}^2\bigr),
+\end{equation}
+ここで $\mathrm{corr}=\Cov(\bar m_\rho,\bar Y)/\sqrt{\Var(\bar m_\rho)\Var(\bar Y)}$。標準シャドウ($\beta=0$)に対する利得は
+\begin{equation}
+  \boxed{\ G_{\rm opt}=\frac{\Var(\bar m_\rho)}{\Var_{\min}}=\frac{1}{1-\mathrm{corr}^2}\ \ge 1\ }
+\end{equation}
+であり、\emph{prior がどれほど悪くても損をしない}($\beta^\ast$ をデータから推定すれば、悪い prior では $\beta^\ast\to0$ となり標準シャドウに自動的に退化)。通常の CRM は $\beta=1$ の特殊例である。複数 prior $\{Y_i\}$ は多変量回帰 $\boldsymbol\beta=\Sigma_{YY}^{+}\mathbf c_{Y\rho}$ に一般化される($\Sigma_{YY}$ は $Y_i$ の共分散行列、$\mathbf c_{Y\rho}$ は $Y_i$ と $m_\rho$ の共分散)。
+
+\section{平均場 prior の Wick 閉形式}
+\label{sec:wickderive}
+
+式\eqref{eq:priorcond}の $Y(u)$ に必要な $\ev{P}_\sigma$ を、UHF(Slater 行列式)prior について相関行列 $C$\eqref{eq:corrmat}から閉形式で求める。JW 変換 $Z_j=1-2n_j$ を使う。
+
+\paragraph{1 点(密度).}
+\begin{equation}
+  \ev{Z_q}_\sigma = 1-2\ev{n_q} = 1-2C_{qq}.
+\end{equation}
+\paragraph{2 点(密度$\times$密度).}$Z_aZ_b=(1-2n_a)(1-2n_b)=1-2n_a-2n_b+4n_an_b$ に Wick の 4 演算子公式\eqref{eq:wick4}を代入:
+\begin{equation}
+  \ev{Z_aZ_b}_\sigma = 1-2C_{aa}-2C_{bb}+4\bigl(C_{aa}C_{bb}-C_{ab}C_{ba}\bigr).
+\end{equation}
+異スピン間はブロック対角性($\up$--$\dn$ 間の $C=0$)より $\ev{Z_aZ_b}=\ev{Z_a}\ev{Z_b}$ に退化する。
+\paragraph{ホッピング.}JW 隣接の $\tfrac12(X_aZ\cdots ZX_b+Y_aZ\cdots ZY_b)=\cd_ac_b+\cd_bc_a$ より
+\begin{equation}
+  \Bigl\langle\tfrac12(XZ\cdots ZX+YZ\cdots ZY)\Bigr\rangle_\sigma = C_{ab}+C_{ba}=2\,\mathrm{Re}\,C_{ab}.
+\end{equation}
+いずれも $C$($N_{\rm orb}\times N_{\rm orb}$)から $O(1)$ で読め、\textbf{MPS 表現を要さず任意サイズで $O(N^3)$}($C$ の構成コスト)である。
+
+\subsection{対称性回復:混合状態 prior}
+共線 UHF は Néel 秩序を凍結させ、サイト間スピン相関 $\ev{S^zS^z}$ を過大評価する($\Delta$ が大きくなる)。これを、全スピンを一様回転して平均した\emph{混合状態}
+\begin{equation}
+  \bar\sigma=\int d\Omega\,R(\Omega)\,\ket{\rm UHF}\!\bra{\rm UHF}\,R(\Omega)^\dagger
+\end{equation}
+で改善する。回転後も一般化(非共線)Slater 行列式なので、フル相関行列 $C(\theta)=U(\theta)\,C\,U(\theta)^\dagger$ に対し同じ Wick 式が使える。共線秩序は $z$ 軸回りの回転で不変なので、平均は極角 $\theta$ の 1 次元数値積分に落ちる。\textbf{CRM の prior に要るのは $\ev{P}_{\bar\sigma}$ だけ}なので、$\bar\sigma$ が純粋状態でなく混合状態でも支障はない — これが「混合状態 prior」という自由度が使える理由である。
+
+\section{matchgate(フェルミオン)シャドウ}
+\label{sec:matchgate-t}
+
+2 次元の $x$ ボンドは JW 弦で台 $|A|=2W+1$ となり、\eqref{eq:varstd}の $3^{|A|}$ で古典シャドウが破綻する。これを避けるには、パウリ基底の代わりに\emph{フェルミオンに自然な測定}を使う。Majorana 演算子
+\begin{equation}
+  \gamma_{2j-1}=\cd_j+c_j,\qquad \gamma_{2j}=i(\cd_j-c_j),\qquad \{\gamma_\mu,\gamma_\nu\}=2\delta_{\mu\nu}
+\end{equation}
+を導入すると、ホッピングは 2 次の単項式 $\gamma_\mu\gamma_\nu$ になり(台のサイズによらない)、密度も 2 次である。matchgate シャドウは、Haar 一様なフェルミオン Gauss 回転 $U_Q$($Q\in SO(2n)$、$U_Q^\dagger\gamma_\mu U_Q=\sum_\nu Q_{\mu\nu}\gamma_\nu$)を掛けてから占有数測定する。次数 $2k$ の Majorana 単項式に対するスナップショット推定量は
+\begin{equation}
+  X_S(b)=\lambda_{2k}^{-1}\sum_{S'}\det\bigl(Q[S,S']\bigr)\,\bra{b}\Gamma_{S'}\ket{b},\qquad
+  \lambda_{2k}=\binom{n}{k}\Big/\binom{2n}{2k}
+\end{equation}
+で、$\lambda_{2k}$ が古典シャドウの $3^{|A|}$ に対応するチャネル係数である。CRM の prior 側は、Gauss 状態の 2 点関数 $K_{\mu\nu}=\ev{\gamma_\mu\gamma_\nu}$ が回転で $K'=Q^TKQ$ となることから、\emph{Pfaffian} で厳密に
+\begin{equation}
+  \mathbb E[X_S\,|\,u]=\lambda^{-1}\sum_{S'}\det\bigl(Q[S,S']\bigr)\,\Pf\bigl(K'[S']\bigr)
+\end{equation}
+と計算できる(Pfaffian は反対称行列に対する行列式の平方根に当たる量で、Wick の定理の Majorana 版)。UHF prior と matchgate 測定はこの意味で構造的に相性がよい。ただし本研究の結果として、Gauss 測定は\emph{自己平均的}で設定間揺らぎ $V_u$ 自体が小さく、CRM の利得は限定的である(第\ref{part:crm}部本文参照)。
+
+\section{シミュレーションの技法:窓サンプリング}
+\label{sec:window}
+
+数値実験では「実験」を MPS からのサンプリングで模擬する。観測量の台が狭い場合、全系をサンプルするのは無駄である。\emph{窓サンプリング}は、台を含む連続窓 $[q_1,q_2]$ だけをサンプルする。MPS の直交中心を $q_1$ に置くと左側の環境が恒等になり、窓の左端の Schmidt 指標 $l$ が測定基底(回転)に依存しない確率
+\begin{equation}
+  p(l)=\Bigl[\textstyle\sum_b C^{[q_1]}_b (C^{[q_1]}_b)^\dagger\Bigr]_{ll}
+\end{equation}
+で引ける。$l$ を先に引いてから窓内を通常の逐次サンプリングすればよく、コストが\emph{窓幅のみ}に依存し系サイズ $L$ に依存しない。これにより $L=32$ 鎖や 96 量子ビットシリンダーの測定を高速に模擬できる。
+
+\section{全体像のまとめ}
+
+\begin{keybox}
+\textbf{論理の流れ.}
+\begin{enumerate}
+  \item 古典シャドウの分散は $(3^{|A|}-1)\ev{P}^2+v_s$\eqref{eq:varstd}。第 1 項が「ランダム基底の当たり外れ」による設定間揺らぎ。
+  \item CRM は\emph{同一設定}を prior と共有し、この第 1 項を $(3^{|A|}-1)\Delta^2$ に減らす $\Rightarrow$ 利得法則\eqref{eq:gain-t}。利得は\emph{局所誤差 $\Delta$ のみ}で決まりグローバル忠実度に依らない。
+  \item 帰結:大きい系でも局所観測量なら利得は保たれる。
+  \item prior は $\ev{P}_\sigma$ しか要らない $\Rightarrow$ Wick で書ける平均場(第\ref{sec:wickderive}節)や混合状態も prior にできる $\Rightarrow$ 2 次元で MPS 不要の安価 prior。
+  \item 制御変量として一般化すると $G_{\rm opt}=1/(1-\mathrm{corr}^2)\ge1$(第\ref{sec:cv-t}節)$\Rightarrow$ 損をしない。
+  \item matchgate 測定は JW 弦問題を回避(第\ref{sec:matchgate-t}節)。ただし CRM 利得は測定アンサンブル依存。
+\end{enumerate}
+\end{keybox}
+
+\subsection*{記号一覧}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+記号 & 意味 \\
+\midrule
+$t,U,\mu$ & ホッピング・オンサイト反発・化学ポテンシャル\eqref{eq:hubbard} \\
+$\cd_q,c_q,n_q$ & 生成・消滅・数演算子\eqref{eq:anticomm} \\
+$C_{pq}=\ev{\cd_pc_q}$ & 相関行列(Slater 状態の全情報)\eqref{eq:corrmat} \\
+$\chi$ & MPS のボンド次元(prior の質のつまみ) \\
+$F$ & 忠実度(グローバルな近さ;利得は決めない) \\
+$P,\ |A|$ & パウリ列とその台のサイズ \\
+$\ev{P}_\rho,\ \ev{P}_\sigma$ & 実験・prior の期待値、$\Delta=\ev{P}_\rho-\ev{P}_\sigma$ \\
+$n_u,n_m$ & 設定数・1 設定あたりのショット数 \\
+$G$ & 利得 $=\Var[\text{標準}]/\Var[\text{CRM}]$\eqref{eq:gain-t} \\
+$v_s$ & ショットノイズ床 $=3^{|A|}(1-\ev{P}^2)/n_m$ \\
+$\gamma_\mu,\ K_{\mu\nu}$ & Majorana 演算子と 2 点関数(matchgate) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\\
+\footnotesize 関連文書:研究本体の要約 \texttt{crm\_hubbard.tex}(論文形式)、実験ごとの詳細 \texttt{README.md}、主張と査読対応 \texttt{CRM\_RESEARCH\_NOTES.md}。参考文献は \texttt{crm\_hubbard.tex} を参照。
+
+\end{document}
