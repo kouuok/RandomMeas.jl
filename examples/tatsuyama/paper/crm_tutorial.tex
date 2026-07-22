@@ -78,95 +78,129 @@
 \end{itemize}
 無次元パラメータは $U/t$ ひとつ(本研究では $t=1$)。$U/t$ が小さいと電子はほぼ自由に動く金属、大きいと動けない絶縁体(次節)になる。ハバード模型は高温超伝導・量子磁性の最小模型として物性理論の中心にある。
 
-\subsection{Mott 絶縁体と超交換相互作用}
-half-filling で $U/t\gg1$ の極限を考える。二重占有はエネルギー $U$ を要するので抑制され、各サイトはちょうど 1 電子で埋まる。電子は動くと必ず二重占有を作る($j$ から $i$ へ飛ぶと $i$ が 2 重占有)ため、運動が凍結し\emph{絶縁体}になる。これはバンドが埋まって生じる通常の絶縁体と違い、\emph{相互作用}が電子を局在させる\emph{Mott 絶縁体}である。電荷ギャップは $\sim U$。
+\paragraph{フィリング・half-filling・粒子正孔対称.}「フィリング」は 1 サイトあたりの平均電子数 $n=\ev{\sum_\sigma n_{i\sigma}}$ を指す。1 サイトには最大 2 個(↑と↓)入るので $0\le n\le2$。$n=1$(全サイトの半分だけ電子で埋まる)を\emph{half-filling} と呼ぶ。$\mu=U/2$ にすると、電子を「ある」と「ない」(=正孔)を入れ替える変換 $c\leftrightarrow \cd$ の下で $H$ が不変になり(粒子正孔対称)、その帰結として基底状態は自動的に $n=1$ になる。この対称性は後で「対称性で $0$ が厳密に決まる観測量」を作り、CRM が損をする例(第\ref{sec:gainderive}節)を生む。本研究では half-filling を基準とし、そこから電子を少し抜いた「ドープ系」も調べる。
 
-各サイトに 1 電子が残ると、その\emph{スピン}の自由度が残る。2 次摂動論(仮想的に電子が隣へ飛んで戻る過程)で有効ハミルトニアン
+\paragraph{2 サイトの最小例.}直観のため 2 サイト・2 電子(↑↓各 1 個)を考える。$U=0$ なら電子は自由に動き、基底状態は 2 サイトにわたって非局在する。$U\to\infty$ なら二重占有は禁止され、各サイトに 1 電子ずつ、スピンは反平行に揃う(次段落の超交換の芽)。この「$U$ が電子を各サイトに縛り、残ったスピンだけが効く」という描像が Mott 物理の核心である。
+
+\subsection{Mott 絶縁体と超交換相互作用}
+half-filling で $U/t\gg1$ の極限を考える。二重占有はエネルギー $U$ を要するので抑制され、各サイトはちょうど 1 電子で埋まる。電子は動くと必ず二重占有を作る($j$ から $i$ へ飛ぶと $i$ が 2 重占有になる)ため、運動が凍結し\emph{絶縁体}になる。これはバンドが埋まって生じる通常の絶縁体と違い、\emph{相互作用}が電子を局在させる\emph{Mott 絶縁体}である。電荷を 1 個動かすのに $\sim U$ のエネルギーが要る(電荷ギャップ $\sim U$)。
+
+\paragraph{超交換 $J=4t^2/U$ の導出(2 次摂動).}各サイトに 1 電子が残ると、\emph{スピンの向き}という自由度が残る。隣り合う 2 サイトのスピン配置を考えよう。
+\begin{itemize}
+  \item スピンが\emph{反平行}($\up\,\dn$)なら、片方の電子が隣へ飛んで一瞬二重占有(エネルギー $+U$)を作り、また戻る、という\emph{仮想過程}が許される。摂動論では、この「行って戻る」過程がエネルギーを $-t^2/U$ だけ下げる(飛ぶ振幅 $t$、戻る振幅 $t$、中間状態のエネルギー分母 $U$ で $\sim -t\cdot t/U$)。↑↓の 2 通り(左が飛ぶ・右が飛ぶ)あるので合計 $-2t^2/U$。
+  \item スピンが\emph{平行}($\up\,\up$)なら、飛んだ先も↑で埋まっており排他律で二重占有できない。仮想過程が禁止され、エネルギーは下がらない。
+\end{itemize}
+つまり\emph{反平行の方がエネルギーが低い}。この効果をスピン演算子で書くと、隣接ボンドあたり
 \begin{equation}
   H_{\rm eff} = J\sum_{\langle ij\rangle}\Bigl(\vec S_i\cdot\vec S_j - \tfrac14 n_i n_j\Bigr),\qquad
-  J = \frac{4t^2}{U}
+  J = \frac{4t^2}{U} > 0
   \label{eq:heisenberg}
 \end{equation}
-が得られる(ハイゼンベルク模型)。$J>0$ は隣り合うスピンを\emph{反平行}に揃えたい(反強磁性)ことを意味する。すなわち Mott 絶縁体では、$\up\dn\up\dn$ と交互に並ぶ\emph{Néel 秩序}が基底状態に近くなる。本研究の $U=8$ はこの領域で、密度・スピン型の観測量が大きな期待値を持つ理由がここにある。
+となる(ハイゼンベルク反強磁性模型)。$\vec S_i\cdot\vec S_j$ は 2 つのスピンが反平行だと $-3/4$、平行だと $+1/4$ を返すので、$J>0$ は\emph{反平行を好む}(反強磁性)。すなわち Mott 絶縁体の基底状態は、$\up\dn\up\dn\cdots$ と交互に並ぶ\emph{Néel 秩序}に近い。本研究で $U=8$(強結合)のとき密度・スピン型の観測量が大きな期待値を持ち、CRM の利得が大きくなるのは、この強い秩序が理由である。
 
 \subsection{磁気秩序の記号:スタッガード磁化とストライプ}
-2 次元正方格子を A/B の 2 副格子(市松模様)に分ける。Néel 反強磁性の秩序パラメータは\emph{スタッガード磁化}
+反強磁性秩序を数値で表すには、格子を市松模様(2 副格子 A/B)に塗り分け、$\up$ が多いサイトと $\dn$ が多いサイトの差を測ればよい。まずサイトごとのスピンの $z$ 成分は
 \begin{equation}
-  m_{\rm stag} = \frac{1}{N_s}\sum_i (-1)^{i}\,\ev{S^z_i},\qquad
-  S^z_i = \tfrac12\bigl(n_{i\up}-n_{i\dn}\bigr),
+  S^z_i = \tfrac12\bigl(n_{i\up}-n_{i\dn}\bigr)
 \end{equation}
-で、$(-1)^i$ は A 副格子で $+$、B で $-$。$m_{\rm stag}\neq0$ が反強磁性秩序を表す。
+(↑だけなら $+1/2$、↓だけなら $-1/2$、空や二重占有なら $0$)。Néel 秩序では A 副格子で $S^z>0$、B 副格子で $S^z<0$ のように交互に符号が変わる。そこで各サイトに $(-1)^i$(2 次元では $(-1)^{x+y}$;A で $+1$、B で $-1$)を掛けてから平均した\emph{スタッガード磁化}
+\begin{equation}
+  m_{\rm stag} = \frac{1}{N_s}\sum_i (-1)^{i}\,\ev{S^z_i}
+\end{equation}
+を秩序パラメータに使う。交互パターンでは $(-1)^i$ が符号を揃えるので、$m_{\rm stag}\neq0$ が反強磁性秩序の目印になる(乱れていれば $\ev{S^z_i}$ がばらついて相殺し $m_{\rm stag}\approx0$)。
 
-ドープ(電子を抜く)すると、抜けた「ホール」が集まって\emph{電荷の川}を作り、その両側で反強磁性の位相が反転する\emph{ストライプ秩序}が現れることがある(高温超伝導体で観測される)。これは列 $x$ ごとの平均密度 $\ev{n_x}$ が変調し、$m_{\rm stag}$ が壁で符号反転するパターンで、本研究の第\ref{part:crm}部・ドープ系実験の主役になる。
+\paragraph{ドープとストライプ.}half-filling から電子を抜くと、空いた席(\emph{ホール})が生じる。強結合の 2 次元系では、ホールが 1 列に集まって\emph{電荷の川}(ホールの通り道)を作り、その川を「ドメイン壁」として\emph{両側で反強磁性の位相が反転する}パターンが安定になることがある。これを\emph{ストライプ秩序}と呼び、実際の高温超伝導体で観測されている。数値的には、列 $x$ ごとの平均密度 $\ev{n_x}=\frac1W\sum_y\ev{n_{x,y}}$ が川の位置で凹み、$m_{\rm stag}$ が壁を挟んで符号反転する。本研究のドープ系実験(第\ref{part:crm}部)では、平均場(UHF)がまさにこのストライプ解を自発的に見つける一方、その電荷変調が鋭すぎて真の状態と食い違う、という現象が主役になる。
 
 \section{平均場近似(Hartree--Fock)}
 \label{sec:hf}
 
-相互作用 $H_U$ は 4 つの演算子の積($\cd\cd cc$ 型)を含み、そのままでは解けない。最も基本的な近似は、各電子が他の電子の作る\emph{平均場}だけを感じるとみなすことである。$n_{i\up}n_{i\dn}$ を、揺らぎ $\delta n = n-\ev{n}$ の 2 次を無視して線形化する:
+相互作用 $H_U=U\sum_i n_{i\up}n_{i\dn}$ は 4 つの演算子の積($n=\cd c$ なので $\cd c\,\cd c$ 型)を含む。演算子の積が 2 個以下(1 体)なら対角化で厳密に解けるが、4 個($\cd\cd cc$ 型)あると量子状態の全次元($2^N$)を扱う必要が生じ、そのままでは解けない。そこで、各電子は他の電子の\emph{平均}だけを感じるとみなす\emph{平均場近似}を使う。
+
+\paragraph{なぜ「揺らぎ 2 次を無視」で 1 体になるか.}演算子 $n_{i\sigma}$ を平均 $\ev{n_{i\sigma}}$(ただの数)とそこからのずれ(揺らぎ)$\delta n_{i\sigma}=n_{i\sigma}-\ev{n_{i\sigma}}$ に分ける。$n_{i\up}n_{i\dn}$ を代入して展開すると
 \begin{align}
   n_{i\up}n_{i\dn}
   &= (\ev{n_{i\up}}+\delta n_{i\up})(\ev{n_{i\dn}}+\delta n_{i\dn})\notag\\
-  &\approx \ev{n_{i\up}}n_{i\dn} + n_{i\up}\ev{n_{i\dn}} - \ev{n_{i\up}}\ev{n_{i\dn}}.
-  \label{eq:mfdecouple}
+  &= \ev{n_{i\up}}\ev{n_{i\dn}} + \ev{n_{i\up}}\delta n_{i\dn} + \delta n_{i\up}\ev{n_{i\dn}} + \underbrace{\delta n_{i\up}\delta n_{i\dn}}_{\text{揺らぎ}\times\text{揺らぎ}}.
 \end{align}
-これを\eqref{eq:hubbard}に代入すると、ハミルトニアンは 1 体(2 次)になる:
+最後の項は「2 つの揺らぎの積」で、揺らぎが小さいとして\emph{これだけ捨てる}のが平均場近似である。捨てた後、$\delta n=n-\ev{n}$ を戻して整理すると
 \begin{equation}
-  H_{\rm HF} = \sum_\sigma \cd_\sigma\,\bigl(T + U\,\mathrm{diag}(\ev{n_{\bar\sigma}})\bigr)\,c_\sigma + \text{const},
+  n_{i\up}n_{i\dn}\ \approx\ \ev{n_{i\up}}\,n_{i\dn} + n_{i\up}\,\ev{n_{i\dn}} - \ev{n_{i\up}}\ev{n_{i\dn}}
+  \label{eq:mfdecouple}
 \end{equation}
-ここで $T$ はホッピング行列、$\bar\sigma$ は反対スピン。$\up$ の電子は $\dn$ の平均密度 $\ev{n_{i\dn}}$ が作るポテンシャルを感じる(逆も同様)。$\ev{n}$ は解いて得られる固有ベクトルから再計算するので、\emph{自己無撞着}に反復して解く(下から $N_\sigma$ 個の軌道を占有):
+となる。右辺には演算子が\emph{1 個ずつ}しか残らない($\ev{n}$ は数)。すなわち相互作用が「相手スピンの平均密度 $\ev{n_{i\bar\sigma}}$ が作る 1 体ポテンシャル」に化けた。
+
+\paragraph{1 体ハミルトニアンと自己無撞着.}\eqref{eq:mfdecouple}を\eqref{eq:hubbard}に代入すると、スピンごとに独立な 1 体ハミルトニアン
 \begin{equation}
-  H_\sigma \phi^{(\sigma)}_k = \varepsilon^{(\sigma)}_k \phi^{(\sigma)}_k,\qquad
-  \ev{n_{i\sigma}} = \sum_{k=1}^{N_\sigma} |\phi^{(\sigma)}_{k}(i)|^2.
+  H_{\rm HF} = \sum_\sigma \cd_\sigma\,\underbrace{\bigl(T + U\,\mathrm{diag}(\ev{n_{i\bar\sigma}})\bigr)}_{\equiv\,h_\sigma}\,c_\sigma + \text{const}
 \end{equation}
-$\up$ と $\dn$ で密度が異なることを許す(スピン対称性を破る)ので\emph{非制限} Hartree--Fock (UHF) と呼ぶ。Néel 初期値から解くと、$m_{\rm stag}\neq0$ の反強磁性平均場解が得られる。コストは行列の対角化で $O(N_s^3)$ と安価である。
+が得られる($T$ はホッピング行列、$\bar\sigma$ は反対スピン、$\mathrm{diag}(\cdot)$ は対角行列)。$\up$ の電子が感じる場 $h_\up$ は $\dn$ の密度 $\ev{n_{i\dn}}$ を含み、逆もまた然り — つまり答え($\ev{n}$)を知らないと方程式($h_\sigma$)が書けない。そこで\emph{自己無撞着}に反復する:
+\begin{equation}
+  \underbrace{h_\sigma\,\phi^{(\sigma)}_k = \varepsilon^{(\sigma)}_k \phi^{(\sigma)}_k}_{\text{(1) 対角化}},\qquad
+  \underbrace{\ev{n_{i\sigma}} = \sum_{k=1}^{N_\sigma} |\phi^{(\sigma)}_{k}(i)|^2}_{\text{(2) 密度を更新}}.
+\end{equation}
+手順:適当な $\ev{n}$ から出発 $\to$ (1) $h_\sigma$ を対角化しエネルギーの低い方から $N_\sigma$ 個の軌道 $\phi_k$ を占有 $\to$ (2) その占有から新しい $\ev{n_{i\sigma}}=\sum_k|\phi_k(i)|^2$ を計算 $\to$ (1) へ戻る。$\ev{n}$ が変わらなくなったら収束(自己無撞着解)。↑と↓で密度が異なること($\ev{n_\up}\neq\ev{n_\dn}$、=スピン対称性の破れ)を許すので\emph{非制限} Hartree--Fock (UHF) と呼ぶ。初期値を Néel パターン($\up\dn\up\dn$)にすると、$m_{\rm stag}\neq0$ の反強磁性平均場解に落ち着く。対角化 1 回のコストは $O(N_s^3)$ と安く、これが「タダの prior」の安さの正体である。
 
 \begin{keybox}
-\textbf{要点.} 平均場近似 = 相互作用項\eqref{eq:mfdecouple}を「相手スピンの平均密度が作る 1 体ポテンシャル」に置き換えること。得られる状態は次節の Slater 行列式で、安価($O(N_s^3)$)。本研究ではこれを CRM の prior に使う。
+\textbf{要点.} 平均場近似 = 相互作用\eqref{eq:mfdecouple}の「揺らぎ$\times$揺らぎ」を捨て、相手スピンの平均密度が作る 1 体ポテンシャルに置き換えること。答えが方程式に入るので反復して解く(自己無撞着)。得られる状態は次節の Slater 行列式で、$O(N_s^3)$ と安い。本研究ではこれを CRM の prior に使う。
 \end{keybox}
 
 \section{Slater 行列式と相関行列}
 \label{sec:slater}
 
-平均場ハミルトニアンのように 1 体(2 次)の $H=\sum_{pq}h_{pq}\cd_p c_q$ の固有状態は、下から $N$ 個の軌道 $\{\phi_k\}$ を埋めた\emph{Slater 行列式}
+平均場ハミルトニアンのように演算子の積が 2 個の(1 体・2 次の)$H=\sum_{pq}h_{pq}\cd_p c_q$ の固有状態は、$h$ を対角化して得た 1 電子軌道 $\{\phi_k\}$ のうちエネルギーの低い $N$ 個を「詰めた」状態
 \begin{equation}
-  \ket{\Psi} = \Bigl(\textstyle\sum_p \phi_{1}(p)\cd_p\Bigr)\cdots\Bigl(\sum_p \phi_{N}(p)\cd_p\Bigr)\ket{0}
+  \ket{\Psi} = \tilde c_1^\dagger\,\tilde c_2^\dagger\cdots \tilde c_N^\dagger\ket{0},\qquad
+  \tilde c_k^\dagger \equiv \sum_p \phi_{k}(p)\,\cd_p
 \end{equation}
-である。これは\emph{自由フェルミオン状態}(相互作用のない電子の状態)で、その性質は\emph{相関行列}
+になる。ここで $\tilde c_k^\dagger$ は「軌道 $\phi_k$ に電子を 1 個作る」演算子である。この形の状態を\emph{Slater 行列式}と呼ぶ(展開すると各成分が行列式の形になることに由来)。相互作用がない電子の状態なので\emph{自由フェルミオン状態}ともいう。
+
+\paragraph{相関行列がすべてを決める.}Slater 行列式の物理的中身は、\emph{相関行列}
 \begin{equation}
-  C_{pq} \equiv \ev{\cd_p c_q} = \sum_{k=1}^{N}\phi_k(p)^*\phi_k(q) = (\Phi\Phi^\dagger)_{qp}
+  C_{pq} \equiv \ev{\cd_p c_q} = \sum_{k=1}^{N}\phi_k(p)^*\,\phi_k(q)
   \label{eq:corrmat}
 \end{equation}
-($\Phi$ は占有軌道を並べた行列)に\emph{すべて}含まれる。$C$ は $N_{\rm orb}\times N_{\rm orb}$ のエルミート行列で、$C^2=C$(射影子)を満たす。次節の Wick の定理により、任意の多体期待値が $C$ だけから計算できる。これが「Slater 行列式は安く扱える」ことの数学的な理由である。
+に\emph{すべて}含まれる。$C_{pq}$ は「軌道 $q$ から電子を消して軌道 $p$ に作る」過程の振幅で、対角成分 $C_{pp}=\ev{n_p}$ は占有数(平均密度)そのものである。占有軌道を列に並べた行列 $\Phi$($p$ 行 $k$ 列成分が $\phi_k(p)$)を使うと $C=(\Phi\Phi^\dagger)^{\!*}$ と書け、$C$ は $N_{\rm orb}\times N_{\rm orb}$ のエルミート行列で射影子の性質 $C^2=C$(固有値は占有 $=1$ か非占有 $=0$)を満たす。重要なのは、次節の Wick の定理により\emph{どんな多体の期待値も $C$ だけから計算できる}ことである。$2^{N}$ 次元の状態ベクトルを陽に持つ必要がなく、$N_{\rm orb}\times N_{\rm orb}$ の行列 $C$ さえあれば済む — これが「Slater 行列式(=平均場 prior)は安く扱える」ことの数学的な理由であり、本研究で 2 次元でも MPS を使わずに済む鍵になる。
 
 \section{Wick の定理}
 \label{sec:wick-tutorial}
 
-自由フェルミオン状態(Slater 行列式や熱的 Gauss 状態)では、多体の期待値が 2 体の期待値(相関行列 $C$)の\emph{積の和}に分解する。これが\emph{Wick の定理}である。数保存する状態では $\ev{\cd\cd}=\ev{cc}=0$ で、基本の縮約は
+自由フェルミオン状態(Slater 行列式や熱的 Gauss 状態)では、多体の期待値が 2 体の期待値(相関行列 $C$)の\emph{積の和}に分解する。これが\emph{Wick の定理}である。「多数の演算子の平均 = すべての 2 個組(縮約)の作り方について、$C$ の積を(符号つきで)足し上げたもの」と述べられる。数保存する状態(電子数が確定)では、生成だけ・消滅だけの平均は消える($\ev{\cd\cd}=\ev{cc}=0$)ので、基本の縮約(2 演算子平均)は
 \begin{equation}
-  \ev{\cd_p c_q}=C_{pq},\qquad \ev{c_p \cd_q}=\delta_{pq}-C_{qp}.
+  \ev{\cd_p c_q}=C_{pq},\qquad
+  \ev{c_p \cd_q}=\delta_{pq}-\ev{\cd_q c_p}=\delta_{pq}-C_{qp}
 \end{equation}
-例えば 4 演算子は(異なる軌道 $a\ne b$ で)
+の 2 つだけ(2 番目は反交換関係\eqref{eq:anticomm} $c_p\cd_q=\delta_{pq}-\cd_q c_p$ を平均した)。
+
+\paragraph{4 演算子の分解を手で.}密度$\times$密度 $\ev{\cd_a c_a\,\cd_b c_b}$($a\ne b$)を例に計算する。4 つの演算子から「$\cd$ と $c$ の組」を作る縮約は 2 通り:
+\begin{enumerate}
+  \item $\cd_a$ と $c_a$、$\cd_b$ と $c_b$(隣同士)$\Rightarrow$ $\ev{\cd_a c_a}\ev{\cd_b c_b}=C_{aa}C_{bb}$。
+  \item $\cd_a$ と $c_b$、$c_a$ と $\cd_b$(交差)$\Rightarrow$ $\ev{\cd_a c_b}\ev{c_a\cd_b}=C_{ab}(\,\delta_{ab}-C_{ba})=-C_{ab}C_{ba}$($a\ne b$ なので $\delta_{ab}=0$)。
+\end{enumerate}
+交差する縮約には、演算子を隣接させるために間を 1 回すり抜ける必要があり、フェルミオンの反交換から\emph{マイナス符号}がつく。合計して
 \begin{equation}
-  \ev{\cd_a c_a \cd_b c_b} = \ev{\cd_a c_a}\ev{\cd_b c_b} + \ev{\cd_a c_b}\ev{c_a \cd_b}
-  = C_{aa}C_{bb} - C_{ab}C_{ba}.
+  \ev{\cd_a c_a\,\cd_b c_b} = C_{aa}C_{bb} - C_{ab}C_{ba}.
   \label{eq:wick4}
 \end{equation}
-第 2 項の符号はフェルミオンの入れ替えから来る。この式が第\ref{sec:wickderive}節で「密度$\times$密度相関」の閉形式を与える。
+第 1 項は「各サイトの密度の積」(独立なら期待される値)、第 2 項は「サイト間を電子が渡る相関」による補正(交換相関)である。この式が第\ref{sec:wickderive}節で $\ev{Z_aZ_b}$(密度$\times$密度相関)の閉形式を与える。
 
 \section{エンタングルメント・行列積状態・DMRG}
 \label{sec:mps}
 
-量子多体状態 $\ket{\Psi}$ を系 $A$ と補系 $B$ に分けると、\emph{Schmidt 分解}
+量子多体状態は、$N$ 個の量子ビットなら $2^N$ 個の複素数(振幅)で指定される。この指数的な情報を圧縮できるかどうかを決めるのが\emph{量子もつれ}(エンタングルメント)である。状態 $\ket{\Psi}$ を系 $A$ と補系 $B$ に分けると、\emph{Schmidt 分解}
 \begin{equation}
   \ket{\Psi} = \sum_{\alpha=1}^{\chi} \lambda_\alpha \ket{\alpha}_A\otimes\ket{\alpha}_B,\qquad \sum_\alpha\lambda_\alpha^2=1
 \end{equation}
-が書ける。項数(Schmidt ランク)$\chi$ と重み $\lambda_\alpha$ が $A$--$B$ 間の\emph{量子もつれ}(エンタングルメント)を測る。エンタングルメント・エントロピー $S=-\sum_\alpha\lambda_\alpha^2\log\lambda_\alpha^2$ が大きいほど、状態を古典的に表現するのに大きな $\chi$ が要る。
+という「$A$ 側の状態と $B$ 側の状態のペアの重ね合わせ」に必ず書ける($\ket{\alpha}_A,\ket{\alpha}_B$ は各々直交する状態)。
 
-\emph{行列積状態} (MPS) は、1 次元に並べた各サイトに行列 $A^{[s_i]}$ を割り当て、
+\paragraph{最小例:2 量子ビット.}$A,B$ が各 1 量子ビットとする。積状態 $\ket{00}=\ket0_A\ket0_B$ は項が 1 個($\chi=1$)で、もつれていない。一方 Bell 状態 $\ket{\Psi}=\frac1{\sqrt2}(\ket{00}+\ket{11})$ は $\lambda_1=\lambda_2=\frac1{\sqrt2}$ の 2 項($\chi=2$)で、$A$ を測ると $B$ の結果が完全に決まる(最大もつれ)。この\emph{項数}(Schmidt ランク)$\chi$ が、状態を表現するのに必要な情報量の目安になる。
+
+\paragraph{エントロピーと必要な情報量.}もつれの大きさは\emph{エンタングルメント・エントロピー} $S=-\sum_\alpha\lambda_\alpha^2\log\lambda_\alpha^2$ で測る(積状態で $S=0$、上の Bell 状態で $S=\log2$)。$S$ が大きいほど有効な項数 $\chi\sim e^{S}$ が大きく、状態を古典的に表すのに多くの数が要る。逆に $S$ が小さい状態は少数の $\chi$ で近似でき、これが古典計算で多体状態を扱える条件になる。
+
+\emph{行列積状態} (MPS) は、この考えを 1 次元鎖の全カットに適用した表現で、各サイト $i$ に小さな行列の組 $A^{[s_i]}$($s_i$ はそのサイトの状態 $0/1$)を割り当て、
 \begin{equation}
-  \ket{\Psi} = \sum_{\{s_i\}} A^{[s_1]}A^{[s_2]}\cdots A^{[s_N]}\,\ket{s_1\cdots s_N}
+  \ket{\Psi} = \sum_{\{s_i\}} A^{[s_1]}A^{[s_2]}\cdots A^{[s_N]}\,\ket{s_1 s_2\cdots s_N}
 \end{equation}
-と表す表現で、行列サイズ(\emph{ボンド次元})$\chi$ が各カットの Schmidt ランクに対応する。$\chi$ を上げるほど正確だが、計算コストは $O(N\chi^3)$ 程度で増える。\emph{DMRG}(密度行列繰り込み群)は、この MPS 表現の下で基底状態を変分的に求める強力なアルゴリズムである。
+と「行列の積」で振幅を作る。行列のサイズ(\emph{ボンド次元})$\chi$ が各カットの Schmidt ランクに対応し、$\chi$ を上げるほど正確になるが計算コストは $O(N\chi^3)$ 程度で増える。$2^N$ の代わりに $N\chi^2$ 個の数で状態を持てるので、$\chi$ が小さければ劇的な圧縮になる。\emph{DMRG}(密度行列繰り込み群)は、この MPS 表現の枠内でエネルギーを最小化して基底状態を求めるアルゴリズムで、1 次元では事実上厳密な標準手法である。本研究では DMRG で作った状態を「擬似実験 $\rho$」とし、その $\chi$ を小さく切り詰めたものを「質を連続的に変えられる prior」として使う。
 
 \begin{keybox}
 \textbf{面積則と 1D/2D の違い.} ギャップのある基底状態のエンタングルメントは、境界の「面積」に比例する(\emph{面積則})。1 次元では境界は点なので $S=$ 一定 $\Rightarrow$ $\chi=$ 一定で済み DMRG は非常に効率的。2 次元の幅 $W$ のシリンダーでは境界は長さ $W$ なので $S\propto W$、したがって $\chi\sim e^{cW}$ と\emph{指数的}に増える。これが「2 次元では MPS が高くつく」ことの本質であり、本研究で安価な平均場 prior が効く理由(第\ref{sec:wickderive}節)でもある。
@@ -181,18 +215,20 @@ $\up$ と $\dn$ で密度が異なることを許す(スピン対称性を破る
 \section{Jordan--Wigner 変換:電子を量子ビットに写す}
 \label{sec:jw}
 
-量子コンピュータ・量子情報の言葉は量子ビット(スピン $1/2$、パウリ演算子 $X,Y,Z$)である。フェルミオンを量子ビットに写すのが\emph{Jordan--Wigner (JW) 変換}である。軌道に一列に番号 $1,2,\dots$ を振り、
+量子コンピュータ・量子情報の言葉は量子ビット(2 準位系、パウリ演算子 $X,Y,Z$)である。ハバード模型を量子ビットの言葉に翻訳するには、「軌道に電子がいる/いない」を「量子ビットが $\ket1/\ket0$」に対応させればよい。素朴には $\cd\leftrightarrow$「$\ket0\to\ket1$ に上げる演算子」$\sigma^-=(X-iY)/2$ とすればよさそうだが、これだと\emph{別々の}量子ビットの演算子が\emph{可換}になってしまい、フェルミオンの反交換\eqref{eq:anticomm}(演算子を入れ替えると符号がつく)を再現できない。この不一致を直すのが\emph{Jordan--Wigner (JW) 変換}である。軌道に一列に番号 $1,2,\dots$ を振り、
 \begin{equation}
   c_j = \Bigl(\prod_{k<j} Z_k\Bigr)\,\frac{X_j+iY_j}{2},\qquad
   \cd_j = \Bigl(\prod_{k<j} Z_k\Bigr)\,\frac{X_j-iY_j}{2}
   \label{eq:jw}
 \end{equation}
-とする。$\prod_{k<j}Z_k$(\emph{JW 弦})が、\eqref{eq:anticomm}のフェルミオン反交換符号を量子ビット演算子の非可換性で再現する。占有数は $n_j=\cd_j c_j=(1-Z_j)/2$、すなわち $Z_j=1-2n_j$(空なら $+1$、占有なら $-1$)。この変換から、観測量の\emph{台のサイズ}が次のように決まる:
+と、「自分より前($k<j$)の全量子ビットの $Z$ の積」= \emph{JW 弦} を掛けておく。$Z$ は固有値 $\pm1$ で、前を電子が 1 個通るごとに $-1$ を与えるので、この弦が\emph{フェルミオンの符号}を量子ビット演算子の非可換性として正しく再現する。占有数は $n_j=\cd_j c_j=(1-Z_j)/2$、すなわち $Z_j=1-2n_j$(空なら $+1$、占有なら $-1$)であり、これは第\ref{sec:jw}節以降で繰り返し使う。
+
+\paragraph{なぜ台のサイズが観測量で違うか(本研究で決定的).}パウリ列 $P$ の\emph{台} $A$(単位行列でない量子ビットの集合)の大きさ $|A|$ が、後の測定分散を支配する(古典シャドウで $3^{|A|}$、第\ref{sec:shadowvar}節)。JW 変換\eqref{eq:jw}から、観測量ごとに $|A|$ が次のように決まる:
 \begin{itemize}
-  \item 密度・スピン型($n_j$ や $S^z_i$)は $Z_j$ の積になり、JW 弦が\emph{相殺}して短い(台 $|A|=1$--$2$)。
-  \item ホッピング $\cd_a c_b+\text{h.c.}$ は $a<b$ のとき $\tfrac12(X_a Z_{a+1}\cdots Z_{b-1}X_b + Y_a Z\cdots Z Y_b)$ となり、間の JW 弦が残るため台が\emph{距離だけ伸びる}($|A|=b-a+1$)。
+  \item \textbf{密度・スピン型}($n_j$ や $S^z_i$)は $Z_j$ だけで書ける($n_j=(1-Z_j)/2$)。JW 弦を含まないので台は短く $|A|=1$--$2$、しかも\emph{距離によらない}。
+  \item \textbf{ホッピング}$\cd_a c_b+\text{h.c.}$($a<b$)を\eqref{eq:jw}で書き下すと、$c_a$ と $c_b$ が持つ JW 弦が\emph{間の区間 $[a{+}1,b{-}1]$ で残り}、$\tfrac12(X_a Z_{a+1}\cdots Z_{b-1}X_b + Y_a Z\cdots Z Y_b)$ となる。すなわち台が\emph{2 点間の JW 距離だけ伸びる}($|A|=b-a+1$)。
 \end{itemize}
-2 次元をスネーク状に 1 次元へ並べると、$x$ 方向ボンドの JW 距離は $\sim2W$ になり台が $|A|=2W+1$ と大きくなる。第\ref{sec:matchgate-t}節の matchgate シャドウはこの問題を回避する。
+2 次元格子をスネーク状に 1 列へ並べると、$y$ 方向(周期方向)の隣接ボンドは JW 上でも近いが、$x$ 方向のボンドは JW 距離が $\sim2W$($W$=幅)になり、台が $|A|=2W+1$ と大きくなる。この「長い演算子」が古典シャドウで測定不能になる問題を、第\ref{sec:matchgate-t}節の matchgate シャドウが回避する。
 
 % =====================================================================
 \part{量子測定と古典シャドウ}
@@ -212,8 +248,15 @@ $\up$ と $\dn$ で密度が異なることを許す(スピン対称性を破る
 \begin{enumerate}
   \item 各量子ビット $i$ で測定基底 $b_i\in\{X,Y,Z\}$ を独立一様にランダムに選ぶ(この組を\emph{設定} $u=(b_1,\dots,b_N)$ と呼ぶ)。
   \item その基底で測定し、結果 $s_i\in\{\pm1\}$ を得る。
-  \item 古典スナップショット $\hat\rho_u = \bigotimes_i \hat\rho_i$、$\hat\rho_i = 3\ket{s_i}_{b_i}\!\bra{s_i}_{b_i} - I$ を(概念的に)構成する。係数 $3$ は 1 量子ビットの逆測定チャネルから来る。
+  \item 古典スナップショット $\hat\rho_u = \bigotimes_i \hat\rho_i$、$\hat\rho_i = 3\ket{s_i}_{b_i}\!\bra{s_i}_{b_i} - I$ を(概念的に)構成する。係数 $3$ は 1 量子ビットの\emph{逆測定チャネル}から来る。
 \end{enumerate}
+
+\paragraph{なぜ「$3\ket{s}\!\bra{s}-I$」で不偏になるか.}測定は状態の情報を一部つぶす操作(チャネル)であり、それを「逆算」して元の状態を復元するのがスナップショットである。1 量子ビットで確認しよう。基底 $b$ をランダムに選び測定して得た $\ket{s}_b\!\bra{s}_b$ を、基底についても平均すると、任意の入力状態 $\rho_1$ が
+\begin{equation}
+  \mathcal M(\rho_1) \equiv \mathbb E_{b,s}\bigl[\ket{s}_b\!\bra{s}_b\bigr] = \tfrac13\rho_1 + \tfrac23\cdot\tfrac{I}{2}
+\end{equation}
+に写される(3 基底の測定が状態を $1/3$ に縮め、残りを完全混合 $I/2$ で薄める「脱分極チャネル」)。この $\mathcal M$ の\emph{逆写像}が $\mathcal M^{-1}(\cdot)=3(\cdot)-I\cdot\mathrm{tr}(\cdot)$ で、測定結果 $\ket{s}_b\!\bra{s}_b$ に当てはめると $\hat\rho_1=3\ket{s}_b\!\bra{s}_b-I$。設計上 $\mathbb E[\hat\rho_1]=\rho_1$(不偏)になる。多量子ビットでは各ビット独立に逆写像するので係数 $3$ がビットごとに掛かり、台 $A$ 上で $3^{|A|}$ が現れる — これが後の分散の $3^{|A|}$ 因子の源である。
+
 このスナップショットは $\mathbb E[\hat\rho_u]=\rho$ を満たす(不偏)。パウリ列 $P$ の\emph{スナップショット推定値}は
 \begin{equation}
   X(P;u,s)=\Tr[P\,\hat\rho_u]=\prod_{i\in A}\Tr\bigl[\sigma_{a_i}(3\ket{s_i}_{b_i}\!\bra{s_i}_{b_i}-I)\bigr].
