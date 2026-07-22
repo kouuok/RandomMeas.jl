@@ -9,3 +9,10 @@
 /examples/BrydgesScience2019_vonNeumann_plotting.ipynb
 /examples/BrydgesScience2019_NumSim.ipynb
 *.npy
+
+# LaTeX build artifacts (keep .tex and .pdf, drop the rest)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz

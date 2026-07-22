@@ -1,0 +1,764 @@
+% ==========================================================
+%  詳細解説（学部生向け）
+%  元論文: A. Zhao, N. C. Rubin, and A. Miyake,
+%          "Fermionic partial tomography via classical shadows",
+%          Physical Review Letters 127, 110504 (2021).
+%          arXiv:2010.16094v3
+%  コンパイル: lualatex fermion_shadow_kaisetsu.tex   (2回)
+% ==========================================================
+\documentclass[11pt,a4paper]{ltjsarticle}
+
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb,amsthm,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=24mm]{geometry}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,
+            urlcolor=blue!55!black]{hyperref}
+\usepackage{xcolor}
+
+\allowdisplaybreaks
+
+% ---------- 便利マクロ ----------
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\braket}[2]{\langle #1|#2\rangle}
+\newcommand{\ketbra}[2]{|#1\rangle\!\langle #2|}
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\ad}{a^\dagger}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Id}{\mathbb{1}}
+\newcommand{\Uc}{\mathcal{U}}
+\newcommand{\Mc}{\mathcal{M}}
+\newcommand{\Cc}{\mathcal{C}}
+\newcommand{\Dc}{\mathcal{D}}
+\newcommand{\Ac}{\mathcal{A}}
+\newcommand{\Gm}{\Gamma_{\bm\mu}}
+\newcommand{\FGU}{\mathrm{FGU}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\Cl}{\mathrm{Cl}}
+\newcommand{\Alt}{\mathrm{Alt}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\NC}{\mathrm{NC}}
+
+% ---------- 定理環境 ----------
+\theoremstyle{definition}
+\newtheorem{teigi}{定義}[section]
+\newtheorem{rei}{例}[section]
+\theoremstyle{plain}
+\newtheorem{teiri}{定理}[section]
+\newtheorem{hodai}{補題}[section]
+\newtheorem{kei}{系}[section]
+
+% ---------- 囲みボックス ----------
+\newtcolorbox{keybox}[1][]{colback=blue!4,colframe=blue!45!black,
+  boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=5pt,bottom=5pt,#1}
+\newtcolorbox{ideabox}[1][]{colback=orange!6,colframe=orange!55!black,
+  boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=5pt,bottom=5pt,
+  title=\textbf{直感的な理解},#1}
+
+\title{\bfseries 古典シャドウによるフェルミオン部分トモグラフィ\\[4pt]
+  \large ―― Zhao--Rubin--Miyake (PRL 2021) の詳細解説 ――}
+\author{}
+\date{2026年7月}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+本稿は，A.\ Zhao, N.\ C.\ Rubin, A.\ Miyake による論文
+\textit{``Fermionic partial tomography via classical shadows''}
+(Phys.\ Rev.\ Lett.\ \textbf{127}, 110504 (2021); arXiv:2010.16094) を，
+量子情報や量子化学を専門としない学部生でも読み通せることを目標に，
+必要な数学・物理の前提から丁寧に解説するものである。
+この論文は「量子コンピュータ上で用意したフェルミオン状態の
+$k$体縮約密度行列（$k$-RDM）を，できるだけ少ない測定回数で推定する」
+という実用上きわめて重要な問題に，
+\emph{古典シャドウ}（classical shadows）とよばれるランダム測定の枠組みを
+フェルミオン系向けに拡張して答えたものである。
+本稿では，(1) フェルミオンの第二量子化とマヨラナ演算子，
+(2) 古典シャドウの一般論，(3) フェルミオン・ガウシアン・ユニタリを
+用いた測定アンサンブル，(4) 主定理（サンプル複雑性の見積もり）とその導出，
+(5) 粒子数保存版と数値結果，の順に，式変形をなるべく省略せずに追う。
+\end{abstract}
+
+\tableofcontents
+
+% ==========================================================
+\section{この論文は何を解決したのか（全体像）}
+% ==========================================================
+
+\subsection{背景：量子コンピュータでフェルミオンを扱う}
+量子コンピュータの最も有望な応用のひとつは，
+電子のような\textbf{相互作用するフェルミオン系}のシミュレーションである。
+分子の電子状態（量子化学）や，物性物理の模型（ハバード模型など）は，
+まさにこの問題にあたる。近年の\emph{ノイズあり中規模量子}（NISQ）デバイスでは，
+浅い量子回路を繰り返し実行して観測量の期待値を推定する
+\textbf{変分量子固有値法}（VQE, variational quantum eigensolver）が
+盛んに研究されている。
+
+VQE をはじめとする多くのアルゴリズムでは，
+量子コンピュータ上に用意した状態 $\rho$ に対して，
+たくさんの\textbf{観測量の期待値} $\tr(O\rho)$ を測定する必要がある。
+ところが，量子力学では 1 回の測定で得られる情報は確率的で限られているため，
+必要な精度 $\varepsilon$ を得るには
+状態 $\rho$ を何度も作り直して測定を繰り返す必要がある。
+この\textbf{測定回数（サンプル数）をいかに減らすか}が，
+NISQ 時代の中心的な技術課題のひとつになっている。
+
+\subsection{$k$-RDM の部分トモグラフィという問題}
+本論文が狙うのは，状態 $\rho$ の
+\textbf{$\bm{k}$体縮約密度行列}（$k$-RDM, $k$-body reduced density matrix）
+のすべての成分を同時に推定することである。
+$k$-RDM とは，ざっくり言えば「同時に高々 $k$ 個の粒子だけに注目したときの
+相関情報をすべて集めた表」である（正確な定義は\S\ref{sec:rdm}）。
+なぜ重要かというと：
+\begin{itemize}
+  \item 分子の\textbf{電子エネルギー}は 2-RDM の\emph{線形関数}で書ける。
+        つまり 2-RDM さえ分かればエネルギーが計算できる。
+  \item 誤差緩和，励起状態計算，適応的アンザッツ構成などの手法は
+        2-RDM や，ときに 3-RDM・4-RDM を必要とする。
+\end{itemize}
+状態 $\rho$ の\emph{すべて}を復元するのが「完全トモグラフィ」だが，
+それは指数関数的に高コストで非現実的である。
+そこで「$k$-RDM という\emph{一部}の情報だけを効率的に取り出す」ことを
+\textbf{部分トモグラフィ}（partial tomography）とよぶ。本論文の主役はこれである。
+
+\subsection{本論文の貢献を一言で}
+\begin{keybox}
+\textbf{主結果.}\; $n$ モードのフェルミオン状態の $k$-RDM の全成分を，
+加法誤差 $\varepsilon$ で推定するには，
+\[
+   M=\mathcal{O}\!\left(\binom{n}{k}\,\frac{k^{3/2}\log n}{\varepsilon^2}\right)
+\]
+回の状態準備＋測定があれば十分である。これは対数因子を除いて
+\textbf{理論的に最適}なスケーリングである。手法は，
+\emph{フェルミオン・ガウシアン・ユニタリ}（線形深さの回路で実装可能）を
+ランダムに選んで測定するという，古典シャドウのフェルミオン版である。
+\end{keybox}
+
+従来手法（決定的に観測量をグループ分けする方法）と比べ，
+$k\ge 2$ で\textbf{定数倍の改善}を数値的に示している。
+また，NP困難な「可換な観測量へのグループ分け」を回避できる点，
+粒子数保存対称性を使うと回路深さを半分にできる点も本論文の売りである。
+
+\medskip
+以下では，この結果を理解するために必要な道具を順に組み立てていく。
+
+% ==========================================================
+\section{準備１：フェルミオンの第二量子化}
+% ==========================================================
+
+\subsection{生成・消滅演算子と反交換関係}
+$n$ 個の\textbf{モード}（1粒子状態，例えば分子軌道やスピン軌道）を考える。
+各モード $p\in\{0,1,\dots,n-1\}$ に，フェルミオンを 1 個生成する演算子 $\ad_p$ と，
+1 個消滅させる演算子 $a_p$ を割り当てる。
+フェルミオンは\textbf{パウリの排他律}に従うので，
+これらの演算子は次の\textbf{正準反交換関係}（CAR）を満たす：
+\begin{equation}
+  \{a_p,\ad_q\}=\delta_{pq}\,\Id,\qquad
+  \{a_p,a_q\}=\{\ad_p,\ad_q\}=0 .
+  \label{eq:CAR}
+\end{equation}
+ここで $\{A,B\}:=AB+BA$ は\textbf{反交換子}である。
+特に $p=q$ のとき $\{a_p,a_p\}=2a_p^2=0$ なので
+\begin{equation}
+  a_p^2=0,\qquad (\ad_p)^2=0 .
+  \label{eq:nilpotent}
+\end{equation}
+これは「同じモードに 2 個以上のフェルミオンは入れない」という排他律の表現である。
+
+\begin{teigi}[占有数状態とフォック空間]
+各モードの占有数を $0$ か $1$ で指定したベクトル
+$\ket{x}=\ket{x_0 x_1\cdots x_{n-1}}$（$x_p\in\{0,1\}$）を\textbf{占有数状態}とよぶ。
+これらが張る $2^n$ 次元空間が\textbf{フォック空間}である。
+\textbf{数演算子} $\hat n_p:=\ad_p a_p$ は $\hat n_p\ket{x}=x_p\ket{x}$ を満たし，
+モード $p$ の占有数（$0$ か $1$）を返す。
+\end{teigi}
+
+\begin{ideabox}
+量子ビット（qubit）を知っているなら，占有数状態 $\ket{x}$ は
+$n$ 量子ビットの計算基底状態 $\ket{x_0\cdots x_{n-1}}$ にそのまま対応すると思ってよい。
+「モード＝量子ビット」「占有＝$\ket1$，空＝$\ket0$」という対応である。
+ただしフェルミオンの演算子 $a_p,\ad_p$ を量子ビットの演算子（パウリ演算子）に
+翻訳するには工夫が要る。これが\S\ref{sec:f2q}のフェルミオン--量子ビット写像である。
+\end{ideabox}
+
+% ==========================================================
+\section{準備２：$k$体縮約密度行列（$k$-RDM）}\label{sec:rdm}
+% ==========================================================
+
+固定粒子数の状態 $\rho$（密度行列）に対し，
+「$k$ 個の粒子を取り出したときの相関」を集めたものが $k$-RDM である。
+
+\begin{teigi}[$k$-RDM]
+状態 $\rho$ の $k$-RDM は，$2k$ 個の添字をもつテンソル
+\begin{equation}
+  {}^{k}D^{p_1\cdots p_k}_{q_1\cdots q_k}
+  :=\tr\!\bigl(\ad_{p_1}\cdots\ad_{p_k}\,a_{q_k}\cdots a_{q_1}\,\rho\bigr),
+  \label{eq:kRDM}
+\end{equation}
+と定義される。ここで $p_i,q_i\in\{0,\dots,n-1\}$ である。
+\end{teigi}
+
+\noindent
+たとえば $k=1$ なら ${}^{1}D^{p}_{q}=\tr(\ad_p a_q\rho)$ で，
+これは 1 体の相関（1粒子密度行列）を表す。
+$k=2$ なら $\tr(\ad_p\ad_{p'}a_{q'}a_q\rho)$ で，電子間相互作用のエネルギーは
+この 2-RDM と線形に結びつく（だから 2-RDM が分かればエネルギーが出る）。
+
+\paragraph{独立成分の数。}
+反交換関係から $k$-RDM は添字の入れ替えについて反対称性をもつので，
+独立な成分の数はおよそ $\binom{n}{k}^2$ 程度である。
+「すべての成分を測る」というのは，これらすべてを同時に精度 $\varepsilon$ で
+求める，という意味になる。この個数のオーダー $\mathcal O(n^k)$（$k$ 固定）が，
+最終的なサンプル複雑性 $\binom{n}{k}$ の由来になる。
+
+% ==========================================================
+\section{準備３：マヨラナ演算子――主役の道具}\label{sec:majorana}
+% ==========================================================
+
+生成・消滅演算子 $a_p,\ad_p$ をそのまま扱うより，
+それらの\emph{実部・虚部}にあたる\textbf{マヨラナ演算子}を使うと
+理論が驚くほど見通しよくなる。これが本論文の技術的な鍵である。
+
+\subsection{定義と基本性質}
+\begin{teigi}[マヨラナ演算子]
+各モード $p$ に対し，2 個のマヨラナ演算子を
+\begin{equation}
+  \gamma_{2p}:=a_p+\ad_p,\qquad
+  \gamma_{2p+1}:=-i\,(a_p-\ad_p)
+  \label{eq:majdef}
+\end{equation}
+で定義する。$n$ モードには $2n$ 個のマヨラナ演算子
+$\gamma_0,\gamma_1,\dots,\gamma_{2n-1}$ がある。
+\end{teigi}
+
+これらは次の著しい性質をもつ。まず\eqref{eq:CAR}を使うと，
+\begin{equation}
+  \{\gamma_\mu,\gamma_\nu\}=2\delta_{\mu\nu}\Id
+  \qquad(\mu,\nu\in\{0,\dots,2n-1\}).
+  \label{eq:majCAR}
+\end{equation}
+実際，たとえば $\mu=\nu=2p$ のとき，
+\[
+  \gamma_{2p}^2=(a_p+\ad_p)^2
+  =\underbrace{a_p^2}_{0}+\underbrace{a_p\ad_p+\ad_p a_p}_{\{a_p,\ad_p\}=1}
+   +\underbrace{(\ad_p)^2}_{0}=\Id ,
+\]
+と\eqref{eq:nilpotent},\eqref{eq:CAR}から直ちに従う。同様に $\mu\ne\nu$ では反交換する。
+式\eqref{eq:majCAR}から特に
+\begin{equation}
+  \gamma_\mu^\dagger=\gamma_\mu\ (\text{エルミート}),\qquad
+  \gamma_\mu^2=\Id\ (\text{自己逆元}),
+\end{equation}
+がわかる。つまり各 $\gamma_\mu$ は固有値 $\pm1$ をもつエルミート演算子である。
+
+\subsection{高次マヨラナ演算子と$k$-RDM}
+$2k$ 個の相異なる添字 $\bm\mu=(\mu_1<\mu_2<\cdots<\mu_{2k})$ を選び，
+\begin{equation}
+  \Gamma_{\bm\mu}:=(-i)^{k}\,\gamma_{\mu_1}\gamma_{\mu_2}\cdots\gamma_{\mu_{2k}}
+  \label{eq:Gammadef}
+\end{equation}
+と定義する（前の $(-i)^k$ はエルミートにするための位相合わせ）。
+これを\textbf{$2k$次マヨラナ演算子}とよぶ。添字の集合
+\[
+  \Cc_{2n,2k}:=\{\,\bm\mu=(\mu_1<\cdots<\mu_{2k})\mid \mu_i\in\{0,\dots,2n-1\}\,\}
+\]
+の要素すべてを走らせると，相異なる $2k$ 次マヨラナ演算子が
+$\bigl|\Cc_{2n,2k}\bigr|=\binom{2n}{2k}$ 個できる。
+
+\begin{keybox}
+\textbf{要点.}\; マヨラナ演算子 $\{\Gamma_{\bm\mu}\}$ は，
+量子ビットの\textbf{パウリ演算子}とまったく同じ代数的性質をもつ：
+エルミート，自己逆元（$\Gamma_{\bm\mu}^2=\Id$），
+そして\textbf{ヒルベルト--シュミット直交}
+\begin{equation}
+  \tr(\Gamma_{\bm\mu}\Gamma_{\bm\nu})=2^{n}\,\delta_{\bm\mu\bm\nu},\qquad
+  \tr(\Gamma_{\bm\mu})=0\ (\bm\mu\neq\varnothing).
+  \label{eq:HSorth}
+\end{equation}
+したがって，任意のフェルミオン--量子ビット写像のもとで
+$\Gamma_{\bm\mu}$ は 1 つのパウリ演算子に 1 対 1 対応する。
+\end{keybox}
+
+\paragraph{なぜマヨラナで $k$-RDM が測れるのか。}
+定義\eqref{eq:majdef}を逆に解くと $a_p=\tfrac12(\gamma_{2p}+i\gamma_{2p+1})$，
+$\ad_p=\tfrac12(\gamma_{2p}-i\gamma_{2p+1})$ となる。
+これを $k$-RDM の定義\eqref{eq:kRDM}に代入すると，
+$\ad_{p_1}\cdots a_{q_1}$ は
+高々 $2k$ 次までのマヨラナ演算子 $\Gamma_{\bm\mu}$ の\emph{線形結合}に展開される。
+したがって，
+\begin{equation}
+  \boxed{\ \text{$k$-RDM のすべての成分を知ること}
+    \ \Longleftrightarrow\
+    \text{すべての}\ \tr(\Gamma_{\bm\mu}\rho),\
+    \bm\mu\in\textstyle\bigcup_{j=1}^{k}\Cc_{2n,2j}\ \text{を知ること}. \ }
+  \label{eq:equiv}
+\end{equation}
+つまり問題は「高々 $2k$ 次のマヨラナ演算子の期待値をすべて推定せよ」に帰着する。
+以降はこの言い換えられた問題を解く。
+
+\begin{rei}[$k=1$ の具体例：数演算子は対角]\label{rei:number}
+最も簡単な例として $\bm\mu=(2p,2p+1)$ を取ると，
+\[
+  \Gamma_{(2p,2p+1)}=(-i)\gamma_{2p}\gamma_{2p+1}
+  =(-i)(a_p+\ad_p)\bigl(-i(a_p-\ad_p)\bigr)
+  =\Id-2\ad_p a_p=\Id-2\hat n_p .
+\]
+これは占有数状態 $\ket x$ に対して固有値 $1-2x_p=\pm1$ をとる
+\textbf{対角}演算子である。Jordan--Wigner 写像ではこれはパウリ $Z_p$ に対応する。
+一般に，計算基底で\emph{対角}になる $2k$ 次マヨラナ演算子は，
+$k$ 個の数演算子の積 $\prod_{j}(\Id-2\hat n_{p_j})$ に対応するものであり，
+その個数はちょうど $\binom{n}{k}$ 個である。\textbf{この $\binom{n}{k}$ が後で
+主定理に現れる。}
+\end{rei}
+
+% ==========================================================
+\section{準備４：フェルミオン--量子ビット写像}\label{sec:f2q}
+% ==========================================================
+
+量子コンピュータは量子ビットで動くので，
+フェルミオンの演算子 $a_p,\ad_p$（あるいは $\gamma_\mu$）を
+$n$ 量子ビット上のパウリ演算子に翻訳する必要がある。
+代表例が\textbf{Jordan--Wigner (JW) 写像}や
+\textbf{Bravyi--Kitaev (BK) 写像}である。JW 写像では
+\begin{equation}
+  \gamma_{2p}\ \mapsto\ \Bigl(\prod_{r<p}Z_r\Bigr)X_p,\qquad
+  \gamma_{2p+1}\ \mapsto\ \Bigl(\prod_{r<p}Z_r\Bigr)Y_p .
+  \label{eq:JW}
+\end{equation}
+ここで問題が生じる。$\gamma_\mu$ を 1 個パウリに直すだけで，
+$Z$ の列（\emph{Jordan--Wigner ストリング}）が付くため，
+一般に多くの量子ビットにまたがる\textbf{非局所的}なパウリ演算子になる。
+
+\begin{ideabox}
+この\textbf{非局所性}こそが，素朴なパウリ測定ではフェルミオンの
+$k$-RDM を効率的に測れない根本原因である（次節）。
+本論文の戦略は，「量子ビットに翻訳してからパウリ測定」ではなく，
+「\emph{マヨラナ演算子そのものをきれいに回転させる}特別なユニタリで測定する」ことで，
+この非局所性を回避する点にある。
+\end{ideabox}
+
+% ==========================================================
+\section{古典シャドウの一般論}\label{sec:cs}
+% ==========================================================
+
+ここで，Huang--Kueng--Preskill による\textbf{古典シャドウ}
+（classical shadows）の枠組みを一般論として復習する。
+これは「ランダムな測定から，未知状態 $\rho$ の
+\emph{部分的な古典表現}を作り，多数の観測量の期待値を一挙に推定する」手法である。
+
+\subsection{測定プリミティブとチャネル}
+$\rho$ を $n$ 量子ビット状態とする。次の操作を\textbf{測定プリミティブ}とよぶ：
+\begin{enumerate}
+  \item アンサンブル $\Uc$ からユニタリ $U$ をランダムに選び，$\rho\mapsto U\rho U^\dagger$ を作用；
+  \item 計算基底で射影測定し，結果 $\ket z$（$z\in\{0,1\}^n$）を得る。
+        Born 則より確率は $\Pr(z)=\bra z U\rho U^\dagger\ket z$。
+  \item 「どの $U$ を使い，どの $z$ が出たか」を古典的に記録する。
+\end{enumerate}
+この過程を「測定→古典的に $U$ を逆作用」と見なすと，期待値として
+次の\textbf{量子チャネル} $\Mc$ が定まる：
+\begin{equation}
+  \Mc(\rho)=\E_{U\sim\Uc}\ \E_{z\sim U\rho U^\dagger}
+     \bigl[\,U^\dagger\ketbra{z}{z}U\,\bigr]
+   =\E_{U\sim\Uc}\sum_{z}\bra z U\rho U^\dagger\ket z\;U^\dagger\ketbra{z}{z}U .
+  \label{eq:channel}
+\end{equation}
+アンサンブル $\Uc$ が\textbf{情報的に完全}（測定が状態を一意に決められる）
+であれば，このチャネル $\Mc$ は\textbf{可逆}である。
+
+\subsection{古典シャドウ：不偏推定量}
+1 回の測定結果 $(U,z)$ から，逆チャネルを使って
+\begin{equation}
+  \hat\rho:=\Mc^{-1}\bigl(U^\dagger\ketbra{z}{z}U\bigr)
+  \label{eq:shadow}
+\end{equation}
+を作る。これを\textbf{古典シャドウ}（1 個のスナップショット）とよぶ。
+$\Mc$ の線形性から，これは $\rho$ の\textbf{不偏推定量}である：
+\begin{equation}
+  \E_{U,z}[\hat\rho]
+   =\Mc^{-1}\bigl(\E_{U,z}[U^\dagger\ketbra{z}{z}U]\bigr)
+   =\Mc^{-1}\bigl(\Mc(\rho)\bigr)=\rho .
+\end{equation}
+したがって任意の観測量 $O$ について
+$\E[\tr(O\hat\rho)]=\tr(O\rho)$ が成り立ち，
+$\tr(O\hat\rho)$ は $\tr(O\rho)$ の\textbf{不偏推定量}になる。
+$M$ 個のシャドウ $\hat\rho_1,\dots,\hat\rho_M$ を作れば，
+標本平均でいくらでも精度を上げられる。
+
+\subsection{シャドウノルムとサンプル複雑性}
+問題は「どれだけの $M$ が要るか」である。それを支配するのが
+推定量 $\tr(O\hat\rho)$ の\textbf{分散}であり，その上界が
+\textbf{シャドウノルム} $\|O\|_{\Uc}$ で与えられる：
+\begin{equation}
+  \Var\bigl[\tr(O\hat\rho)\bigr]\le \|O\|_{\Uc}^2,\qquad
+  \|O\|_{\Uc}^2
+  :=\max_{\sigma}\ \E_{U\sim\Uc}\sum_z
+     \bra z U\sigma U^\dagger\ket z\,
+     \bigl[\bra z U\,\Mc^{-1}(O)\,U^\dagger\ket z\bigr]^2 .
+  \label{eq:shadownorm}
+\end{equation}
+（$\max_\sigma$ は状態 $\sigma$ について最悪ケースをとる。）
+$L$ 個の観測量 $O_1,\dots,O_L$ を同時に精度 $\varepsilon$ で推定するには，
+\textbf{median-of-means}（中央値化した標本平均）を使えば
+\begin{equation}
+  M=\mathcal{O}\!\left(\frac{\log L}{\varepsilon^2}\,
+     \max_{1\le j\le L}\|O_j\|_{\Uc}^2\right)
+  \label{eq:samplecomplexity}
+\end{equation}
+個のサンプルで十分である。ここで $\log L$ は「多数の観測量を同時に押さえる」
+ための同時確率（union bound）由来の因子である。
+
+\begin{keybox}
+\textbf{設計の自由度はアンサンブル $\Uc$ の選び方だけ.}\;
+\eqref{eq:samplecomplexity}を，測りたい観測量の集合に対して最小化するように
+$\Uc$ を選ぶことが，古典シャドウ設計の核心である。
+本論文の観測量は「マヨラナ演算子 $\Gamma_{\bm\mu}$」であり，
+それに最適な $\Uc$ を見つけることが目標になる。
+\end{keybox}
+
+\subsection{素朴なパウリ測定はなぜダメか}
+最も手軽なアンサンブルは，各量子ビットに独立なランダム 1 量子ビット・クリフォード
+（$\Uc=\Cl(1)^{\otimes n}$，実質ランダムなパウリ基底測定）である。
+このとき $\ell$-局所パウリ演算子 $P$ のシャドウノルムは
+$\|P\|^2=3^{\ell}$ となる。ところがフェルミオンでは，
+$2k$ 次マヨラナ演算子を JW 写像で量子ビットに直すと
+局所性が\textbf{少なくとも $\log_2(2n)$}（BK でも同様に大きい）になり，
+\[
+  \|\Gamma_{\bm\mu}\|^2_{\Cl(1)^{\otimes n}}
+  \ \sim\ 3^{2k\log_2(2n)}=(2n)^{2k\log_2 3}\approx (2n)^{3.17k}
+\]
+のように，望ましい $\mathcal O(n^k)$ よりずっと悪化してしまう。
+\begin{ideabox}
+教訓：\textbf{フェルミオンの非局所性を，量子ビットの世界で無理に測ろうとすると損をする}。
+そこで「マヨラナ演算子を\emph{直接}うまく回すユニタリ」を測定に使うべきだ，
+というのが本論文のアイデアである。それが次節のフェルミオン・ガウシアン・ユニタリである。
+\end{ideabox}
+
+% ==========================================================
+\section{フェルミオン・ガウシアン・ユニタリ（FGU）}\label{sec:fgu}
+% ==========================================================
+
+\subsection{定義とマヨラナ回転}
+\begin{teigi}[フェルミオン・ガウシアン・ユニタリ]
+実の反対称行列 $A=-A^{\mathsf T}\in\R^{2n\times 2n}$ に対し，
+\begin{equation}
+  U(e^{A}):=\exp\!\Bigl(-\tfrac14\sum_{\mu,\nu=0}^{2n-1}A_{\mu\nu}\,
+      \gamma_\mu\gamma_\nu\Bigr)
+  \label{eq:FGUdef}
+\end{equation}
+の形のユニタリ全体を\textbf{フェルミオン・ガウシアン・ユニタリ}
+$\FGU(n)$ とよぶ。物理的には，マヨラナ演算子の\emph{2 次}
+（＝生成・消滅の 2 次形式，非相互作用ハミルトニアン）で生成される時間発展である。
+\end{teigi}
+
+$\FGU(n)$ の決定的な性質は，マヨラナ演算子を\textbf{直交行列で回転}させることである：
+\begin{equation}
+  U(Q)^\dagger\,\gamma_\mu\,U(Q)=\sum_{\nu=0}^{2n-1}Q_{\mu\nu}\,\gamma_\nu,
+  \qquad Q\in\SO(2n).
+  \label{eq:adjoint}
+\end{equation}
+すなわち $\FGU(n)$ は特殊直交群 $\SO(2n)$ と（本質的に）同一視できる。
+$2k$ 次マヨラナ演算子への作用は，これを $2k$ 回使って
+\begin{equation}
+  U(Q)^\dagger\,\Gamma_{\bm\mu}\,U(Q)=\sum_{\bm\nu\in\Cc_{2n,2k}}
+     \det[Q_{\bm\mu,\bm\nu}]\,\Gamma_{\bm\nu}
+  \label{eq:adjoint2k}
+\end{equation}
+となる。ここで $Q_{\bm\mu,\bm\nu}$ は，$Q$ の行を $\bm\mu$，列を $\bm\nu$ で
+選び出した $2k\times2k$ 部分行列であり，
+その\textbf{行列式}が展開係数を与える（Cauchy--Binet の公式による）。
+
+\begin{keybox}
+\textbf{FGU は古典的に効率よくシミュレートできる.}\;
+式\eqref{eq:adjoint}は「$2n$ 次元の直交行列 $Q$ を追うだけ」を意味する。
+これは\emph{フェルミオン線形光学}（matchgate 回路）とよばれ，
+$2^n$ 次元の状態を陽に扱わずに古典計算できる。
+だから古典シャドウの逆チャネル $\Mc^{-1}$ も効率的に評価できる。
+また，このユニタリは Givens 回転分解で\textbf{回路深さ高々 $2n$}（線形）で実装できる。
+\end{keybox}
+
+\subsection{クリフォードとの共通部分：符号付き置換}
+古典シャドウでは，$U$ を「古典的に逆作用」する必要があるので，
+$U$ がパウリ演算子をパウリ演算子に移す\textbf{クリフォード演算}でもあると都合がよい。
+FGU かつクリフォードであるユニタリは，\eqref{eq:adjoint}の $Q$ が
+\textbf{符号付き置換行列}（各行・各列に $\pm1$ が 1 つだけ）になるものに対応する。
+符号は本質的でないので，行列式 $+1$ の置換群
+\[
+  \Alt(2n)\quad(\text{$2n$ 文字の交代群}）
+\]
+に制限してよい。本論文が採用する測定アンサンブルは
+\begin{equation}
+  \boxed{\ \Uc_{\FGU}:=\{\,U(Q)\mid Q\in\Alt(2n)\,\}. \ }
+  \label{eq:UFGU}
+\end{equation}
+\begin{ideabox}
+$Q$ が置換行列だと，式\eqref{eq:adjoint2k}の和はただ 1 項だけ残り
+（各 $\bm\mu$ に対して $\det[Q_{\bm\mu,\bm\nu}]\ne0$ となる $\bm\nu$ が唯一），
+\[
+  U(Q)^\dagger\,\Gamma_{\bm\mu}\,U(Q)=\pm\,\Gamma_{\bm\nu}.
+\]
+つまり FGU クリフォードは，$2k$ 次マヨラナ演算子を
+\textbf{別の $2k$ 次マヨラナ演算子へ（符号込みで）置換する}。
+測定で読み取れるのは，これが\emph{計算基底で対角}な演算子
+（例\ref{rei:number}の数演算子の積）に移ったときだけである。
+この「対角に移る確率」が，次節のチャネル固有値になる。
+\end{ideabox}
+
+% ==========================================================
+\section{チャネルの対角化と主定理}\label{sec:main}
+% ==========================================================
+
+\subsection{チャネルがマヨラナ基底で対角になる}
+測定アンサンブル $\Uc_\FGU$ に対するチャネル\eqref{eq:channel}を
+$\Mc_\FGU$ と書く。本論文の中心的な計算結果は次である。
+
+\begin{teiri}[チャネルの対角化]\label{thm:diag}
+$\Mc_\FGU$ はマヨラナ演算子 $\{\Gamma_{\bm\mu}\}$ を固有ベクトルにもち，
+\begin{equation}
+  \Mc_\FGU(\Gamma_{\bm\mu})=\lambda_{\bm\mu}\,\Gamma_{\bm\mu},\qquad
+  \lambda_{\bm\mu}=\lambda_{n,k}=\binom{n}{k}\Big/\binom{2n}{2k}
+  \quad(\forall\,\bm\mu\in\Cc_{2n,2k}).
+  \label{eq:eigen}
+\end{equation}
+固有値は $\bm\mu$ の具体形によらず，次数 $2k$ だけで決まる。
+\end{teiri}
+
+\paragraph{なぜこう言えるか（導出の筋）。}
+チャネル\eqref{eq:channel}は，
+「ランダムな置換 $Q\in\Alt(2n)$ で $\Gamma_{\bm\mu}$ を回し，
+計算基底で測って逆作用させる」平均である。
+式\eqref{eq:adjoint2k}より $U(Q)^\dagger\Gamma_{\bm\mu}U(Q)=\pm\Gamma_{\bm\nu}$，
+そして計算基底測定 $\sum_z\ketbra zz(\cdot)\ketbra zz$ は
+\textbf{対角成分だけ}を取り出す射影である。
+基底状態を展開すると（本文 Eq.~(B5)）
+\[
+  \ketbra zz=\frac1{2^n}\Bigl(\Id+\sum_{k\ge1}\sum_{\bm\mu\in\Dc_{2n,2k}}
+     \bra z\Gamma_{\bm\mu}\ket z\,\Gamma_{\bm\mu}\Bigr),
+\]
+ここで $\Dc_{2n,2k}\subset\Cc_{2n,2k}$ は\textbf{対角な}マヨラナ演算子の集合で，
+$|\Dc_{2n,2k}|=\binom nk$（例\ref{rei:number}）。
+これらを組み合わせると，$Q$ について平均した後に生き残るのは
+「$\Gamma_{\bm\mu}$ が\emph{再び自分自身}に戻る」寄与だけになり，係数として
+\begin{equation}
+  \lambda_{\bm\mu}
+  =\E_{Q\sim\Alt(2n)}\!\Bigl[\sum_{\bm\sigma\in\Dc_{2n,2k}}
+     \bigl|\det[Q_{\bm\sigma,\bm\mu}]\bigr|\Bigr]
+  \label{eq:lambdaexp}
+\end{equation}
+が現れる。これは「ランダムな置換 $Q$ が $\Gamma_{\bm\mu}$ を
+\emph{対角な}マヨラナ演算子のどれかに移す確率」に等しい。
+
+\begin{ideabox}[title=\textbf{数え上げによる直感的理解}]
+\emph{$2k$ 次マヨラナ演算子は全部で $\binom{2n}{2k}$ 個}。そのうち
+\emph{計算基底で対角なものは $\binom{n}{k}$ 個}（数演算子の積）。
+FGU クリフォードは全マヨラナ演算子を一斉に置換するので，
+ランダムに 1 つ選べば，我々の標的 $\Gamma_{\bm\mu}$ が
+「対角な $\binom nk$ 個のいずれか」に当たる確率は
+\[
+  \lambda_{n,k}=\frac{\binom nk}{\binom{2n}{2k}} .
+\]
+標的が対角に移ったときだけ計算基底測定でその期待値が読める。
+だから「$1$ 回の測定で標的を捕まえられる確率」がちょうど $\lambda_{n,k}$ で，
+その逆数だけ測定を繰り返せばよい，というわけである。
+\end{ideabox}
+
+厳密な証明では，$\Alt(2n)$ が $\phi_{2k}$（$\SO(2n)$ の $2k$ 次表現）に関して
+\textbf{既約}であることを示し，\emph{有限フレーム理論}
+（tight frame と Schur の補題）を用いて\eqref{eq:lambdaexp}の平均が
+$\binom nk/\binom{2n}{2k}$ に等しいことを厳密に導く（本文 Appendix B）。
+本稿では上記の数え上げ的直感で十分とする。
+
+\subsection{シャドウノルムと主定理}
+固有値\eqref{eq:eigen}が分かれば，逆チャネルは
+$\Mc_\FGU^{-1}(\Gamma_{\bm\mu})=\lambda_{n,k}^{-1}\Gamma_{\bm\mu}$ で，
+標的観測量 $\Gamma_{\bm\mu}$ に対するシャドウノルムが閉じた形で求まる。
+
+\begin{teiri}[シャドウノルム, 本論文 Theorem 1]\label{thm:shadownorm}
+アンサンブル $\Uc_\FGU$ のもとで，任意の $2k$ 次マヨラナ演算子について
+\begin{equation}
+  \|\Gamma_{\bm\mu}\|^2_{\FGU}
+  =\lambda_{n,k}^{-1}
+  =\binom{2n}{2k}\Big/\binom{n}{k}
+  \ \approx\ \binom{n}{k}\sqrt{\pi k}\, .
+  \label{eq:shadownormFGU}
+\end{equation}
+しかも $\FGU(n)\cap\Cl(n)$ の\emph{いかなる部分群}を使っても
+これより小さいシャドウノルムは達成できない（この意味で\textbf{最適}）。
+\end{teiri}
+
+\paragraph{Stirling 近似の確認。}
+$n\to\infty$（$k$ 固定）で
+$\binom{2n}{2k}\approx\frac{(2n)^{2k}}{(2k)!}$，$\binom nk\approx\frac{n^k}{k!}$ より
+\[
+  \frac{\binom{2n}{2k}}{\binom nk}
+  \approx\frac{(2n)^{2k}k!}{(2k)!\,n^k}
+  =4^k\,\frac{k!}{(2k)!}\,n^k
+  =\frac{4^k}{\binom{2k}{k}}\,\frac{n^k}{k!}\cdot k!\cdot\frac1{k!}\cdots
+\]
+より丁寧には，$\binom{2k}{k}\approx 4^k/\sqrt{\pi k}$（これも Stirling）を使うと
+$4^k/\binom{2k}{k}\approx\sqrt{\pi k}$，したがって
+\[
+  \frac{\binom{2n}{2k}}{\binom nk}
+  \approx \sqrt{\pi k}\cdot\frac{n^k}{k!}
+  \approx \binom nk\sqrt{\pi k},
+\]
+となり\eqref{eq:shadownormFGU}の近似が確かめられる。
+
+\medskip
+これを一般論の\eqref{eq:samplecomplexity}に代入する。
+標的の観測量は高々 $2k$ 次のマヨラナ演算子で，その総数は
+$L=\sum_{j=1}^{k}\binom{2n}{2j}=\mathcal O(n^k)$ 個，よって
+\[
+  \log L=\mathcal O(k\log n).
+\]
+最大シャドウノルムは\eqref{eq:shadownormFGU}で
+$\max_j\|\Gamma_{\bm\mu}\|^2\approx\binom nk\sqrt{\pi k}$。
+これらを掛け合わせて，主定理を得る。
+
+\begin{keybox}
+\textbf{主定理（サンプル複雑性, 本論文 Eq.~(16)).}\;
+$k$-RDM の全成分を加法誤差 $\varepsilon$ で推定するのに必要な状態準備数は
+\begin{equation}
+  M=\mathcal{O}\!\left[\binom{n}{k}\,
+     \frac{k^{3/2}\log n}{\varepsilon^2}\right].
+  \label{eq:mainresult}
+\end{equation}
+ここで $k^{3/2}=\underbrace{\sqrt{k}}_{\sqrt{\pi k}\ \text{由来}}
+\times\underbrace{k}_{\log L=k\log n\ \text{由来}}$ である。
+$k=\mathcal O(1)$ なら $\binom nk=\mathcal O(n^k)$ なので，
+これは\textbf{添字数のオーダー $\mathcal O(n^k)$ に対数因子を掛けただけ}で，
+理論下限に対して対数を除き最適。
+\end{keybox}
+
+\subsection{median-of-means が不要であること}
+Huang らのオリジナルの古典シャドウでは，分散の裾を抑えるために
+median-of-means（データを分割して各平均の中央値を取る）が使われた。
+本論文は，マヨラナ演算子の推定量が\textbf{有界}であることを利用して，
+Bernstein の不等式から，単純な\textbf{標本平均}でも同じサンプル複雑性
+\eqref{eq:mainresult}が達成できることを示した（本文 Theorem 14）。
+実装が簡単になるうえ，数値定数も小さくなるという実務的な利点がある。
+
+% ==========================================================
+\section{粒子数保存版（回路深さを半分に）}\label{sec:nc}
+% ==========================================================
+
+$\FGU(n)$ の一般元は\textbf{粒子数を保存しない}（超伝導的な項を含む）ため，
+回路深さは $2n$ 必要だった。多くの物理状態は粒子数が確定しているので，
+\textbf{粒子数を保存する}部分群だけを使えば回路を浅くできる。
+
+粒子数保存（number-conserving, NC）なガウシアン・ユニタリは
+\begin{equation}
+  U(e^{\kappa}):=\exp\!\Bigl(\sum_{p,q}\kappa_{pq}\,\ad_p a_q\Bigr),
+  \qquad \kappa=-\kappa^\dagger\in\C^{n\times n},
+\end{equation}
+すなわち $\mathrm U(n)$（軌道基底の回転）でパラメトライズされる。
+ただし NC ユニタリだけでは
+情報的完全性が足りない（対角成分しか触れない）ため，
+回路の\emph{最後にパウリ測定の 1 層}を足す。本論文の NC アンサンブルは
+\begin{equation}
+  \Uc_{\NC}:=\{\,V\circ U(u)\mid V\in\Cl(1)^{\otimes n},\ u\in\Alt(n)\,\}.
+\end{equation}
+\begin{teiri}[NC 版のシャドウノルム上界, 本論文 Theorem 2]
+\begin{equation}
+  \max_{\bm\mu\in\Cc_{2n,2k}}\|\Gamma_{\bm\mu}\|^2_{\NC}
+   \le 9^{k}\binom{n}{k}\Big/\binom{n-k}{k}=\mathcal O(n^k),
+\end{equation}
+したがってサンプル複雑性は
+$M=\mathcal O\!\bigl(n^k\log n/\varepsilon^2\bigr)$（$k$ 固定）。
+\end{teiri}
+NC 版は，軌道回転が深さ $n$ で済むので回路深さが\textbf{半分}になる代わりに，
+測定回数がおよそ $2$--$5$ 倍に増える，というトレードオフをもつ
+（因子 $9^k$ が効くため。ただしフェルミオン--量子ビット写像に依存し，
+BK 写像なら JW 写像より局所性が小さく有利）。
+
+% ==========================================================
+\section{数値結果と他手法との比較}\label{sec:numerics}
+% ==========================================================
+
+論文の Fig.~1 では，$k=1,2,3,4$，モード数 $n=4$--$16$ について，
+本手法（FGU / NC 古典シャドウ）を従来の\emph{決定的}な測定戦略と比較している。
+比較対象は主に，可換な観測量へグループ分けする方法
+（\textsc{sorted insertion}, Majorana clique cover）と，
+フェルミオン・スワップ・ネットワークである。
+
+\begin{itemize}
+  \item \textbf{$k=1$}：1-RDM は構造が単純で最適戦略が既知のため，
+        ランダム化の利点は出ない（従来法と同等）。
+  \item \textbf{$k\ge2$}：本手法の優位が明確になる。
+        漸近的に最適な $\mathcal O(n^2)$ をもつ Majorana clique cover に対しても，
+        本手法は\textbf{およそ 2 倍}の（定数因子の）改善を示す。
+  \item ランダム化の最大の利点は，\textbf{NP困難な「可換グループ分け」問題を
+        完全に回避}できること。どうせ $1/\varepsilon^2$ 回は測定するのだから，
+        「重なりの大きい観測量の被覆」をランダムに実現してしまえばよい，
+        という発想である。
+\end{itemize}
+
+\paragraph{ハミルトニアン平均への注意（正直な限界）。}
+補足資料の Table~I では，単一観測量（分子のエネルギー）の推定分散を
+BRG や LBCS といった\emph{その目的に特化した}手法と比べている。
+一様ランダムな本アンサンブルはこの用途には最適化されておらず，
+エネルギー推定単体では特化手法に劣る。
+著者らは「分布にバイアスをかける」等の改良余地があると述べている。
+すなわち本手法の主戦場はあくまで\textbf{$k$-RDM 全成分の同時推定}である。
+
+% ==========================================================
+\section{まとめ}\label{sec:summary}
+% ==========================================================
+
+\begin{keybox}
+\textbf{論文の到達点.}
+\begin{enumerate}
+  \item フェルミオンの $k$-RDM 推定を，マヨラナ演算子 $\Gamma_{\bm\mu}$ の
+        期待値推定に翻訳した（\S\ref{sec:majorana}）。
+  \item 測定アンサンブルとして，マヨラナ演算子をきれいに回す
+        \textbf{フェルミオン・ガウシアン・クリフォード}
+        $\Uc_\FGU$（深さ $2n$ で実装可能）を提案した（\S\ref{sec:fgu}）。
+  \item このとき古典シャドウのチャネルはマヨラナ基底で\textbf{対角化}され，
+        固有値は $\lambda_{n,k}=\binom nk/\binom{2n}{2k}$（\S\ref{sec:main}, 定理\ref{thm:diag}）。
+  \item その結果，シャドウノルムは $\binom{2n}{2k}/\binom nk\approx\binom nk\sqrt{\pi k}$
+        となり（定理\ref{thm:shadownorm}），サンプル複雑性は
+        $M=\mathcal O\!\bigl(\binom nk k^{3/2}\log n/\varepsilon^2\bigr)$，
+        対数を除いて\textbf{最適}（\eqref{eq:mainresult}）。
+  \item 粒子数保存版では回路深さを半分にできる（\S\ref{sec:nc}）。
+  \item 数値的に，$k\ge2$ で従来法に対し定数倍の改善を示した（\S\ref{sec:numerics}）。
+\end{enumerate}
+\end{keybox}
+
+\paragraph{意義.}
+本論文は，Huang らの古典シャドウ（もともと量子ビット向け）を，
+\textbf{フェルミオンの物理構造（マヨラナ演算子の直交回転）に合わせて設計し直す}
+ことで，量子化学・物性の最重要ターゲットである $k$-RDM を
+理論最適に近い効率で測る道を開いた。鍵となったのは，
+「非局所なフェルミオン演算子を量子ビットで無理に測る」のではなく，
+「マヨラナ演算子そのものを効率よく置換する特別なユニタリで測る」
+という視点の転換である。
+
+\bigskip
+\hrule
+\bigskip
+\noindent\textbf{原論文.}\;
+A.~Zhao, N.~C.~Rubin, and A.~Miyake,
+``Fermionic partial tomography via classical shadows,''
+Phys.\ Rev.\ Lett.\ \textbf{127}, 110504 (2021).
+arXiv:2010.16094v3.
+
+\medskip
+\noindent\textbf{主要な関連文献.}\;
+H.-Y.~Huang, R.~Kueng, and J.~Preskill,
+``Predicting many properties of a quantum system from very few measurements,''
+Nat.\ Phys.\ \textbf{16}, 1050 (2020)（古典シャドウの原論文）；
+X.~Bonet-Monroig \textit{et al.}, Phys.\ Rev.\ X \textbf{10}, 031064 (2020);
+Z.~Jiang \textit{et al.}, Quantum \textbf{4}, 276 (2020)（従来の最適測定スケジュール）。
+
+\end{document}

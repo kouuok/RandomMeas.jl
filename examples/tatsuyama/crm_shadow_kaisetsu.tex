@@ -1,0 +1,686 @@
+% ==========================================================
+% CRM shadow（共通ランダム測定シャドウ）ゼロからの解説
+% 元論文: B. Vermersch, A. Rath, B. Sundar, C. Branciard,
+%         J. Preskill, and A. Elben,
+%         "Enhanced Estimation of Quantum Properties with
+%          Common Randomized Measurements",
+%         PRX Quantum 5, 010352 (2024).
+% コンパイル: lualatex crm_shadow_kaisetsu.tex
+% ==========================================================
+\documentclass[11pt]{ltjsarticle}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+% ---- 便利マクロ ----
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathbb{V}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\ketbra}[2]{|#1\rangle\langle#2|}
+\newcommand{\id}{\mathbb{1}}
+\newcommand{\NU}{N_U}
+\newcommand{\NM}{N_M}
+
+% ---- 囲み記事 ----
+\newtcolorbox{pointbox}[1]{colback=blue!4,colframe=blue!55!black,
+  title=#1,fonttitle=\bfseries,breakable}
+\newtcolorbox{analogybox}[1]{colback=orange!6,colframe=orange!70!black,
+  title=#1,fonttitle=\bfseries,breakable}
+
+\title{\textbf{CRMシャドウ入門}\\[4pt]
+\large ――「答えをある程度知っている」ことを利用して\\
+量子測定の統計誤差を劇的に減らす方法――}
+\author{解説対象論文: Vermersch \textit{et al.},\\
+``Enhanced Estimation of Quantum Properties with Common Randomized Measurements'',\\
+PRX Quantum \textbf{5}, 010352 (2024)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+量子コンピュータや量子シミュレータの中に作られた「量子状態」の性質を知るには，
+同じ状態を何度も作っては測る，という統計的な作業が必要である。
+必要な測定回数はしばしば天文学的な数になり，実験時間のボトルネックとなる。
+本稿で解説する\textbf{CRMシャドウ}（Common Randomized Measurement shadows，
+共通ランダム測定シャドウ）は，
+「実験で作られた状態がだいたいどんなものか」という\emph{近似的な事前知識}を
+古典コンピュータ上のシミュレーションとして持っておき，
+実験とシミュレーションに\emph{同じ乱数}（同じランダム測定の設定）を使って
+両者の差だけを統計的に推定することで，測定回数を大幅に削減する手法である。
+実験データの取り方は従来と全く同じで，事前知識は\emph{解析の段階で後から}
+組み込めるのが大きな特長である。
+本稿は量子情報の予備知識を仮定せず，
+(1)~量子測定の何が大変なのか，(2)~土台となる古典影（classical shadow）法，
+(3)~統計学の古典的アイデア「共通乱数法」，(4)~CRMシャドウ本体とその性能保証，
+(5)~エンタングルメント検出などへの応用，の順にゼロから説明する。
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+% ==========================================================
+\section{はじめに：量子状態を「調べる」ことはなぜ大変か}
+% ==========================================================
+
+\subsection{量子測定は壊れやすく，確率的である}
+
+量子コンピュータや量子シミュレータは，内部に「量子状態」と呼ばれる
+非常に情報量の多いオブジェクトを作り出す。
+ところが，この状態を直接まるごと読み出すことはできない。
+量子力学の原理により，
+\begin{itemize}
+  \item 測定の結果は\textbf{確率的}にしか得られない（同じ状態を測っても毎回違う結果が出うる），
+  \item 測定すると状態は\textbf{壊れる}（同じコピーを二度測ることはできない），
+\end{itemize}
+という制約があるからである。
+したがって，状態の性質（たとえばエネルギー，量子もつれの量，理想状態との一致度など）を
+知りたければ，「同じ状態を作る $\to$ 測る」を何千回・何万回と繰り返し，
+その統計から性質を\emph{推定}するしかない。
+
+\begin{analogybox}{アナロジー：世論調査}
+量子測定は世論調査に似ている。
+国民全員（＝量子状態そのもの）の意見を直接知ることはできず，
+無作為に選んだ回答（＝個々の測定結果）を集めて平均的な傾向を推定する。
+調査人数が少なければ結果は誤差だらけになる。
+本稿のテーマは，いわば
+「\textbf{事前の予想（過去の調査や理論的予測）をうまく使って，
+少ない調査人数で同じ精度を出す}」ための統計テクニックである。
+\end{analogybox}
+
+\subsection{問題は「統計誤差」との闘い}
+
+推定の精度は測定回数 $N$ に対しておおむね $1/\sqrt{N}$ でしか改善しない。
+つまり精度を10倍にするには測定を100倍にする必要がある。
+さらに悪いことに，量子系では知りたい量が複雑になるほど
+（後述する「多コピー観測量」など），
+必要な測定回数が系のサイズに対して\textbf{指数関数的}に増えることがある。
+イオントラップ型の量子実験などでは，測定設定を1つ切り替えるごとに
+較正（キャリブレーション）の時間がかかるため，
+測定設定の数を減らすことが実験時間の短縮に直結する。
+
+CRMシャドウ論文の実験デモでは，
+量子もつれの検出に必要な測定設定の数が
+従来法の約 $300$ から約 $50$ へ，
+すなわち\textbf{約6分の1}に削減された。
+これは実験時間にして数時間の節約に相当する。
+
+% ==========================================================
+\section{準備：最小限の数学的道具}
+% ==========================================================
+
+以降で使う記号を最小限だけ導入する。
+細部を追わなくても，各記号の「気持ち」がわかれば本稿は読み通せる。
+
+\subsection{量子ビットと状態}
+
+\textbf{量子ビット}（qubit）は，古典ビットの $0,1$ に対応する
+2つの基準状態 $\ket{0},\ket{1}$ の「重ね合わせ」を取れる系である。
+$N$ 個の量子ビットからなる系の状態は，一般に
+\textbf{密度行列}と呼ばれる $2^N \times 2^N$ の行列 $\rho$ で表される。
+$\rho$ は次の性質を持つ：
+\begin{itemize}
+  \item エルミート（$\rho = \rho^\dagger$），
+  \item 固有値がすべて $0$ 以上（確率として解釈できる），
+  \item トレース（対角和）が $1$：$\Tr(\rho)=1$（確率の総和が $1$）。
+\end{itemize}
+純粋な（雑音のない）状態はベクトル $\ket{\psi}$ で書け，
+このとき $\rho = \ketbra{\psi}{\psi}$ である。
+実際の実験ではノイズが混ざるため，$\rho$ は一般に「混合状態」になる。
+
+重要なのは，$\rho$ が $2^N \times 2^N$ 行列だという点である。
+$N=30$ ならおよそ $10^9 \times 10^9$ 行列であり，
+これを丸ごと実験から決定する（完全トモグラフィ）のは絶望的である。
+そこで「$\rho$ 全体ではなく，知りたい量だけを狙って推定する」戦略が必要になる。
+
+\subsection{観測量と期待値}
+
+知りたい物理量は\textbf{観測量}（オブザーバブル）と呼ばれるエルミート行列 $O$ で表され，
+その測定値の平均（期待値）は
+\begin{equation}
+  \langle O \rangle = \Tr(O\rho)
+\end{equation}
+で与えられる。$\Tr(O\rho)$ という記法に馴染みがなければ，
+「状態 $\rho$ のもとでの量 $O$ の平均値」と読み替えてよい。
+
+観測量の基本部品として\textbf{パウリ行列}
+\begin{equation}
+  X=\begin{pmatrix}0&1\\1&0\end{pmatrix},\quad
+  Y=\begin{pmatrix}0&-i\\i&0\end{pmatrix},\quad
+  Z=\begin{pmatrix}1&0\\0&-1\end{pmatrix},\quad
+  \id_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}
+\end{equation}
+を使う。$N$ 量子ビット系の観測量は，各量子ビットにこれらのどれかを割り当てた
+テンソル積 $O = O_1 \otimes O_2 \otimes \cdots \otimes O_N$
+（\textbf{パウリ列}）の組み合わせで書ける。
+$O_i \neq \id_2$ である量子ビットの集合を $O$ の\textbf{サポート}と呼び，
+そのサイズを $N_A$ と書く。
+「$N_A$ が小さい観測量（少数体観測量）は推定しやすい」というのが
+後で効いてくる基本則である。
+
+\subsection{多コピー観測量：エンタングルメントを測るには}
+
+エンタングルメント（量子もつれ）の量や状態の「混ざり具合」は，
+$\rho$ の\emph{非線形}関数として書かれる。代表例は\textbf{純度}（purity）
+\begin{equation}
+  p_2 = \Tr(\rho^2)
+\end{equation}
+で，$\rho$ が純粋状態なら $1$，混ざるほど小さくなる。
+一般に $\Tr(\rho^n)$ のような量は，状態のコピーを $n$ 個並べた系の上の
+観測量の期待値
+\begin{equation}
+  \Tr\!\left(O\,\rho^{\otimes n}\right)
+\end{equation}
+として表せる。これを\textbf{多コピー観測量}
+（multicopy observable, \textbf{MCO}）と呼ぶ。
+レニー・エントロピー，部分転置モーメント（もつれ検出に使う），
+フォン・ノイマン・エントロピーの多項式近似などが，すべてMCOの形で書ける。
+MCOは知りたい情報の宝庫だが，
+\textbf{その分だけ推定に必要な測定回数が多い}のが泣きどころであり，
+CRMシャドウが最も威力を発揮する舞台でもある。
+
+% ==========================================================
+\section{土台：ランダム測定と古典影（classical shadows）}
+% ==========================================================
+
+CRMシャドウは，2020年頃に確立した
+\textbf{古典影}（classical shadow）法\cite{Huang2020}の改良版である。
+まず古典影を説明する。
+
+\subsection{プロトコル：ランダムに回してから測る}
+
+量子ビットを測ると，各ビットにつき $0$ か $1$ が得られる
+（\textbf{計算基底測定}）。
+これだけでは状態の一面（$Z$ 方向の情報）しか見えない。
+そこで測定の直前に，\textbf{ランダムに選んだユニタリ変換} $U$
+（状態を「回転」させる操作）をかけてから測る。
+回転の向きを乱数で毎回変えることで，状態をあらゆる方向から満遍なく覗くことになる。
+
+手続きは次の通りである：
+\begin{enumerate}
+  \item 乱数でユニタリ $U^{(r)}$ を選ぶ（$r = 1,\dots,\NU$）。
+        よく使うのは各量子ビットごとに独立な回転
+        $U = \bigotimes_{i=1}^{N} U_i$（\textbf{局所パウリ測定}）。
+  \item 状態 $\rho$ を用意し，$U^{(r)}$ をかけ，全ビットを測定して
+        ビット列 $\mathbf{s} = (s_1,\dots,s_N)$ を得る。
+  \item 同じ $U^{(r)}$ のまま，測定を $\NM$ 回繰り返す
+        （そのたびに状態は作り直す）。
+  \item $r$ を変えて 1--3 を $\NU$ 回繰り返す。
+\end{enumerate}
+データの総数は $\NU \times \NM$ 個のビット列である。
+$\NU$ は「測定設定の数」，$\NM$ は「設定ごとのショット数」に対応する。
+実験ではしばしば\textbf{設定の切り替え（$\NU$）が高コスト}で，
+同じ設定での繰り返し（$\NM$）は安価である。この非対称性を覚えておいてほしい。
+
+\subsection{古典影：測定データから作る「状態のスナップショット」}
+
+各設定 $r$ のデータから，次の行列を組み立てる：
+\begin{equation}
+  \hat{\rho}^{(r)}
+  = \sum_{\mathbf{s}} \hat{P}_\rho(\mathbf{s}|U^{(r)})\,
+    \mathcal{M}^{-1}\!\left( U^{(r)\dagger} \ketbra{\mathbf{s}}{\mathbf{s}} U^{(r)} \right).
+  \label{eq:shadow}
+\end{equation}
+記号の意味は：
+\begin{itemize}
+  \item $\hat{P}_\rho(\mathbf{s}|U^{(r)})$：設定 $r$ でビット列 $\mathbf{s}$ が出た
+        \textbf{経験頻度}（$\NM$ 回中の出現回数 $/\NM$）。実験データそのもの。
+  \item $U^{(r)\dagger} \ketbra{\mathbf{s}}{\mathbf{s}} U^{(r)}$：
+        「$U^{(r)}$ で回してから $\mathbf{s}$ を見た」という事実を，
+        元の（回す前の）座標系に引き戻したもの。
+  \item $\mathcal{M}^{-1}$：ランダム測定がかける「ぼかし」を打ち消す
+        線形変換（\textbf{逆シャドウチャネル}）。
+        局所パウリ測定なら各量子ビットごとに
+        $\mathcal{M}^{-1}_i(O_i) = 3O_i - \Tr(O_i)\,\id_2$
+        という簡単な式で書ける。
+\end{itemize}
+この $\hat{\rho}^{(r)}$ を\textbf{古典影}（classical shadow）と呼ぶ。
+名前の通り，量子状態が古典データの上に落とした「影」である。
+
+古典影の決定的な性質は\textbf{不偏性}である：
+ユニタリの乱数と測定の量子的な確率の両方について平均すると，
+\begin{equation}
+  \E\!\left[\hat{\rho}^{(r)}\right] = \rho
+\end{equation}
+が\emph{厳密に}成り立つ。
+つまり個々の $\hat{\rho}^{(r)}$ はデタラメに見えても
+（実際，密度行列ですらない，負の固有値を持つ行列である），
+平均すれば必ず本物の $\rho$ に収束する。
+したがって任意の観測量について
+\begin{equation}
+  \hat{O} = \frac{1}{\NU}\sum_{r=1}^{\NU} \Tr\!\left(O\hat{\rho}^{(r)}\right)
+  \qquad \xrightarrow{\;\NU \to \infty\;} \qquad \Tr(O\rho)
+\end{equation}
+となる。一度データを取れば，
+\textbf{どんな観測量でも後から（データ解析だけで）推定できる}のが
+古典影の革命的な点である。MCOについても，
+複数の影のテンソル積 $\hat{\rho}^{(r_1)} \otimes \cdots \otimes \hat{\rho}^{(r_n)}$
+（異なる $r$ を使うのがミソ）を使えば不偏推定ができる。
+
+\subsection{弱点：分散（統計誤差）}
+
+問題は収束の\emph{速さ}，すなわち推定量の\textbf{分散}である。
+局所パウリ測定でサポートサイズ $N_A$ のパウリ観測量を推定するときの分散は，
+おおよそ
+\begin{equation}
+  \Var[\hat O] \;\lesssim\; \frac{3^{N_A}}{\NU}
+  \left( \Tr(O\rho)^2 + \frac{1}{\NM} \right)
+  \label{eq:var-standard}
+\end{equation}
+と振る舞う\footnote{これは後述するCRMの分散限界
+（式~\eqref{eq:var-crm}）で $\sigma \to 0$ とした形であり，
+既知の標準的な結果と一致する。}。
+注目すべきは括弧内の第1項 $\Tr(O\rho)^2$ である。
+これは「ショット数 $\NM$ をいくら増やしても消えない」項で，
+ユニタリの乱数選びに由来するばらつき，いわば
+\textbf{測定設定ガチャの当たり外れ}を表す。
+この項を抑えるには設定数 $\NU$ を増やすしかない――
+そして $\NU$ こそが実験で高コストな資源なのだった。
+MCO（$n \geq 2$）ではこの問題がさらに深刻化し，
+必要な測定数が（部分）系サイズに対して指数的に増える。
+
+\begin{pointbox}{ここまでのまとめ}
+\begin{itemize}
+  \item 古典影：ランダムに回して測るだけで，あらゆる観測量を後から推定できる万能データ形式。
+  \item ただし統計誤差には，ショット数 $\NM$ で消せる部分と，
+        \textbf{設定数 $\NU$ でしか消せない部分}がある。
+  \item 実験では $\NU$ を増やすのが高くつく。ここを削るのがCRMの狙い。
+\end{itemize}
+\end{pointbox}
+
+% ==========================================================
+\section{鍵となる統計学のアイデア：共通乱数法}
+% ==========================================================
+
+CRMシャドウの心臓部は，量子とは無関係の，
+モンテカルロ法で古くから知られる分散低減テクニック
+「\textbf{共通乱数法}」（common random numbers）である。
+まずこれを純粋に統計の話として理解しよう。
+
+\subsection{相関する「答えの分かっている」変数を引き算する}
+
+確率変数 $X$ の平均 $\E[X]$ を，サンプル平均で推定したいとする。
+誤差はサンプル数 $n$ に対して $\sqrt{\Var[X]/n}$ で決まる。
+
+ここで，もう一つの確率変数 $Y$ が使えるとしよう。ただし
+\begin{enumerate}
+  \item $Y$ は $X$ と\textbf{強く相関}している（似た動きをする），
+  \item $Y$ の平均 $\E[Y]$ は\textbf{正確に分かっている}，
+\end{enumerate}
+とする。このとき，$X$ の代わりに
+\begin{equation}
+  X' = X - Y + \E[Y]
+\end{equation}
+をサンプル平均すればよい。平均は変わらない（$\E[X']=\E[X]$：不偏性は保たれる）が，
+分散は
+\begin{equation}
+  \Var[X - Y] = \Var[X] + \Var[Y] - 2\,\Cov[X,Y]
+\end{equation}
+となる。$X$ と $Y$ の相関（共分散 $\Cov$）が十分大きければ
+$\Var[X-Y] \ll \Var[X]$ となり，
+\textbf{同じサンプル数で誤差が劇的に減る}。
+ポイントは，$X$ と $Y$ を\emph{同じ乱数}から生成することで
+相関を人為的に最大化することにある――これが「共通乱数」の名の由来である。
+
+\begin{analogybox}{アナロジー：ペア比較}
+2種類の枕AとBの寝心地を比べたいとき，
+「Aを100人，Bを別の100人に試してもらう」よりも，
+「同じ100人に両方試してもらって\emph{差}を聞く」ほうがはるかに精度が高い。
+人ごとの好みのばらつき（大きなノイズ）が，差を取ることで打ち消されるからである。
+共通乱数法はこの「同じ被験者で比べる」を乱数の世界で行うものだ。
+CRMシャドウでは「被験者」に当たるのが\textbf{ランダムに選んだ測定設定 $U^{(r)}$}である。
+\end{analogybox}
+
+\subsection{量子測定への翻訳}
+
+これを古典影に当てはめると，次の対応になる：
+\begin{center}
+\begin{tabular}{lll}
+\hline
+統計の言葉 & & 量子の言葉 \\
+\hline
+知りたい平均 $\E[X]$ & $\longleftrightarrow$ & 実験状態の性質 $\Tr(O\rho)$ \\
+確率変数 $X$ & $\longleftrightarrow$ & 実験データから作る古典影 $\hat\rho^{(r)}$ \\
+相棒の変数 $Y$ & $\longleftrightarrow$ & 近似状態のシミュレーション影 $\sigma^{(r)}$ \\
+既知の平均 $\E[Y]$ & $\longleftrightarrow$ & 古典計算機で厳密に分かる $\sigma$ \\
+共通の乱数 & $\longleftrightarrow$ & 同じランダムユニタリ $U^{(r)}$ \\
+\hline
+\end{tabular}
+\end{center}
+「相棒 $Y$」を用意するには，実験状態 $\rho$ に近い状態 $\sigma$ の
+\textbf{古典計算機上の記述}（事前知識）が必要である。
+これが揃えば，あとは機械的に共通乱数法を適用できる。
+それがCRMシャドウである。
+
+% ==========================================================
+\section{本体：CRMシャドウ}
+% ==========================================================
+
+\subsection{設定：近似状態 $\sigma$ という事前知識}
+
+実験で作られた状態 $\rho$ について，
+「だいたいこんな状態のはず」という近似 $\sigma$ が
+古典計算機上で扱える形で手に入るとする。入手元の例：
+\begin{itemize}
+  \item 実験の理論モデル（理想的な回路やダイナミクスのシミュレーション）。
+        大きな系ではテンソルネットワーク（行列積状態，MPS）などの
+        圧縮表現を使う。
+  \item 過去の実験・別の実験（コンパニオン実験）のデータから構成した近似
+        （論文の付録Aで扱われる）。
+\end{itemize}
+重要な注意：$\sigma$ は正確でなくてよい。
+ノイズを含まない理想シミュレーションでも，粗い近似でも構わない。
+さらに言えば，$\sigma$ は物理的な状態である必要すらなく，
+エルミートでさえあれば固有値が負でもトレースが $1$ でなくてもよい
+（論文ではこれを「擬状態（pseudostate）」と呼ぶ）。
+なぜそんなに緩くてよいのかは，次の不偏性の議論で明らかになる。
+
+\subsection{定義：実験の影からシミュレーションの影を引く}
+
+CRMシャドウは次で定義される：
+\begin{equation}
+  \boxed{\;
+  \hat{\rho}^{(r)}_\sigma = \hat{\rho}^{(r)} - \sigma^{(r)} + \sigma
+  \;}
+  \label{eq:crm-shadow}
+\end{equation}
+ここで $\hat{\rho}^{(r)}$ は実験データから作った通常の古典影
+（式~\eqref{eq:shadow}）であり，$\sigma^{(r)}$ は
+\begin{equation}
+  \sigma^{(r)}
+  = \sum_{\mathbf{s}} P_\sigma(\mathbf{s}|U^{(r)})\,
+    \mathcal{M}^{-1}\!\left( U^{(r)\dagger} \ketbra{\mathbf{s}}{\mathbf{s}} U^{(r)} \right)
+  \label{eq:sim-shadow}
+\end{equation}
+で定義される\textbf{シミュレーション影}である。
+式~\eqref{eq:shadow}との違いは一箇所だけ：
+経験頻度 $\hat P_\rho$ の代わりに，
+\textbf{近似状態 $\sigma$ に同じユニタリ $U^{(r)}$ をかけて測った場合の
+理論上の厳密な確率} $P_\sigma(\mathbf{s}|U^{(r)}) = \bra{\mathbf{s}} U^{(r)} \sigma\, U^{(r)\dagger} \ket{\mathbf{s}}$
+が入っている。この確率は古典計算機で（$\sigma$ がテンソルネットワークなら効率的に）
+計算できる。\textbf{実験と全く同じ乱数 $U^{(r)}$ を使い回す}のが共通乱数法の実装である。
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, minimum height=9mm, inner sep=6pt, align=center, font=\small},
+  qbox/.style={box, fill=blue!8},
+  cbox/.style={box, fill=orange!10},
+  rbox/.style={box, fill=green!8},
+  arr/.style={-{Stealth[length=2.5mm]}, thick},
+  node distance=7mm and 10mm
+]
+\node[qbox] (rho) {量子実験\\状態 $\rho$};
+\node[qbox, right=of rho] (meas) {ランダム測定\\$U^{(r)}$ をかけて測定};
+\node[qbox, right=of meas] (shadow) {実験の古典影\\$\hat\rho^{(r)}$（経験頻度 $\hat P_\rho$）};
+
+\node[cbox, below=13mm of rho] (sigma) {古典計算機\\近似状態 $\sigma$};
+\node[cbox, right=of sigma] (sim) {同じ $U^{(r)}$ で\\測定を厳密シミュレート};
+\node[cbox, right=of sim] (simshadow) {シミュレーション影\\$\sigma^{(r)}$（厳密確率 $P_\sigma$）};
+
+\node[rbox, right=9mm of $(shadow.east)!0.5!(simshadow.east)$]
+  (crm) {CRMシャドウ\\$\hat\rho^{(r)}_\sigma = \hat\rho^{(r)} - \sigma^{(r)} + \sigma$};
+
+\draw[arr] (rho) -- (meas);
+\draw[arr] (meas) -- (shadow);
+\draw[arr] (sigma) -- (sim);
+\draw[arr] (sim) -- (simshadow);
+\draw[arr] (shadow.east) -- (crm.west |- shadow.east) -- (crm);
+\draw[arr] (simshadow.east) -- (crm.west |- simshadow.east) -- (crm);
+\draw[arr, dashed, gray] (meas.south) -- node[right, font=\scriptsize, black, align=left]{同じ乱数\\（共通乱数）} (sim.north);
+\end{tikzpicture}
+\caption{CRMシャドウの構成。上段は実際の量子実験，下段は古典計算機上のシミュレーション。
+両者に\textbf{同じランダムユニタリ}を使うことで強い相関を作り，差を取って統計ノイズを打ち消す。}
+\label{fig:scheme}
+\end{figure}
+
+\subsection{なぜ答えが歪まないのか（不偏性）}
+
+シミュレーション影は，古典影の不偏性と同じ理屈で
+$\E[\sigma^{(r)}] = \sigma$ を満たす（$\mathcal M^{-1}$ の定義そのものによる）。
+したがって
+\begin{equation}
+  \E\!\left[\hat{\rho}^{(r)}_\sigma\right]
+  = \underbrace{\E[\hat\rho^{(r)}]}_{\rho}
+  - \underbrace{\E[\sigma^{(r)}]}_{\sigma} + \sigma
+  = \rho .
+\end{equation}
+つまり\textbf{$\sigma$ がどんなにいい加減でも，推定の平均値は必ず正しい} $\rho$ になる。
+$\sigma$ の質が影響するのは誤差の\emph{大きさ}（分散）だけであって，
+答えの\emph{正しさ}（バイアス）ではない。
+これが「$\sigma$ は擬状態でもよい」と言える理由であり，
+CRM法の安心設計の核心である。
+
+\begin{pointbox}{CRMシャドウの実務上の美点}
+\begin{itemize}
+  \item \textbf{実験は一切変えなくてよい}：データの取り方は通常の古典影と同一。
+        $\sigma$ は\textbf{解析段階で後から}注入される。
+  \item よって $\sigma$ は\textbf{実験後に選び直せる}：より良い理論モデルが
+        できたら，同じデータを再解析するだけで精度が上がる。
+  \item $\sigma$ が悪くても\textbf{答えは歪まない}（不偏性は無条件）。
+        最悪でも誤差が減らないだけである。
+  \item 既存の実験データにも遡って適用できる（実際，論文は2019年の
+        イオントラップ実験データを再解析している）。
+\end{itemize}
+\end{pointbox}
+
+\subsection{直観：なぜ分散が減るのか}
+
+ショット数 $\NM$ が十分大きいとき，経験頻度 $\hat P_\rho$ は
+真の確率 $P_\rho$ に近づくので，
+$\hat\rho^{(r)} \approx \rho^{(r)}$（$\rho$ の理論的な影）となる。
+もし $\sigma \approx \rho$ なら，同じ $U^{(r)}$ を使っている限り
+$\rho^{(r)}$ と $\sigma^{(r)}$ は\textbf{ほとんど同じ行列}になる
+――どちらも同じ「回転」による同じ癖（ゆらぎ）を持つからである。
+したがって差 $\hat\rho^{(r)} - \sigma^{(r)}$ では
+測定設定ガチャ由来の大きなゆらぎが打ち消し合い，
+残るのは (i) 実験と近似のずれ $\rho - \sigma$ に由来する小さなゆらぎと，
+(ii) 有限ショット数のノイズだけになる。
+最後に既知の $\sigma$ を足し戻せば，
+「ゆらぎの小さい，$\rho$ の不偏推定」が完成する。
+
+\subsection{性能保証：分散の上限}
+
+直観は定理で裏づけられる。局所パウリ測定で，
+サポートサイズ $N_A$ のパウリ観測量 $O$ を推定するとき，
+CRM推定量の分散は
+\begin{equation}
+  \Var[\hat O] \;\leq\; \frac{3^{N_A}}{\NU}
+  \left( \Tr\!\left[O(\rho - \sigma)\right]^2 + \frac{1}{\NM} \right)
+  \label{eq:var-crm}
+\end{equation}
+を満たす（論文の式(4)）。
+通常の古典影の分散（式~\eqref{eq:var-standard}）と比べると，
+$\NM$ で消せない第1項が
+$\Tr(O\rho)^2$ から $\Tr[O(\rho-\sigma)]^2$ に置き換わっている。
+すなわち：
+\begin{itemize}
+  \item $|\Tr[O(\rho - \sigma)]| \leq |\Tr(O\rho)|$ である限り
+        （＝$\sigma$ がその観測量について実験より「まし」な予測を与える限り），
+        CRMは通常法より分散が小さい。
+  \item $\sigma \to \rho$ の極限では第1項が\textbf{完全に消え}，
+        残る誤差は $3^{N_A}/(\NU\NM)$ のみ。
+        これは総測定数 $\NU\NM$ だけで決まるので，
+        安価な $\NM$ を増やせば\textbf{高価な $\NU$ はごく少数で済む}。
+\end{itemize}
+これがまさに「$\NU$ 律速の実験」への処方箋になっている。
+
+MCO（$n$ コピー観測量）についても同様の保証がある。
+バッチシャドウ法\cite{Rath2021}と組み合わせた推定量
+\begin{equation}
+  \hat O = \frac{(m-n)!}{m!}
+  \sum_{t_1 \neq \cdots \neq t_n}
+  \Tr\!\left[ O\left( \hat\rho^{[t_1]}_\sigma \otimes \cdots \otimes \hat\rho^{[t_n]}_\sigma \right)\right]
+\end{equation}
+（$\hat\rho^{[t]}_\sigma$ はCRM影を $m$ グループに分けて平均したもの）に対し，
+\begin{equation}
+  \Var[\hat O] \;\leq\;
+  \frac{n^2\,\|O^{(1)}_A\|_2^2}{\NU}
+  \left( 3^{N_A}\,\|\rho_A - \sigma_A\|_2^2 + \frac{2^{N_A}}{\NM} \right)
+  + \mathcal{O}\!\left(\frac{1}{\NU^2}\right)
+  \label{eq:var-mco}
+\end{equation}
+が成り立つ（論文の式(6)。$A$ は $O$ のサポート，
+$\rho_A, \sigma_A$ はそこへの縮約状態，$\|\cdot\|_2$ はヒルベルト–シュミットノルム）。
+やはり支配項が「実験と近似の距離 $\|\rho_A - \sigma_A\|_2$」の2乗に比例しており，
+$\sigma$ が良いほど，必要な $\NU$ が体系的に減ることを示している。
+
+% ==========================================================
+\section{応用例：論文で示された3つのデモ}
+% ==========================================================
+
+\subsection{エンタングルメント検出：測定設定数が約6分の1に}
+
+10量子ビットのイオントラップ量子シミュレータで
+クエンチダイナミクス（急激な変化後の時間発展）を調べた
+既存実験（2019年）のデータが再解析された。
+判定に使うのは部分転置モーメント $p_n$ を用いた
+$p_3$-PPT条件：
+\begin{equation}
+  \frac{p_2^2}{p_3} > 1
+  \quad\Longrightarrow\quad
+  \text{2つの領域の間にエンタングルメントが存在}
+\end{equation}
+これは3コピーのMCOであり，通常の古典影では推定誤差が大きい。
+理論シミュレーションから得た純粋状態を $\sigma$ としてCRM解析を行ったところ
+（実験状態はデコヒーレンスのため $\sigma$ と厳密には一致しないにもかかわらず），
+1標準偏差でのエンタングルメント検出に必要なユニタリ数が
+\begin{equation}
+  \NU \approx 299 \;(\text{通常の古典影})
+  \quad\longrightarrow\quad
+  \NU \approx 53 \;(\text{CRM})
+\end{equation}
+と，\textbf{約6分の1}に削減された。
+測定設定の切り替えに較正時間がかかるこの種の実験では，
+データ取得時間で数時間の節約に相当する。
+
+\subsection{フォン・ノイマン・エントロピーの推定}
+
+量子多体系のエンタングルメント・エントロピー
+$S = -\Tr(\rho_A \log \rho_A)$ は相転移や熱化の診断に使われる重要量だが，
+そのままではMCOの形にならない。論文では
+$-x\log x$ を多項式で近似（例：$f_3(x) = \tfrac{137}{60}x - 4x^2 + \tfrac{7}{4}x^3$）し，
+トレースモーメント $\mathcal{P}_n = \Tr[\rho_A^n]$ の線形結合
+\begin{equation}
+  S \approx S_{n_{\max}} = \sum_{n=1}^{n_{\max}} a_n\, \mathcal{P}_n
+\end{equation}
+として推定する。各 $\mathcal{P}_n$ は $n$ コピーMCOなので，CRMが直接使える。
+
+数値実験の舞台は臨界横磁場イジング模型の基底状態
+（半分の部分系のエントロピーが $\log$ 則で成長する系）。
+事前知識 $\sigma$ には，真の状態（結合次元 $\chi_G \approx 40$ の行列積状態）を
+\textbf{結合次元 $\chi = 1, 2, 3$ に切り詰めた粗い近似}を使った。結果：
+\begin{itemize}
+  \item $\chi = 1$（単なる直積状態）：近似が粗すぎて改善なし。
+  \item $\chi = 2, 3$：それだけの粗い近似でも統計誤差が有意に減少。
+        誤差が測定数 $\NU\NM$ に対して通常法より一貫して速く減る。
+\end{itemize}
+「完璧な事前知識でなくても，方向性が合っていれば十分効く」ことを示す好例である。
+
+\subsection{フィデリティ推定と，事前知識を自力で育てる反復法}
+
+30量子ビットのランダム量子回路（ノイズ入り）で，
+作った状態と理論状態の一致度（フィデリティ）
+$\mathcal{F}_\psi = \bra{\psi}\rho\ket{\psi}$ を推定するデモも示された。
+$\sigma$ には理想回路の出力を結合次元 $\chi$ のMPSに切り詰めたものを使い，
+$\NU = 15$（！）という極めて少ない設定数で，
+$\chi$ を上げるほどCRMの誤差棒が縮むことが確認された。
+
+さらに実用上重要なのが\textbf{事前知識の反復改善}である：
+\begin{enumerate}
+  \item 適当な候補 $\sigma = \ketbra{\phi}{\phi}$ を用意し，
+        手元のデータで $\mathcal{F}_\phi$（実験状態との一致度）を推定する。
+  \item $\mathcal{F}_\phi$ が閾値（目安 $1/2$ 以上）に届かなければ
+        別の候補を作って 1 に戻る。
+  \item 十分高い $\mathcal{F}_\phi$ の $\sigma$ が見つかったら，
+        それを使って本命のMCO推定を行う。
+\end{enumerate}
+この試行錯誤は\textbf{すべて同じ1回分の実験データ上の後処理}として実行できる。
+測定をやり直す必要は一切ない――事前知識が解析段階でのみ入るというCRMの
+設計が，ここで最大限に活きる。
+
+\subsection{補足：事前知識を別の実験から得る（コンパニオン実験）}
+
+理論的な $\sigma$ が手に入らない場合でも，
+\textbf{別の実験装置}（より測定を回しやすい装置や過去の実験）で
+近い状態を作ってランダム測定し，そのデータから $\sigma$ 側の影を構成する
+変種も提案されている（論文付録A）。
+この場合もコンパニオン実験側のユニタリ数 $\NU'$ が十分大きければ
+同様の分散低減が得られることが，イジング模型の数値実験で確認されている。
+
+% ==========================================================
+\section{まとめ}
+% ==========================================================
+
+\begin{pointbox}{CRMシャドウ 一枚まとめ}
+\textbf{課題}：量子状態の性質（特に多コピー観測量）の推定は測定回数を食う。
+とりわけ測定設定数 $\NU$ が実験のボトルネック。
+
+\textbf{アイデア}：実験状態 $\rho$ の近似 $\sigma$ を古典計算機に持ち，
+実験と\textbf{同じ乱数}（同じランダムユニタリ）でシミュレーション影 $\sigma^{(r)}$ を作り，
+\[
+  \hat\rho^{(r)}_\sigma = \hat\rho^{(r)} - \sigma^{(r)} + \sigma
+\]
+とする（統計学の共通乱数法の量子版）。
+
+\textbf{保証}：
+(i) $\sigma$ がどうであれ不偏（答えは歪まない）。
+(ii) 分散の支配項が $\Tr(O\rho)^2$ から $\Tr[O(\rho-\sigma)]^2$
+（MCOでは $\|\rho_A - \sigma_A\|_2^2$）へ置き換わり，
+$\sigma$ が良いほど必要な $\NU$ が減る。
+
+\textbf{実務}：実験手順は不変。$\sigma$ は後処理で注入・差し替え・反復改善が可能。
+実験デモでは必要ユニタリ数が約6分の1に。
+\end{pointbox}
+
+最後に展望を一言。CRMシャドウは
+「\textbf{古典シミュレーションと量子実験の相関を資源として使う}」
+という，より大きな潮流の一例である。
+変分量子アルゴリズムの勾配推定，物質の量子相の探索，
+量子プロセス（操作そのもの）の特性評価などへの拡張が論文でも挙げられており，
+古典計算機によるシミュレーション技術（テンソルネットワーク等）が進歩するほど
+量子実験の効率も上がる，という好循環を生む枠組みだと言える。
+
+% ==========================================================
+\begin{thebibliography}{9}
+\bibitem{Vermersch2024}
+B.~Vermersch, A.~Rath, B.~Sundar, C.~Branciard, J.~Preskill, and A.~Elben,
+\emph{Enhanced Estimation of Quantum Properties with Common Randomized Measurements},
+PRX Quantum \textbf{5}, 010352 (2024).
+（本稿の解説対象。式番号(1)--(7)は本文の式\eqref{eq:shadow}, \eqref{eq:crm-shadow},
+\eqref{eq:sim-shadow}, \eqref{eq:var-crm}, \eqref{eq:var-mco} 等に対応。）
+
+\bibitem{Huang2020}
+H.-Y.~Huang, R.~Kueng, and J.~Preskill,
+\emph{Predicting many properties of a quantum system from very few measurements},
+Nat.\ Phys.\ \textbf{16}, 1050 (2020).
+（古典影の原論文。）
+
+\bibitem{Elben2023}
+A.~Elben \textit{et al.},
+\emph{The randomized measurement toolbox},
+Nat.\ Rev.\ Phys.\ \textbf{5}, 9 (2023).
+（ランダム測定全般のレビュー。）
+
+\bibitem{Rath2021}
+A.~Rath, R.~van Bijnen, A.~Elben, P.~Zoller, and B.~Vermersch,
+\emph{Importance sampling of randomized measurements for probing entanglement},
+Phys.\ Rev.\ Lett.\ \textbf{127}, 200503 (2021)；および
+バッチシャドウ法については
+S.~Sarkar \textit{et al.} の関連文献（論文の参考文献[25]）を参照。
+
+\bibitem{Brydges2019}
+T.~Brydges \textit{et al.},
+\emph{Probing Rényi entanglement entropy via randomized measurements},
+Science \textbf{364}, 260 (2019).
+（\S6.1で再解析されたイオントラップ実験。）
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,203 @@
+% ==========================================================
+% レポート(A4・3ページ版):イオントラップ量子コンピュータにおけるランダム測定
+%   対象論文: T. Brydges et al., Science 364, 260 (2019).
+%   コンパイル: lualatex iontrap_report.tex  (参照のため2回)
+% ==========================================================
+\documentclass[11pt,a4paper,twocolumn]{ltjsarticle}
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage[margin=14mm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\setlength{\columnsep}{6mm}
+\setlength{\parindent}{1em}
+\allowdisplaybreaks
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\Tr}{\operatorname{Tr}}
+\renewcommand{\baselinestretch}{1.0}
+
+% セクション見出しを詰める
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{4pt}{2pt}
+\titleformat{\section}{\normalfont\bfseries\large}{\thesection}{0.5em}{}
+
+\begin{document}
+
+\twocolumn[{%
+\begin{center}
+{\LARGE\bfseries レポート:イオントラップ量子シミュレータにおける\\[2pt]
+ランダム測定によるエンタングルメント測定}\\[6pt]
+{\large ―― 自分の研究(CRM シャドウによるハバード模型の測定効率化)との関連を中心に ――}\\[10pt]
+{\normalsize 学籍番号:24B25028\qquad 名前:龍山 昊平\qquad 2026 年 7 月}
+\end{center}
+\vspace{4pt}
+\begin{center}
+\begin{minipage}{0.92\textwidth}
+\small
+\textbf{対象論文:} T.~Brydges, A.~Elben, P.~Jurcevic, B.~Vermersch, C.~Maier, B.~P.~Lanyon,
+P.~Zoller, R.~Blatt, C.~F.~Roos, ``Probing R\'enyi entanglement entropy via randomized measurements'',
+\textit{Science} \textbf{364}, 260--263 (2019) [arXiv:1806.05747].\par
+\smallskip
+\textbf{要旨:} イオントラップ量子シミュレータ上で\textbf{ランダム測定}によりエンタングルメント
+エントロピーを測った本論文を取り上げる。選んだ理由は、私の研究――\textbf{共通ランダム測定シャドウ
+(CRM shadow)によるハバード模型の測定効率化}――が、本論文で実証された「ランダムな局所ユニタリを
+掛けてから射影測定する」プロトコルを土台とし、著者(Vermersch, Elben)が私の出発点である CRM 原論文の
+著者でもある、という一本の系譜上にあるからである。本レポートは私の研究ノート
+(\texttt{CRM\_RESEARCH\_NOTES.md})の各主張と本論文を対応づけ、両者の接点を論じる。
+\end{minipage}
+\end{center}
+\vspace{10pt}
+}]
+
+% =====================================================================
+\section{はじめに:なぜこの論文か}
+% =====================================================================
+私の研究は、量子状態 $\rho$ の物理量 $\ev{O}=\Tr[O\rho]$ をより少ない測定で精度よく推定する後処理
+手法に関するもので、土台は\textbf{古典シャドウ/ランダム測定}、中心はその分散削減版である
+\textbf{CRM シャドウ}\cite{crm}をフェルミオン系(ハバード模型)へ特化・拡張することである。
+「ランダムな局所ユニタリを掛けて射影測定を繰り返す」枠組みを実機で初めて本格実証したのが
+Brydges らの本論文\cite{brydges}であり、Vermersch・Elben は本論文と CRM 論文の\emph{両方}の著者である。
+すなわち私の手法は
+\emph{Brydges 2019(イオンでの実証)$\to$ 古典シャドウ\cite{shadow} $\to$ CRM\cite{crm} $\to$
+私のフェルミオン特化 CRM} という系譜の末端にあり、本論文は私の研究の\emph{根}にあたる。
+
+% =====================================================================
+\section{イオントラップの基礎(自分で調べたこと)}
+% =====================================================================
+ランダム測定は実機に (i) 高忠実度な\emph{個別}単一量子ビット回転、(ii) 個別射影読み出し、
+(iii) 十分なコヒーレンス、を要求する。イオントラップはこれらを高水準で満たす。本論文では
+${}^{40}\mathrm{Ca}^{+}$ イオンを線形 Paul トラップに並べ、各イオンの光学遷移($S_{1/2}$--$D_{5/2}$)に
+1 量子ビットを符号化する。空間的に絞ったレーザーで任意回転 $R_z(\theta_3)R_y(\theta_2)R_z(\theta_1)$ を
+掛け(角度を乱数にすればランダム局所ユニタリ)、状態依存蛍光を CCD で空間分解して個別読み出しする。
+イオンは共有振動モードを介して\emph{全対全結合}でき、$J_{ij}\approx J_0/|i-j|^\alpha$ の長距離相互作用を
+設計できる。私が仮定する測定モデル(各量子ビットにランダム基底を選び射影測定)は、この実機能力の抽象化に他ならない。
+
+% =====================================================================
+\section{論文の内容(読んで分かったこと)}
+% =====================================================================
+\textbf{狙い.} 部分系 $A$ の 2 次 R\'enyi エントロピー $S^{(2)}(\rho_A)=-\log_2\Tr[\rho_A^2]$ を測る。
+純度 $\Tr[\rho_A^2]$ は密度行列の\emph{2 次(非線形)}の量で、素朴には状態の 2 コピーが要る。本論文は
+\emph{1 コピーずつ}の測定と古典後処理だけで純度を測る点が新規である。
+
+\textbf{プロトコル.} N\'eel 状態 $\ket{\downarrow\uparrow\cdots}$ を横磁場付き長距離 XY 模型
+$H=\hbar\sum_{i<j}J_{ij}(\sigma_i^+\sigma_j^-+\sigma_i^-\sigma_j^+)+\hbar B\sum_j\sigma_j^z$ で発展させ、
+各量子ビットに CUE(単一量子ビット Haar)から引いた $u_i$ を掛け、$z$ 基底で射影測定する。
+これを 1 設定あたり $N_M$ ショット、$N_U$ 設定繰り返す。純度は測定確率
+$P(s)=\bra{s}U\rho U^\dagger\ket{s}$ の\emph{異なるビット列間の相関}のアンサンブル平均から復元される:
+\begin{equation}
+X=2^{N_A}\!\!\sum_{s,s'}(-2)^{-D[s,s']}P(s)\,P(s'),\quad \Tr[\rho_A^2]=\overline{X},
+\label{eq:est}
+\end{equation}
+ここで $D$ はハミング距離。直観的には純度は「ランダム回転後の測定分布の\emph{広がり}」に符号化される。
+
+\textbf{結果.} 10 量子ビット系を $N_U{=}500,\ N_M{=}150$ で測定し、全系純度 $\Tr[\rho^2]{=}0.74\pm0.07$ が
+時間発展を通じほぼ一定=近似的ユニタリと実証。\emph{1 データセットから $2^{10}{-}1{=}1023$ 通りの全分割}を
+再構成し、$511$ 通りの二分割でエンタングルメントを確認した。20 量子ビットでは中央 10 量子ビットの
+エントロピー増大を測り MPS 数値と一致。乱れを入れると多体局在の兆候(増大の抑制、初期状態の記憶、
+相互情報量の距離減衰)を観測した。重要な系統誤差として、純度は状態準備で $0.08$、\emph{ランダム回転中の
+デコヒーレンス}で約 $0.17$ 過小評価されると定量化されている。
+
+\textbf{要点.}(1)非線形・グローバル量を 1 コピー測定+古典後処理で測れる。(2)ただし統計誤差は部分系
+サイズ $N_A$ とともに\emph{指数的}に増大する(式\eqref{eq:est}の $2^{N_A}$、Fig.~2 のエラーバー拡大\cite{toolbox_pra})。
+(3)ランダム回転の不完全さが定量的な系統誤差を生む。
+
+% =====================================================================
+\section{自分の研究との関連(本レポートの中心)}
+% =====================================================================
+私の研究ノートの主張(以下「主張 $k$」)と本論文を、次の 7 点で対応づける。
+
+\textbf{(1) 同じ測定プリミティブ.} 私の CRM は「各量子ビットにランダム基底($X/Y/Z$)を選び射影測定」を
+$n_u$ 設定 $\times$ $n_m$ ショット行うデータの上に建つ。これは本論文($N_U{\leftrightarrow}n_u$,
+$N_M{\leftrightarrow}n_m$)と\emph{同じ骨格}である。違いは回転の集団だけで、Brydges は連続 CUE(Haar)、私は
+離散ランダム Pauli。推定量はどちらも\emph{測定チャネルの逆写像}で、私の逆係数 $3^{|A|}$ は式\eqref{eq:est}の
+$2^{N_A}(-2)^{-D}$ と同じ起源をもつ。\emph{私の CRM は本論文の実験データの上でそのまま走らせられる後処理}である。
+
+\textbf{(2) 指数的な壁と局所性への動機.} 本論文の純度・エントロピーは非線形・グローバル量で誤差が $N_A$ で
+指数増大する。これは私の主張 2 と\emph{同じ壁}である:私のグローバル忠実度も 2 次の量で、$L{=}32$ 鎖で
+$F{=}0.007$ と指数崩壊し、局所シャドウでの忠実度推定は指数的に破綻する。\emph{だから私は局所観測量に集中する。}
+局所 Pauli 観測量 $P$ に対する CRM 利得は閉形式
+\begin{equation}
+G=\frac{(3^{|A|}-1)\ev{P}^2+v_s}{(3^{|A|}-1)\Delta^2+v_s},\quad \Delta\equiv\ev{P}_\rho-\ev{P}_\sigma
+\label{eq:gain}
+\end{equation}
+で、利得は\emph{グローバル忠実度でなく観測量ごとの局所誤差 $\Delta$} で決まる(主張 1)。ゆえに $F$ が
+指数崩壊しても局所観測量の利得は\emph{$L$ 非依存で生き残る}(主張 2、$G\approx12$--$57$)。
+つまり本論文が「最も高くつく」と示した領域を、私は「そこを測らず局所観測量に集中」して回避している。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{crm_fig2_locality.png}
+\caption{\small 私の研究(\texttt{crm\_mps\_scaling.jl})より。1D ハバード鎖($U{=}4$)で
+グローバル忠実度 $F$ は $L$ とともに指数崩壊する($L{=}32$ で $F{=}0.007$)一方、局所観測量の CRM 利得は
+$L$ 非依存で生き残る。これは Brydges の実験で部分系サイズ $N_A$ とともにエントロピー誤差が指数増大する
+現象の「裏側」にあたる。}
+\label{fig:loc}
+\end{figure}
+
+\textbf{(3) CRM は同じ系譜の直系.} CRM は prior $\sigma$ に\emph{同じ乱数 $u$}を古典適用して差分
+$\overline{X_\rho(u)-X_\sigma(u)}+\Tr[O\sigma]$ を取り分散を削減する。私の貢献はこれをフェルミオンに特化し、
+$O(N^3)$ の UHF 平均場 prior が 2 次元で $\chi{=}32$--$64$ の MPS prior に匹敵すること(主張 3)、混合状態を
+prior にでき観測量ごとに prior を選べること(主張 4)、係数 $\beta$ をデータから推定すれば prior が悪くても
+\emph{漸近的に損しない}こと(主張 5)を示した点にある。いずれも測定を増やさず $N_U{\times}N_M$ を削減する方向である。
+
+\textbf{(4) 測定予算配分が目的で真逆.} 純度(非線形)は分散がユニタリ間ばらつきに支配されるので\emph{多設定}が
+有利($N_U{=}500$)。一方 CRM はユニタリ揺らぎ $V_u{=}(3^{|A|}{-}1)\ev{P}^2$ を打ち消し残るショットノイズを
+潰すので\emph{少設定・多ショット}が有利(主張 3)。同じ実機・同種データでも「何を測るか」で最適ノブが逆になる。
+
+\textbf{(5) 同一データの再利用.} 本論文は 1 データから全 1023 分割を再構成した(分割選択は古典後処理)。
+これは主張 4「同一データに対し観測量ごとに最適 prior を後選択」と同じ哲学であり、私はさらに多 prior 回帰で
+タダの prior 集合だけで $\chi{=}32$ MPS 相当の利得に到達させる。
+
+\textbf{(6) フェルミオン・JW 弦・matchgate.} 本論文の実機はスピン模型を実現する。私はフェルミオンを
+Jordan--Wigner 変換で写すが、変換は反交換符号を\emph{非局所な弦}にする。私のノート §3.5 では 2 次元横ホッピングの
+台が $|A|{=}9$ に伸び\emph{ランダム Pauli では測定不能}になる。解決策の\emph{matchgate(フェルミオン Gauss)
+シャドウ}は台に依らず 2 次 Majorana として測れ JW 弦を解消する(エネルギー誤差が約 $1/13$)。matchgate が要求する
+非局所ゲートはイオンの\emph{全結合性}と相性がよく、私の手法の実機候補としてイオンは有力である。ただし CRM の
+\emph{利得}はアンサンブル依存で、自己平均的な Gauss 回転では小さい(主張 6)。
+
+\textbf{(7) デコヒーレンスと共通乱数.} 本論文の $0.17$ の過小評価は\emph{回転中のデコヒーレンス}に由来する。
+CRM は\emph{同じ乱数 $u$}を $\rho$ と $\sigma$ に掛けて差を取る\emph{共通乱数}の発想で、共通モードの揺らぎだけでなく
+共通モードの\emph{系統誤差}にも部分的に効きうる。ここから「実機ノイズを prior 側にも取り込む noise-aware/robust な
+CRM」\cite{robust}が自然な発展方向として見える(現状の私の実装は prior を理想 $u$ で厳密計算しており、この相殺は未実現)。
+
+% =====================================================================
+\section{さらに調べたこと・考えたこと}
+% =====================================================================
+\textbf{大規模化.} 同じ Innsbruck グループはランダム測定を 51 イオンへ拡張し、XXZ 鎖で最大 20 サイト部分系の
+\emph{エンタングルメント・ハミルトニアン}(局所構造をもつ演算子)をサンプル効率よく学習した\cite{joshi}。さらに
+2 次元・数百イオンの装置も登場している\cite{2dions}。この\emph{50--数百量子ビット}領域こそ私の主戦場である:
+グローバル忠実度も純度も測れず、2 次元では MPS prior も急速に破綻するため、$O(N^3)$ の UHF prior や
+観測量別 prior・最適 $\beta$ といった\emph{測定を増やさない古典側の工夫}が本質的に効く。
+
+\textbf{考えたこと.} (i) 私の研究の価値は Brydges が最も高くつく領域を正面突破することではなく、\emph{局所観測量に
+集中してそこを避ける}ことにある。両者は競合でなく相補的で、「グローバルな構造 vs 局所物理量」で使い分ける。
+(ii) 実験家への具体的助言が言える:局所物理量(占有・スピン相関・ホッピング)を狙うなら「多設定・中ショット」より
+「\emph{少設定・多ショット}+CRM」が有利。実装コストなしに効く。(iii) 次の課題は頑健化で、共通乱数の相殺という
+CRM の構造を robust shadow のノイズ較正と結び、prior 側に実機ノイズを取り込む方向が自然である。
+(iv) 正直な限界:私の主張はすべて\emph{固定参照 $\rho$ に対する分散}の話で、prior 側は理想測定を仮定している。
+Brydges が定量化した実機の不完全さ(準備誤差・回転デコヒーレンス・有限コヒーレンス時間)の取り込みと実データ検証が、
+私の手法を「シミュレーション上の分散削減」から「実機で本当に測定を減らす手法」へ引き上げる次の一歩である。
+
+% =====================================================================
+{\footnotesize
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt}
+\bibitem{brydges} T.~Brydges \textit{et al.}, ``Probing R\'enyi entanglement entropy via randomized measurements'',
+\textit{Science} \textbf{364}, 260 (2019); arXiv:1806.05747.
+\bibitem{crm} B.~Vermersch, A.~Rath, B.~Sundar, C.~Branciard, J.~Preskill, A.~Elben,
+``Enhanced estimation of quantum observables with common randomized measurements'', \textit{PRX Quantum} \textbf{5}, 010352 (2024).
+\bibitem{shadow} H.-Y.~Huang, R.~Kueng, J.~Preskill, \textit{Nat.~Phys.} \textbf{16}, 1050 (2020).(古典シャドウ)
+\bibitem{toolbox_pra} A.~Elben, B.~Vermersch, C.~F.~Roos, P.~Zoller, \textit{Phys.~Rev.~A} \textbf{99}, 052323 (2019).
+\bibitem{joshi} M.~K.~Joshi \textit{et al.}, ``Exploring large-scale entanglement in quantum simulation'',
+\textit{Nature} \textbf{624}, 539 (2023); arXiv:2306.00057.(51 イオン)
+\bibitem{2dions} S.-A.~Guo \textit{et al.}, ``A site-resolved two-dimensional quantum simulator with hundreds of trapped ions'',
+\textit{Nature} \textbf{630}, 613 (2024).
+\bibitem{robust} S.~Chen, W.~Yu, P.~Zeng, S.~T.~Flammia, ``Robust shadow estimation'', \textit{PRX Quantum} \textbf{2}, 030348 (2021).
+\end{thebibliography}
+}
+
+\end{document}
