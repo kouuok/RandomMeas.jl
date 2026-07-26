@@ -1,0 +1,349 @@
+\documentclass[11pt,a4paper]{ltjsarticle}
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=25mm]{geometry}
+\usepackage{mdframed}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\allowdisplaybreaks
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\cd}{c^\dagger}
+\newcommand{\up}{\uparrow}
+\newcommand{\dn}{\downarrow}
+
+\newmdenv[linecolor=gray!60,linewidth=0.6pt,backgroundcolor=gray!6,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{keybox}
+\newmdenv[linecolor=blue!35,linewidth=0.8pt,backgroundcolor=blue!4,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{exbox}
+
+\title{\bfseries 本研究で測っている物理量(観測量)の物理\\[3pt]
+\large — 何を意味し、なぜそれを測り、値がどう振る舞うか —}
+\author{}
+\date{2026年7月}
+
+\begin{document}
+\maketitle
+\vspace{-2.0em}
+\begin{center}\small
+(自習用ノート第 2 弾。CRM 研究で推定対象としている各観測量について、定義・物理的意味・典型値・測定上の性質を初歩から解説する。
+理論の導出は \texttt{crm\_tutorial.tex}、研究全体は \texttt{crm\_hubbard.tex} を参照。)
+\end{center}
+
+\tableofcontents
+
+\begin{keybox}
+\textbf{この文書の位置づけ.}本研究は「量子状態から物理量を測るコストを下げる手法」の研究であり、\emph{何を測るか}(観測量)がそのまま研究対象になる。ところが観測量ごとに
+(i) 物理的な意味、(ii) 典型的な値の大きさ、(iii) 量子ビットに写したときの「測りにくさ」
+が大きく異なり、それが CRM の利得 $G$ の違いに直結する。本書はその 3 点を観測量ごとに整理する。
+\end{keybox}
+
+% ==========================================================
+\section{準備:観測量とは何か、なぜ「期待値」を測るのか}
+
+量子力学では、測定できる物理量は\emph{エルミート演算子} $O$ で表される。状態 $\rho$ におけるその物理量の\emph{期待値}は
+\begin{equation}
+  \ev{O} = \Tr[O\rho]
+\end{equation}
+で定義される。ここで大切なのは、1 回の測定で $\ev{O}$ が得られるわけではないことである。測定は $O$ の\emph{固有値}のどれかをランダムに返し、その平均が $\ev{O}$ になる。例えばスピンの $z$ 成分は $\pm1/2$ のどちらかしか返さないが、多数回の平均が $\ev{S^z}$ になる。したがって「物理量を測る」= 「多数回測って平均する」であり、必要な回数がコストになる(第\ref{sec:measure}節)。
+
+本研究で扱う観測量は、すべてハバード模型の
+\begin{itemize}
+  \item \textbf{電荷(密度)セクター}:どこに電子が何個いるか
+  \item \textbf{スピンセクター}:スピンがどう向き、隣とどう相関しているか
+  \item \textbf{運動エネルギー(ボンド)セクター}:電子がどれくらい動き回っているか
+\end{itemize}
+のいずれかに属する。以下、簡単なものから順に見ていく。
+
+% ==========================================================
+\section{基本の道具:占有数演算子 $n$}
+\label{sec:n}
+
+\subsection{定義}
+サイト $i$、スピン $\sigma\in\{\up,\dn\}$ の\emph{占有数演算子}は
+\begin{equation}
+  n_{i\sigma} = \cd_{i\sigma}c_{i\sigma}
+\end{equation}
+で、固有値は $0$(その軌道は空)か $1$(電子が 1 個いる)のみ。パウリの排他律により $2$ 以上にはならない。1 つのサイトには $\up$ と $\dn$ の 2 席があるので、サイトの全電子数は
+\begin{equation}
+  n_i = n_{i\up} + n_{i\dn} \in \{0,1,2\}
+\end{equation}
+であり、状態としては「空($0$)」「$\up$ が 1 個」「$\dn$ が 1 個」「二重占有($\up\dn$)」の 4 通りがある。
+
+\subsection{量子ビット表現(なぜ $Z$ が出てくるか)}
+Jordan--Wigner 変換で各軌道を 1 量子ビットに対応させると、占有 $=\ket1$、空 $=\ket0$ である。パウリ $Z$ は $\ket0$ に $+1$、$\ket1$ に $-1$ を返すので
+\begin{equation}
+  \boxed{\ Z_q = 1 - 2n_q\quad\Longleftrightarrow\quad n_q = \frac{1-Z_q}{2}\ }
+  \label{eq:ZtoN}
+\end{equation}
+という辞書が成り立つ。以後のすべての密度・スピン型観測量はこの辞書で $Z$ の言葉に翻訳される。実験では「その量子ビットを $Z$ 基底で測り、$0$ が出たか $1$ が出たかを数える」だけでよい。
+
+\subsection{物理的な意味と本研究での役割}
+$\ev{n_i}$ は\emph{局所電荷密度}である。half-filling($\ev{n_i}=1$)の一様な状態では場所によらず $1$ だが、\emph{ドープ}して電子を抜くと、どこに「穴(ホール)」が集まるかで空間分布ができる。本研究のドープ実験では、この\emph{サイト分解密度}
+\begin{equation}
+  \ev{n_i} = 1 - \tfrac12\bigl(\ev{Z_{i\up}}+\ev{Z_{i\dn}}\bigr)
+\end{equation}
+を観測量に入れ、ストライプ秩序(電荷の川)の直接測定に使っている。
+
+\begin{exbox}
+\textbf{実測値の例(W=6 ドープ系, $U=8$).}DMRG 参照状態で $\ev{n}=0.85$--$0.93$ 程度の値がサイトごとに得られた。half-filling なら $1$ のはずが、$1/8$ ドープにより平均が $0.875$ に下がり、さらに\emph{場所ごとに濃淡}がある — これがストライプである。一方 UHF 平均場 prior は同じ場所で $\ev{n}\approx0.99$ と予言し、大きくずれた($\Delta\approx0.13$--$0.16$)。この食い違いが「電荷テクスチャで平均場 prior が破綻する」という本研究の結論の中身である。
+\end{exbox}
+
+% ==========================================================
+\section{オンサイト $ZZ$ 相関 $\ev{Z_{i\up}Z_{i\dn}}$}
+\label{sec:zz-onsite}
+
+\subsection{定義と意味}
+\emph{同じサイト}の $\up$ 軌道と $\dn$ 軌道の $Z$ の積:
+\begin{equation}
+  \ev{Z_{i\up}Z_{i\dn}} = \ev{(1-2n_{i\up})(1-2n_{i\dn})}.
+\end{equation}
+サイトの状態ごとに値を書き下すと理解しやすい:
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+サイトの状態 & $Z_{i\up}$ & $Z_{i\dn}$ & 積 \\
+\midrule
+空($n=0$) & $+1$ & $+1$ & $+1$ \\
+$\up$ のみ & $-1$ & $+1$ & $-1$ \\
+$\dn$ のみ & $+1$ & $-1$ & $-1$ \\
+二重占有($\up\dn$) & $-1$ & $-1$ & $+1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+つまり、\textbf{「電子が 1 個だけ」なら $-1$、「空か二重占有」なら $+1$} を返す量である。展開すれば
+\begin{equation}
+  \ev{Z_\up Z_\dn} = 1 - 2\ev{n_\up} - 2\ev{n_\dn} + 4\ev{n_\up n_\dn}
+  \;\overset{\text{half-filling}}{=}\; 4\ev{n_\up n_\dn} - 1 = 4D - 1
+\end{equation}
+($D$ は次節の二重占有率)であり、half-filling では二重占有率と 1 対 1 に対応する。
+
+\subsection{物理:Mott 局在の指標}
+$U$ が大きいほど二重占有は抑制され、各サイトは「1 電子だけ」の状態に近づく。したがって
+\begin{equation}
+  U\to\infty:\quad \ev{Z_\up Z_\dn}\to -1\qquad\text{(全サイトが単一占有)}
+\end{equation}
+となる。実際、本研究の測定値は $U=4$ で $-0.60$、$U=8$ で $-0.79$ と、$U$ とともに $-1$ に近づく。これは\textbf{Mott 局在の強さを表す最も直接的な指標}である。
+
+\subsection{測定上の性質(なぜ CRM が最も効くか)}
+この量は $|A|=2$($Z$ が 2 つ)の短いパウリ列で、しかも期待値の絶対値 $|\ev{P}|$ が $0.6$--$0.8$ と\emph{大きい}。第\ref{sec:measure}節で述べるように、CRM の利得は $\ev{P}^2/\Delta^2$ 程度なので、$|\ev{P}|$ が大きい観測量ほど「打ち消す価値のある揺らぎ」が大きい。実際この観測量は本研究で最大の利得($U=8$ で $G\approx240$、W=6 で $157$)を示した。
+
+% ==========================================================
+\section{二重占有率 $D=\ev{n_\up n_\dn}$}
+\label{sec:docc}
+
+\subsection{定義}
+\begin{equation}
+  D_i = \ev{n_{i\up}n_{i\dn}}
+\end{equation}
+は「サイト $i$ に $\up$ と $\dn$ が\emph{両方}いる確率」。$0\le D\le1$。量子ビット表現では\eqref{eq:ZtoN}より
+\begin{equation}
+  n_\up n_\dn = \frac{(1-Z_\up)(1-Z_\dn)}{4} = \frac14\bigl(I - Z_\up - Z_\dn + Z_\up Z_\dn\bigr)
+  \label{eq:docc-pauli}
+\end{equation}
+と\emph{4 つのパウリ項の和}になる。この「多項観測量」であることが後で効いてくる(第\ref{sec:multi}節)。
+
+\subsection{物理:相互作用エネルギーそのもの}
+ハバード模型の相互作用項は $H_U = U\sum_i n_{i\up}n_{i\dn}$ なので、
+\begin{equation}
+  \ev{H_U} = U\sum_i D_i
+\end{equation}
+すなわち $D$ は\textbf{相互作用エネルギーを直接与える}。また熱力学的には $D=\frac{1}{N_s}\partial E/\partial U$(Hellmann--Feynman)であり、エネルギーの $U$ 微分としても意味づけられる。
+
+物理的な振る舞いは明快である:
+\begin{itemize}
+  \item $U=0$(自由電子、half-filling):$\up$ と $\dn$ が独立なので $D = \ev{n_\up}\ev{n_\dn} = 0.5\times0.5 = 0.25$。
+  \item $U$ を増やす:二重占有はエネルギー $U$ を要するので抑制され $D$ が減る。
+  \item $U\to\infty$:$D\to0$(Mott 絶縁体、二重占有完全禁止)。
+\end{itemize}
+本研究の測定値($1$ 次元 $L=16$)は $U=4$ で $D=0.100$、2 次元 $W=4$ の $U=8$ で $D=0.053$ と、$U$ の増大とともに $0.25$ から減っていく振る舞いを正しく捉えている。
+
+\begin{keybox}
+\textbf{なぜ $D$ を測りたいか(実験的動機).}冷却原子の量子ガス顕微鏡では二重占有が直接観測でき、Mott 転移の実験的な指標として標準的に使われる。また $D$ はエネルギーの一部なので、量子シミュレータで基底状態エネルギーを推定する際の必須成分でもある。
+\end{keybox}
+
+% ==========================================================
+\section{スピン相関 $\ev{S^z_iS^z_j}$}
+\label{sec:szsz}
+
+\subsection{定義}
+サイト $i$ のスピン $z$ 成分は
+\begin{equation}
+  S^z_i = \tfrac12\bigl(n_{i\up}-n_{i\dn}\bigr)
+  = \tfrac14\bigl(Z_{i\dn}-Z_{i\up}\bigr)
+\end{equation}
+(値は $\up$ のみで $+1/2$、$\dn$ のみで $-1/2$、空・二重占有で $0$)。2 サイトの\emph{スピン相関関数}は
+\begin{equation}
+  C^{zz}_{ij} = \ev{S^z_i S^z_j}
+  = \tfrac1{16}\bigl\langle (Z_{i\dn}-Z_{i\up})(Z_{j\dn}-Z_{j\up})\bigr\rangle
+\end{equation}
+で、展開すると 4 つの $ZZ$ 項の和になる(これも多項観測量)。
+
+\subsection{物理:磁気秩序と相関長}
+符号と大きさの読み方:
+\begin{itemize}
+  \item $\ev{S^z_iS^z_j} < 0$:$i$ と $j$ のスピンが\emph{反平行}になりやすい(反強磁性相関)。
+  \item $\ev{S^z_iS^z_j} > 0$:平行になりやすい(強磁性相関)。
+  \item $\approx 0$:無相関。
+\end{itemize}
+half-filling の Mott 領域では超交換 $J=4t^2/U$ により隣接スピンが反平行を好むので、最近接($r=1$)で\emph{負}になる。実測値は $1$ 次元 $L=16$, $U=4$ で $\ev{S^z_iS^z_{i+1}}=-0.082$、2 次元 $W=4$, $U=8$ で $-0.121$ と、確かに負である。
+
+さらに距離 $r$ を変えると、多くの場合
+\begin{equation}
+  \ev{S^z_iS^z_{i+r}} \sim (-1)^r\,\frac{e^{-r/\xi}}{r^{p}}
+\end{equation}
+のように\emph{符号が交互}に変わりつつ減衰する($\xi$ が\emph{相関長}、$p$ は冪)。「どこまで遠くまでスピンが揃っているか」を教える量で、磁気秩序の有無を判定する標準的な道具である。
+
+\subsection{測定上の性質}
+$S^zS^z$ は 4 項からなり、各項は $|A|=2$。ただし\emph{係数が $1/16$ と小さい}ため、期待値そのものが小さい($|{\ev{P}}|\sim0.1$)。第\ref{sec:measure}節の式から分かるように、期待値が小さい観測量は「打ち消すべき揺らぎ」も小さく、CRM の利得は中程度($G\sim10$--$25$)に留まる。
+
+\begin{exbox}
+\textbf{本研究で最も面白い振る舞いをした観測量.}スピン相関は、prior(近似状態)の\emph{対称性}に非常に敏感だった。共線 UHF は「スピンが完全に $z$ 軸に凍りついた」平均場なので $|\ev{S^zS^z}|$ を過大評価し($\Delta\approx0.2$--$0.4$)、CRM が損をした($G<1$)。ところがスピン回転で平均した prior(UHF-sym)にすると量子揺らぎが部分的に取り込まれ、$\Delta\approx0.01$--$0.03$ まで改善して $G\approx7$--$10$ に転じた。「どの観測量が prior のどの欠陥に敏感か」の教科書的な例である。
+\end{exbox}
+
+% ==========================================================
+\section{サイト間 $ZZ$ 相関 $\ev{Z_{i\sigma}Z_{j\sigma}}$}
+\label{sec:zz-inter}
+
+$Z=1-2n$ なので、異なるサイトの $ZZ$ は\emph{密度$\times$密度}の相関(電荷相関)である:
+\begin{equation}
+  \ev{Z_iZ_j} = 1-2\ev{n_i}-2\ev{n_j}+4\ev{n_in_j}
+  \;\Longrightarrow\;
+  \ev{n_in_j}-\ev{n_i}\ev{n_j} = \tfrac14\bigl(\ev{Z_iZ_j}-\ev{Z_i}\ev{Z_j}\bigr).
+\end{equation}
+右辺は\emph{密度揺らぎの相関}(電荷感受率に関係)で、電子が「一緒にいたがるか、避け合うか」を測る。本研究では純粋な 1 つのパウリ列($|A|=2$、係数 $1$)なので、\textbf{理論式の検証に最適な「素の観測量」}として距離 $r=1,2,4,8$ で系統的に測っている。
+
+実測値(1 次元 $L=16$, $U=4$、同スピン $\up\up$)は
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+距離 $r$ & 1 & 2 & 4 & 8 \\
+\midrule
+$\ev{Z_\up Z_\up}$ & $-0.398$ & $+0.128$ & $+0.081$ & $+0.047$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+で、$r$ とともに $0$ に向かって減衰する(符号も交替)。この\emph{減衰}が第\ref{sec:measure}節の「遠い相関ほど CRM の利得が小さくなる」現象($r=8$ で $G\approx1.3$)を生む — prior が悪いのではなく、\emph{そもそも打ち消すべき揺らぎが小さい}のである。
+
+% ==========================================================
+\section{ホッピング(運動エネルギー)$\ev{\cd_ac_b+\cd_bc_a}$}
+\label{sec:hop}
+
+\subsection{定義と物理}
+隣接するサイト間の\emph{ボンド運動エネルギー}(キネティック項)は
+\begin{equation}
+  K_{ab} = \ev{\cd_{a}c_{b}+\cd_{b}c_{a}}
+\end{equation}
+で、「電子が $b$ から $a$ へ(またはその逆へ)飛び移る振幅」を表す。ハバード模型の運動エネルギー項は $\ev{H_t}=-t\sum_{\langle ab\rangle}K_{ab}$ なので、これは\textbf{エネルギーの運動部分そのもの}である。物理的には
+\begin{itemize}
+  \item $K$ が大きい:電子が活発に動き回っている(金属的、非局在)。
+  \item $K$ が小さい:電子が各サイトに縛られている(絶縁体的、局在)。
+\end{itemize}
+実測値も直観と合う:$1$ 次元 $L=16$ の $U=4$ で $K=0.423$、より強結合の 2 次元 $W=4$, $U=8$ では $K=0.243$ と小さくなる(強い $U$ が電子の運動を凍らせる)。
+
+\subsection{量子ビット表現と「JW 弦」問題}
+密度型と違い、ホッピングは Jordan--Wigner 変換で\emph{長い演算子}になる。$a<b$ として
+\begin{equation}
+  \cd_ac_b+\cd_bc_a
+  = \tfrac12\bigl(X_a Z_{a+1}\cdots Z_{b-1} X_b + Y_a Z_{a+1}\cdots Z_{b-1} Y_b\bigr).
+\end{equation}
+間に挟まる $Z$ の列(JW 弦)のため、台のサイズは $|A|=b-a+1$ と\emph{2 点間の距離だけ伸びる}。1 次元の最近接なら $|A|=3$ で済むが、2 次元格子を 1 列に並べ替えたときの「横方向ボンド」は $|A|=2W+1$($W$ は幅)にもなる。
+
+\begin{keybox}
+\textbf{なぜこれが本研究の重要な論点か.}古典シャドウでは、台が $|A|$ の観測量を測るのに分散が $3^{|A|}$ で増える(第\ref{sec:measure}節)。$W=4$ の横ボンドなら $|A|=9$ で $3^9\approx2$ 万 — 実際、$5000$ 設定の測定で\emph{一度もサンプルされなかった}。この問題を回避するのが matchgate(フェルミオン)シャドウで、ホッピングを「2 次の Majorana 演算子」として台の長さに依らず測れる。本研究ではこれにより全エネルギーの測定誤差が約 $13$ 分の $1$ になった。
+\end{keybox}
+
+% ==========================================================
+\section{全エネルギー}
+\label{sec:energy}
+
+上記を組み合わせると、系の全エネルギー
+\begin{equation}
+  E = \ev{H} = -t\sum_{\langle ab\rangle,\sigma}K_{ab}^{(\sigma)} + U\sum_i D_i
+\end{equation}
+が得られる。すなわちエネルギーは\emph{多数の局所観測量の和}であり、
+\begin{itemize}
+  \item ボンドごとの運動項(第\ref{sec:hop}節)を全ボンドについて、
+  \item サイトごとの二重占有(第\ref{sec:docc}節)を全サイトについて
+\end{itemize}
+足し上げればよい。量子シミュレータで基底状態エネルギーを求める(変分量子アルゴリズム等)際の中心的な推定対象であり、本研究の matchgate 実験でも主要な比較対象にしている。
+
+エネルギーは項数が多い(サイト数・ボンド数に比例)ので、\emph{多数の観測量を同一データから同時推定する}という古典シャドウの土俵にちょうど乗る。一方で、上述の JW 弦問題により、Pauli シャドウでは横ボンド項が測れず\emph{系統誤差}を生む(prior の値をそのまま返してしまう)という落とし穴も本研究で明らかにした。
+
+% ==========================================================
+\section{忠実度 $F=\ev{\psi_\sigma|\rho|\psi_\sigma}$}
+\label{sec:fidelity}
+
+これは物質の性質ではなく、\emph{状態そのものの近さ}を測る量子情報的な観測量である:
+\begin{equation}
+  F = \ev{\psi_\sigma|\rho|\psi_\sigma}\in[0,1]
+\end{equation}
+は「実験で作った状態 $\rho$ が、目標(あるいは近似)状態 $\ket{\psi_\sigma}$ とどれだけ重なっているか」を表す。$F=1$ で完全一致、$F=0$ で直交。量子計算では\emph{ハードウェアの検証}(意図した状態が本当に作れたか)の標準指標である。
+
+ただし本研究で示したように、$F$ は\emph{系サイズとともに指数的に $0$ へ落ちる}:各サイトでわずかな誤差 $f<1$ があると全体では $F\sim f^{N}$。実際 $L=32$ 鎖では $\chi=2$ の近似状態で $F=0.007$ にまで落ちた。しかも $F$ 自体は台が全系に及ぶ「グローバルな」観測量なので、局所シャドウでの推定は量子ビット数に対して指数的に困難になる($L=8$ ですでに誤差 $\pm0.43$)。
+
+\begin{keybox}
+\textbf{本研究の中心的主張との関係.}CRM の元論文では $F$ が「良い prior」の指標として扱われていた。本研究は、\emph{局所観測量の測定効率は $F$ とは無関係}であり、その観測量に対する局所誤差 $\Delta$ だけで決まることを示した。$F=0.007$($\rho$ とほぼ直交する近似)でも局所観測量の測定コストは $1$ 桁以上削減できる、というのが最も重要な結果である。
+\end{keybox}
+
+% ==========================================================
+\section{観測量ごとの「測りにくさ」と CRM 利得}
+\label{sec:measure}
+
+最後に、なぜ観測量によって測定効率が違うのかを整理する。パウリ列 $P$(台のサイズ $|A|$)を古典シャドウで測るとき、1 スナップショットの推定値は「測定基底が台の上で\emph{全一致}したときだけ $3^{|A|}(\pm1)$、外れたら $0$」となる。ここから分散は
+\begin{equation}
+  \Var[\text{標準}] \propto \underbrace{(3^{|A|}-1)\ev{P}^2}_{\text{基底の当たり外れによる揺らぎ}}
+  \;+\;\underbrace{\frac{3^{|A|}(1-\ev{P}^2)}{n_m}}_{\text{ショットノイズ}}
+\end{equation}
+となり、CRM は近似 $\sigma$ を使って第 1 項の $\ev{P}$ を\emph{局所誤差} $\Delta=\ev{P}_\rho-\ev{P}_\sigma$ に置き換える。結果として利得は
+\begin{equation}
+  G = \frac{(3^{|A|}-1)\ev{P}^2+v_s}{(3^{|A|}-1)\Delta^2+v_s}
+\end{equation}
+となる。これを観測量の性質と結びつけると、次の 3 つの「効きどころ」が読める。
+
+\begin{center}
+\begin{tabular}{@{}p{0.24\linewidth}p{0.28\linewidth}p{0.40\linewidth}@{}}
+\toprule
+性質 & 大きいと & 本研究での例 \\
+\midrule
+台のサイズ $|A|$ & 分散が $3^{|A|}$ で急増(測りにくい) & ホッピングの $|A|=3$、2D 横ボンドの $|A|=9$(測定不能) \\
+期待値の大きさ $|\ev{P}|$ & 打ち消せる揺らぎが大きい($G$ 大) & オンサイト $ZZ$($0.6$--$0.8$)$\Rightarrow$ $G\sim240$ \\
+prior の局所誤差 $\Delta$ & 打ち消し残りが大きい($G$ 小) & 共線 UHF のスピン相関($\Delta\sim0.3$)$\Rightarrow$ $G<1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{多項観測量に固有の注意}
+\label{sec:multi}
+二重占有\eqref{eq:docc-pauli}やスピン相関のように、複数のパウリ項の和で書かれる観測量では、利得は「合計の $\Delta$」だけでなく\emph{項ごとの $\Delta$} にも依存する。実際本研究では、SU(2) 対称な二重占有について、対称化した prior が合計 $\Delta$ を変えないのに利得が下がる現象が見られた(参照状態自身が対称性を破っているため、項ごとには共線 prior の方が合う)。観測量を「パウリ項の集合」として見る視点が必要になる例である。
+
+\subsection{まとめ表:本研究の全観測量}
+\begin{center}\small
+\begin{tabular}{@{}llccp{0.30\linewidth}@{}}
+\toprule
+観測量 & 物理的意味 & $|A|$ & 典型値 & CRM 利得の傾向 \\
+\midrule
+$\ev{n_i}$ & 局所電荷密度 & 1--2 & $0.85$--$1.0$ & 平均場 prior は苦手(ドープ系) \\
+$\ev{Z_\up Z_\dn}$ & Mott 局在の指標 & 2 & $-0.6$--$-0.8$ & \textbf{最大}($G\sim10^2$) \\
+$D=\ev{n_\up n_\dn}$ & 相互作用エネルギー & 1--2(4 項) & $0.05$--$0.25$ & 大($G\sim20$--$100$) \\
+$\ev{S^z_iS^z_j}$ & 磁気相関・秩序 & 2(4 項) & $\pm0.1$ & 中、prior の対称性に敏感 \\
+$\ev{Z_iZ_j}$($r$ 依存) & 電荷密度相関 & 2 & $0.05$--$0.4$ & $r$ とともに $1$ へ \\
+$K_{ab}$(ホッピング) & 運動エネルギー & 3(2D 横: $2W{+}1$) & $0.24$--$0.44$ & 中、長い台は matchgate 必須 \\
+$E$(全エネルギー) & 系の全エネルギー & 多数項 & — & 項ごとの和として推定 \\
+$F$(忠実度) & 状態の近さ & 全系 & $0.007$--$1$ & 大きい系では推定自体が困難 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\\
+\footnotesize 関連文書:理論の導出 \texttt{crm\_tutorial.tex}、研究本体 \texttt{crm\_hubbard.tex}、実験ごとの詳細 \texttt{../README.md}。数値はすべて本研究の DMRG 参照状態に対する実測値。
+
+\end{document}
