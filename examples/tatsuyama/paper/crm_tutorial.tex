@@ -96,7 +96,7 @@ half-filling で $U/t\gg1$ の極限を考える。二重占有はエネルギ�
   J = \frac{4t^2}{U} > 0
   \label{eq:heisenberg}
 \end{equation}
-となる(ハイゼンベルク反強磁性模型)。$\vec S_i\cdot\vec S_j$ は 2 つのスピンが反平行だと $-3/4$、平行だと $+1/4$ を返すので、$J>0$ は\emph{反平行を好む}(反強磁性)。すなわち Mott 絶縁体の基底状態は、$\up\dn\up\dn\cdots$ と交互に並ぶ\emph{Néel 秩序}に近い。本研究で $U=8$(強結合)のとき密度・スピン型の観測量が大きな期待値を持ち、CRM の利得が大きくなるのは、この強い秩序が理由である。
+となる(ハイゼンベルク反強磁性模型)。$\vec S_i\cdot\vec S_j$ は 2 つのスピンが反平行だと $-3/4$、平行だと $+1/4$ を返すので、$J>0$ は\emph{反平行を好む}(反強磁性)。すなわち Mott 絶縁体の基底状態は、$\up\dn\up\dn\cdots$ と交互に並ぶ\emph{Néel 秩序}に近い。本研究で $U=8$(強結合)のとき密度・スピン型の観測量が大きな期待値を持つのは、この強い秩序が理由である(そのこと自体は\emph{利得の天井}を上げるだけで、実際の利得は prior の相対誤差で決まる — 第\ref{sec:gainderive}節)。
 
 \subsection{磁気秩序の記号:スタッガード磁化とストライプ}
 反強磁性秩序を数値で表すには、格子を市松模様(2 副格子 A/B)に塗り分け、$\up$ が多いサイトと $\dn$ が多いサイトの差を測ればよい。まずサイトごとのスピンの $z$ 成分は
@@ -358,6 +358,18 @@ $\Delta\to0$ の極限で\emph{飽和則}
 が得られ、$G$ の上限が $n_m$ に比例する。ゆえに「設定を少なく・1 設定あたりのショットを多く」が最適配分になる。
 \end{keybox}
 
+\paragraph{2 つの律速レジーム(よくある疑問への回答).}「$|\ev{P}|$ が大きければ $\Delta$ も比例して大きくなり、比 $\ev{P}^2/\Delta^2$ は変わらないのではないか」という疑問は自然で、しかも\emph{ショットノイズを無視する極限では正しい}。実際、相対誤差 $\varepsilon\equiv\Delta/\ev{P}$ と信号対床比 $g\equiv(3^{|A|}-1)\ev{P}^2/v_s$ を使うと
+\begin{equation}
+  G = \frac{g+1}{\varepsilon^2 g+1}
+  \label{eq:tworegime}
+\end{equation}
+と書け、$v_s\to0$($g\to\infty$)では $G\to1/\varepsilon^2$ となって $\ev{P}$ のスケールは完全に消える。有限 $n_m$ では $v_s$ が $\ev{P}^2$ に比例しないためスケール不変性が破れ、$|\ev{P}|$ が大きいほど\emph{天井}$1+g$ が高くなる。したがって
+\begin{itemize}
+  \item $G\approx G_{\max}$:\emph{ショットノイズ律速}。prior をこれ以上良くしても無駄で、$n_m$ を増やすべき。
+  \item $G\ll G_{\max}$:\emph{$\Delta$ 律速}。prior の改善に余地がある。
+\end{itemize}
+という診断が可能になる。実データでは $\Delta$ は $\ev{P}$ に比例せず(相関 $+0.28$)、$\Delta$ が支配因子である(具体例は付随文書 \texttt{crm\_observables.tex} 第 10 節)。
+
 \paragraph{なぜ $F$ でなく $\Delta$ か.}忠実度は全パウリ成分にわたる大域量で、$N$ 量子ビット系では $F\sim f^N$ と指数的に $0$ へ向かう。一方 $\Delta=\ev{P}_\rho-\ev{P}_\sigma$ は、$P$ の台 $A$ 周辺の\emph{縮約密度行列}の誤差だけで決まり、系サイズ $N$ に依存しない。これが「グローバル忠実度が崩壊しても局所観測量の利得は生き残る」(本研究の主要結果)の数学的な理由である。
 
 \section{制御変量法としての一般化:損をしない CRM}
@@ -443,7 +455,7 @@ $G<1$(損)の可能性は、CRM を統計学の\emph{制御変量法}として�
 \textbf{論理の流れ.}
 \begin{enumerate}
   \item 古典シャドウの分散は $(3^{|A|}-1)\ev{P}^2+v_s$\eqref{eq:varstd}。第 1 項が「ランダム基底の当たり外れ」による設定間揺らぎ。
-  \item CRM は\emph{同一設定}を prior と共有し、この第 1 項を $(3^{|A|}-1)\Delta^2$ に減らす $\Rightarrow$ 利得法則\eqref{eq:gain-t}。利得は\emph{局所誤差 $\Delta$ のみ}で決まりグローバル忠実度に依らない。
+  \item CRM は\emph{同一設定}を prior と共有し、この第 1 項を $(3^{|A|}-1)\Delta^2$ に減らす $\Rightarrow$ 利得法則\eqref{eq:gain-t}。利得は\emph{局所誤差 $\Delta$ のみ}で決まりグローバル忠実度に依らない(より正確には相対誤差 $\Delta/\ev{P}$ とショット床の比で決まる\eqref{eq:tworegime})。
   \item 帰結:大きい系でも局所観測量なら利得は保たれる。
   \item prior は $\ev{P}_\sigma$ しか要らない $\Rightarrow$ Wick で書ける平均場(第\ref{sec:wickderive}節)や混合状態も prior にできる $\Rightarrow$ 2 次元で MPS 不要の安価 prior。
   \item 制御変量として一般化すると $G_{\rm opt}=1/(1-\mathrm{corr}^2)\ge1$(第\ref{sec:cv-t}節)$\Rightarrow$ 損をしない。
