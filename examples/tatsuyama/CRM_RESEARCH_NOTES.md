@@ -173,6 +173,20 @@ CRMは制御変量法のβ=1特殊例: $\hat o(\beta) = \bar m_\rho - \beta(\bar
 
 **論文にとって最も重要な含意**: χ_p=2 のドープ系では2〜3割のサイトで**有意に損をし、最悪25倍悪化する**。中央のサイトだけを見ていた §3.2 はこの領域に一度も触れていなかった。これは**最適係数CRM(§3.7, $G\ge1$ 保証)がなぜ必要かの最も直接的な証拠**であり、「CRMは常に得」という誤読を防ぐために本文に明示すべき。損がドープ系に集中する点は §3.10 の相図(安いpriorの破綻は電荷テクスチャに局在)と整合する。
 
+### 3.2c ボンド観測量の利得の周期2振動 — Friedel振動による $G_{\max}$ の変調 (`crm_site_median.png`)
+
+サイト×観測量ごとの利得中央値(`crm_site_median.jl`、χ_p で集約、1,743組)を取ると、**オンサイト量の利得は鎖に沿って滑らかなのに、ボンド量は隣り合うボンドで5〜17倍違う**($L=16$ の $Z_\uparrow Z_\uparrow$: 186.6, 11.1, 79.7, 15.8, …)。サイト方向の変動係数で観測量は2群に分かれる: オンサイト 0.10–0.29 / ボンド 0.24–0.58。
+
+機構は完全に同定できた(詳細は README §2c、数式版は `paper/crm_tutorial.tex` §16):
+
+1. **開放端がスタッガード($2k_F=\pi$、周期2)の定在波を誘起する**。半充填ハバード鎖は電荷はMottギャップで凍結だがスピンはgapless(Heisenberg普遍類)なので、端が支配的なスタッガード成分をピン留めする。
+2. ボンド量では「強い/弱い」の交替になる。端のサイトは隣が1つなのでその1本にシングレットを集中でき、第1ボンドがほぼダイマー化する($\ev{Z_\uparrow Z_\uparrow}=-0.823$、$\ev{n_\uparrow n_\uparrow}=0.044$、完全シングレットなら $-1$)。
+3. **振幅は端からの距離に対し $A(x)\propto x^{-1/2}$**。$L=128$ で $A(x)\sqrt x = 0.247, 0.248, 0.244, 0.238, 0.237$($x=1,3,7,15,31$、4%以内)、中央のみ両端の寄与が重なり16%上振れ。**gapless スピン鎖のボンド秩序 Friedel 振動の既知の指数と一致**し、DMRG収束の独立なチェックにもなる。
+4. **$\ev{P}$ の2.5倍差が $G$ の17倍差に増幅される理由**は $G_{\max}\propto \ev{P}^2/(1-\ev{P}^2)$ が $|\ev{P}|\to1$ で発散すること。強ボンド $0.677/0.323=2.09$ vs 弱ボンド $0.108/0.892=0.121$(比17.3)→ $G_{\max}=187$ vs $11.8$(実測 186.6 / 11.1)。分子は「CRMが打ち消せる設定間揺らぎ」、分母は「打ち消せないショットノイズ床」で、$|\ev{P}|$ が大きいと前者が増え後者が減るため二重に効く。
+
+**論文上の位置づけ**: (i) §3.2b の「端の増強」はこのFriedel振動の $x\to0$ 極限であり、両者は同一現象である。(ii) $G/G_{\max}=1.00$ かつ $\Delta$ が一様なので、振動は**prior性能ではなく観測量自身の物理**に由来する — 2レジーム診断(§2.2)が「利得のばらつきの原因が prior 側か観測量側か」を切り分けた実例として使える。(iii) 実務的含意として、**測定計画は「どの観測量か」だけでなく「系のどこか」まで含めて $\ev{P}$ を見積もる必要がある**(端の1本と隣の1本で必要ショット数が一桁違う)。この点は prior-informed derandomization(§5項1)の設計変数にもなる。
+
+
 ### 3.3 測定予算配分 — Fig 2b
 
 飽和則 $G_{\max}\propto n_m$ を nm=10–1000 で検証(理論曲線と一致)。実務指針: **CRMを使うなら設定数 $n_u$ を絞りショット $n_m$ を厚くする**。標準シャドウの直感(設定を多く)と逆になる。
@@ -294,7 +308,7 @@ U=8とU=4、電子28個(4ホール)、参照=DMRG χ=512。UHFは複数初期値
 - Fig 3: 2D prior比較(`crm_fig3_priors2d.png`)
 - Fig 4(要追加): 多観測量同時推定での総測定コスト比較(vs derandomization)
 - Fig 5(要追加): $G$ vs $G_{\max}$ 散布図(全観測量・全prior)— 各点が Δ律速かショットノイズ律速かを一目で示す診断図。既存TSVから即作成可能($G_{\max}$ の経験的測定法は §3.2b で確立済み)
-- Fig 6(素材あり): サイト分解 — `crm_site_resolved.png`。(a) $G(i)$ の L非依存バルク平坦部+端増強、(b) ドープ系で χ_p=2 が損をするサイト、(c) $|\Delta(i)|$ のサイト・L非依存性、(d) $G/G_{\max}$ のサイト分解。**(c)が局所性の主張の最も直接的な証拠**なので、Fig 2 に統合する案もある
+- Fig 6(素材あり): サイト分解 — `crm_site_resolved.png` + `crm_site_median.png`(観測量×サイトのヒートマップ)。(a) $G(i)$ の L非依存バルク平坦部+端増強、(b) ドープ系で χ_p=2 が損をするサイト、(c) $|\Delta(i)|$ のサイト・L非依存性、(d) $G/G_{\max}$ のサイト分解。**(c)が局所性の主張の最も直接的な証拠**なので、Fig 2 に統合する案もある
 
 ---
 
@@ -323,6 +337,7 @@ U=8とU=4、電子28個(4ホール)、参照=DMRG χ=512。UHFは複数初期値
 | `crm_mps_scaling.jl` | 1D鎖 L=8/16/32。局所性の実証(Fig 2a の元データ) | 約25分 |
 | `crm_site_resolved.jl` + `.pbs` | 1D鎖 L=8–128(256量子ビット)。**全サイト**の利得、δ=0/1/8、$G_{\max}$実測、bootstrap CI。窓RDMサンプリング | 約45分 (8コア) |
 | `crm_site_resolved_plot.jl` | 上記TSVの解析4表 + 図(Fig 6候補) | 数十秒 |
+| `crm_site_median.jl` | サイト×観測量ごとのG中央値(χ_pで集約)とヒートマップ | 数十秒 |
 | `crm_param_sweep.jl` | nm掃引(L=8)と U・ドーピング掃引(L=16) | 約40分 |
 | `crm_2d_cylinder.jl` | W=4×8シリンダー。UHF vs 切断MPS prior | 約25分 |
 | `crm_2d_symuhf.jl` | 同上 + 対称性回復UHF prior | 約30分 |
@@ -341,7 +356,7 @@ JULIA_LOAD_PATH="@:@v#.#:@stdlib" julia --project=Hubbard_MPS_Env_v2 <script>.jl
 ```
 (`Hubbard_MPS_Env_v2` に ITensors/ITensorMPS、デフォルト環境に Plots。初回は `Pkg.instantiate()`)
 
-データ: `crm_mps_scaling_results.tsv`, `crm_site_resolved_results.tsv`(17,210行。`G_lo`/`G_hi`=bootstrap 16/84%点、`G_max`=完全priorで実測した天井、`S_bond`=観測量の台のボンドエントロピー), `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`, `crm_matchgate_results.tsv`, `crm_optbeta_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
+データ: `crm_mps_scaling_results.tsv`, `crm_site_resolved_results.tsv`(17,210行。`G_lo`/`G_hi`=bootstrap 16/84%点、`G_max`=完全priorで実測した天井、`S_bond`=観測量の台のボンドエントロピー), `crm_site_median_results.tsv`(1,743行。χ_p集約後のG中央値。`G_min`=χ_p方向の最小値で「損」の検出用), `crm_sweep_nm.tsv`, `crm_sweep_U.tsv`, `crm_2d_results.tsv`, `crm_2d_symuhf_results.tsv`, `crm_matchgate_results.tsv`, `crm_optbeta_results.tsv`(列は各ファイルのヘッダ参照。`G_emp`=経験利得、`G_theo`=理論値(純Pauli列のみ)、`Delta`=局所誤差)
 
 ## 付録B: 主要参考文献
 
