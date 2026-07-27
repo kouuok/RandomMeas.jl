@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N crm_beta
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -o crm_beta.log
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export L_LIST="${L_LIST:-16,64}"
+export DOPE_LIST="${DOPE_LIST:-0.0,0.125}"
+export NU_CUTS="${NU_CUTS:-50,100,200}"
+export N_REPEAT="${N_REPEAT:-500}"
+export NBOOT="${NBOOT:-600}"
+export CHI_EXP="${CHI_EXP:-256}"
+export DMRG_BLAS=8
+export JULIA_NUM_THREADS=1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+echo "host=$(hostname) start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_site_beta.jl 2>&1 | tee crm_beta_progress.log
+echo "end=$(date)"
