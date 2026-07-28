@@ -308,6 +308,7 @@ $n_u$ 設定・$n_m$ ショットで平均した推定量の分散は
 % =====================================================================
 
 \section{CRM 推定器と不偏性}
+\label{sec:crmest}
 
 CRM は、実験状態 $\rho$ の古典近似 $\sigma$(prior)を用意し、実験と\emph{同一の設定} $u$ での prior 側の予測を差し引く。本研究では prior 側の条件付き期待値を\emph{厳密に}計算する。\eqref{eq:condmean}より
 \begin{equation}
@@ -476,6 +477,85 @@ $G<1$(損)の可能性は、CRM を統計学の\emph{制御変量法}として�
   \boxed{\ G_{\rm opt}=\frac{\Var(\bar m_\rho)}{\Var_{\min}}=\frac{1}{1-\mathrm{corr}^2}\ \ge 1\ }
 \end{equation}
 であり、\emph{prior がどれほど悪くても損をしない}($\beta^\ast$ をデータから推定すれば、悪い prior では $\beta^\ast\to0$ となり標準シャドウに自動的に退化)。通常の CRM は $\beta=1$ の特殊例である。複数 prior $\{Y_i\}$ は多変量回帰 $\boldsymbol\beta=\Sigma_{YY}^{+}\mathbf c_{Y\rho}$ に一般化される($\Sigma_{YY}$ は $Y_i$ の共分散行列、$\mathbf c_{Y\rho}$ は $Y_i$ と $m_\rho$ の共分散)。
+
+\subsection{実際にやってみると壊れる:プラグイン $\hat\beta$ の落とし穴}
+\label{sec:betapitfall}
+
+上の議論は $\beta^\ast$ を「知っている」前提だった。実際には同じデータから
+\begin{equation}
+  \hat\beta = \frac{\widehat{\Cov}(m_\rho,Y)}{\widehat{\Var}(Y)}
+\end{equation}
+と推定する(\emph{プラグイン推定})。$n_u$ 個の設定しかないので $\hat\beta$ には推定誤差が乗る。数値実験でこれを損の領域に適用したところ、3 つの実在する問題が出た。学ぶ価値があるので順に見る。
+
+\paragraph{問題 1:$\Var(Y)=0$ による発散。}
+$\chi_p=2$ という粗い prior を使うと、二重占有 $D=n_\uparrow n_\downarrow$ の推定で $\hat\beta$ が暴走した($\beta$ の中央値は $0.5$ 前後と正常なのに、標準偏差が $10^3$ を超える)。原因は単純である。$\chi_p=2$ の prior は本質的に N\'eel 積状態 $\ket{\uparrow\downarrow\uparrow\downarrow\cdots}$ であり、\textbf{ダブロン(同一サイトの上下スピン対)を一つも含まない}。したがって $\ev{D}_\sigma=0$ が\emph{厳密に}成り立ち、
+\begin{equation}
+  Y(u) \equiv 0 \quad\Longrightarrow\quad \Var(Y)=0 \quad\Longrightarrow\quad \hat\beta = \frac{0}{0}.
+\end{equation}
+標本から $\widehat{\Var}(Y)$ を推定すると、それは「$0$ 付近の小さな乱数」になり、それで割ると $\hat\beta$ が裾の重い(Cauchy 的な)分布を持つ。
+
+\paragraph{直感的でない失敗:相関による縮小が効かない。}
+自然な対処は「相関が有意でなければ $\beta$ を $0$ に縮める」ことで、$\hat\beta\cdot r^2/(r^2+1/n_u)$ のような縮小を試したくなる。しかしこれは\emph{効かなかった}。理由は、$\Var(Y)\approx0$ のとき標本相関 $r^2$ の分子と分母が\emph{同じノイズに駆動される}ため、真の相関がゼロでも $r^2$ が $1$ に近い偽の高値を出すからである。「相関が高いから信頼できる」という判断自体が壊れている。
+
+\paragraph{解決:$\Var(Y)$ は計算できる(推定する必要がない)。}
+ここで思い出すべきは、$Y(u)$ が\emph{何であったか}である:
+\begin{equation}
+  Y(u)=\sum_t c_t\,\mathbf 1[\text{基底が項 }t\text{ の台で一致}]\,3^{|A_t|}\ev{P_t}_\sigma .
+\end{equation}
+基底は各量子ビットで独立一様に選ぶので、その分布は\emph{完全に既知}である:
+\begin{align}
+  \Pr[\text{項 }t\text{ が一致}] &= 3^{-|A_t|},\\
+  \Pr[\text{項 }t\text{ と }t'\text{ が同時に一致}] &=
+  \begin{cases}
+    3^{-|A_t\cup A_{t'}|} & (\text{重なり }A_t\cap A_{t'}\text{ 上で Pauli 指定が一致}),\\
+    0 & (\text{矛盾する場合}).
+  \end{cases}
+\end{align}
+$a_t\equiv c_t 3^{|A_t|}\ev{P_t}_\sigma$ と置けば $\mathbb E[Y]=\sum_t a_t 3^{-|A_t|}=\Tr[O\sigma]$ であり、
+\begin{equation}
+  \boxed{\ \Var(Y)=\sum_{t,t'}{}' a_t a_{t'}\,3^{-|A_t\cup A_{t'}|} \;-\;\bigl(\Tr[O\sigma]\bigr)^2\ }
+\end{equation}
+(プライムは Pauli 指定が矛盾しない組のみの和)。\textbf{prior の期待値 $\ev{P_t}_\sigma$ だけから閉形式で求まる}。分母を標本推定しなければ $0/0$ は起きない。数値的には $40$ 万サンプルの経験分散と $0.5\%$ 以内で一致することを確認した。
+
+\begin{keybox}
+\textbf{同じ原理が3回効いている。}この修正は目新しいものではなく、本研究が最初に直したバグとまったく同じ発想である。
+\begin{enumerate}
+  \item \textbf{出発点}:CRM 推定器で prior 側を有限ショットでサンプルしていた $\Rightarrow$ 余計なノイズが乗る。厳密計算に変えて解決(第\ref{sec:crmest}節)。
+  \item \textbf{2 次元の prior}:MPS 表現を経由すると 2D では破綻する $\Rightarrow$ Wick の定理で閉形式にして解決(第\ref{sec:wickderive}節)。
+  \item \textbf{最適 $\beta$}:$\Var(Y)$ を標本推定すると発散する $\Rightarrow$ 解析的に計算して解決(本節)。
+\end{enumerate}
+prior は\emph{古典的に完全に手元にある}オブジェクトなのだから、prior に関する量を標本推定する必要はない --- これが繰り返し効く設計原則である。
+\end{keybox}
+
+\paragraph{問題 2:分散比だけを見てはいけない。}
+プラグイン $\hat\beta$ は同じデータで係数を推定するので、推定量は\emph{もはや不偏ではない}。バイアスは $O(1/n_u)$、標準偏差は $O(1/\sqrt{n_u})$ なので $n_u$ を大きくすれば消えるが、有限の $n_u$ では無視できない。ここで注意すべきは、我々がずっと使ってきた指標
+\begin{equation}
+  G=\frac{\Var[\text{標準}]}{\Var[\text{CRM}]}
+\end{equation}
+が\textbf{分散比であってバイアスを見ていない}ことである。バイアスを持つ推定量は分散を小さくできるので、$G$ だけで比較すると\emph{プラグイン推定量を不当に有利に評価する}。正しくは平均二乗誤差
+\begin{equation}
+  \mathrm{MSE} = \Var + (\text{bias})^2
+\end{equation}
+の比で比べる。数値実験では、分散比で見ると「厳密 $\Var(Y)$ 版が最良」に見えたが、MSE で見るとプラグイン版の方が良いという\emph{順位の逆転}が起きた。
+
+\paragraph{問題 3:$\Var(Y)=0$ は「直せる不具合」ではなく「原理的な限界」でもある。}
+上の閉形式は $\hat\beta$ の\emph{発散}を防ぐが、$\Var(Y)$ が厳密に $0$ ならそもそも
+\begin{equation}
+  Y(u)=\text{定数} \quad\Longrightarrow\quad Y \text{ は } m_\rho \text{ について何の情報も持たない}
+\end{equation}
+なので、制御変量として使えるものが存在しない。このとき $\beta=0$ となり、推定量は標準シャドウに戻る(損もしないが得もしない)。実際、$\chi_p=2$ の prior はホッピング振幅を厳密に $0$ と予言するため、ホッピングの測定では利得の天井が $35.7$ もあるのに最適 $\beta$ でも $1.00$ のままだった。整理すると:
+\begin{itemize}
+  \item $\Var(Y)=0$:制御変量が\emph{存在しない} $\Rightarrow$ 標準シャドウに退化(原理的限界)。
+  \item $\Var(Y)$ が小さいが非ゼロ:プラグインが\emph{不安定} $\Rightarrow$ 解析的 $\Var(Y)$ で解消(技術的問題)。
+\end{itemize}
+
+\paragraph{おまけ:単一 Pauli 列では prior が消える。}
+観測量が単一の Pauli 列 $P$ のとき $Y(u)=\mathbf 1[\text{一致}]\,3^{|A|}\ev{P}_\sigma$ であり、$\ev{P}_\sigma$ は $u$ に依らない定数倍にすぎない。したがって
+\begin{equation}
+  \hat\beta\,(\bar Y-\Tr[O\sigma])
+  = \frac{\widehat{\Cov}(m_\rho,\mathbf 1)}{\widehat{\Var}(\mathbf 1)}\bigl(\bar{\mathbf 1}-3^{-|A|}\bigr)
+\end{equation}
+と $\ev{P}_\sigma$ が\textbf{完全に約分される}。つまり最適 $\beta$ の推定量は\emph{prior にまったく依存しない}。制御変量として使われているのは prior の予言値ではなく「基底が一致したかどうか」という\emph{既知の指標関数}だけである。数値実験でも、$\chi_p$ を $2$ から $32$ まで変えても $G$ が小数点 2 桁まで不変になることが確認された。忠実度 $10^{-17}$ という無意味な prior でも利得の天井の $94\%$ に達するのはこのためで、prior を上手に使っているのではなく\emph{使っていない}のである。多項観測量では項ごとの相対重みが prior で変わるので、この約分は起こらず prior が実際に効く。
 
 \section{平均場 prior の Wick 閉形式}
 \label{sec:wickderive}
