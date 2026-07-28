@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N crm_chi
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -o crm_chistar.log
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export DMRG_BLAS=8
+export JULIA_NUM_THREADS=1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+echo "host=$(hostname) start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_chistar.jl 2>&1 | tee crm_chistar_progress.log
+echo "end=$(date)"
