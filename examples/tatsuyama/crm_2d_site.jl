@@ -156,6 +156,65 @@ function wick_term(sup::Vector{Tuple{Int,Int}}, uhf)
     error("wick_term: 3体以上は未対応")
 end
 
+# ---- 対称性回復UHF: 一般化(非共線)相関行列に対するWick ----
+
+# UHFのブロック対角相関行列をフル 2n×2n (qubit=JWモード順) に展開
+function full_C(uhf, n)
+    C = zeros(2n, 2n)
+    for s1 in 1:n, s2 in 1:n
+        C[qup(s1), qup(s2)] = uhf.Cu[s1, s2]
+        C[qdn(s1), qdn(s2)] = uhf.Cd[s1, s2]
+    end
+    return C
+end
+
+# 全サイト一斉スピン回転 (y軸回り角θ) をかけた相関行列
+function rotate_C(C0::Matrix{Float64}, n::Int, θ::Float64)
+    c, s = cos(θ/2), sin(θ/2)
+    U = zeros(2n, 2n)
+    for site in 1:n
+        a, b = qup(site), qdn(site)
+        U[a, a] = c;  U[a, b] = -s
+        U[b, a] = s;  U[b, b] = c
+    end
+    return U * C0 * U'
+end
+
+# 一般化相関行列 C (実対称) に対するPauli項のWick期待値
+function wick_term_gen(sup::Vector{Tuple{Int,Int}}, C::Matrix{Float64})
+    isempty(sup) && return 1.0
+    ps = [a for (_, a) in sup]
+    if all(==(3), ps)
+        qs = [q for (q, _) in sup]
+        if length(qs) == 1
+            return 1 - 2C[qs[1], qs[1]]
+        elseif length(qs) == 2
+            a, b = qs
+            return 1 - 2C[a,a] - 2C[b,b] + 4*(C[a,a]*C[b,b] - C[a,b]*C[b,a])
+        end
+        error("wick_term_gen: unsupported Z-string length")
+    elseif length(sup) == 3 && (ps == [1, 3, 1] || ps == [2, 3, 2])
+        a = sup[1][1]; b = sup[3][1]
+        return 2 * C[a, b]
+    end
+    error("wick_term_gen: unsupported term $(sup)")
+end
+
+# スピン回転平均 <P>_σ̄ : 極角cosθの中点則求積 (被積分関数はcosθの低次多項式)
+function symavg_P(obs, uhf, n; nθ=64)
+    C0 = full_C(uhf, n)
+    P = [[0.0 for _ in o.terms] for o in obs]
+    for k in 1:nθ
+        θ = acos(-1 + (k - 0.5) * 2 / nθ)
+        C = rotate_C(C0, n, θ)
+        for (i, o) in enumerate(obs), (j, tm) in enumerate(o.terms)
+            P[i][j] += wick_term_gen(tm.sup, C) / nθ
+        end
+    end
+    return P
+end
+
+
 # ------------------------------------------------------------
 # 2Dサイトの観測量（窓が連続になる量に限る）
 # ------------------------------------------------------------
@@ -237,7 +296,12 @@ function main()
         push!(Pσ_all, Pu)
         push!(trOσ_all, [sum(tm.coeff * Pu[k][ti] for (ti, tm) in enumerate(obs[k].terms))
                          for k in 1:length(obs)])
-        labels = vcat(plabels, ["UHF"])
+        # 対称性回復UHF (スピン回転平均した混合状態 prior)
+        Ps = symavg_P(obs, uhf, n)
+        push!(Pσ_all, Ps)
+        push!(trOσ_all, [sum(tm.coeff * Ps[k][ti] for (ti, tm) in enumerate(obs[k].terms))
+                         for k in 1:length(obs)])
+        labels = vcat(plabels, ["UHF", "UHFsym"])
 
         Gs = fill(NaN, length(obs), length(labels))
         if do_sample
@@ -271,7 +335,7 @@ function main()
         println("\n[$o] 列 x ごとの median 相対誤差")
         @printf("%-8s", "prior"); for x in 1:LX; @printf("%9s", "x=$x"); end
         @printf("%11s\n", "max/min")
-        for lb in vcat(plabels, ["UHF"])
+        for lb in vcat(plabels, ["UHF", "UHFsym"])
             lb == "exact" && continue
             @printf("%-8s", lb); v = Float64[]
             for x in 1:LX
