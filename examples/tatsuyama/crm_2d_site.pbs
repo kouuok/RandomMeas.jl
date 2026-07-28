@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N crm2dsite
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=24:00:00
+#PBS -j oe
+#PBS -o crm_2d_site.log
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export LX="${LX:-8}"
+export UVAL="${UVAL:-8.0}"
+export NHOLE="${NHOLE:-0}"
+export CHI_EXP="${CHI_EXP:-512}"
+export N_REPEAT="${N_REPEAT:-300}"
+export DMRG_BLAS=8
+export JULIA_NUM_THREADS=1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+echo "host=$(hostname) UVAL=${UVAL} NHOLE=${NHOLE} LX=${LX} start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_2d_site.jl 2>&1 | tee "crm_2d_site_U${UVAL}_h${NHOLE}.progress"
+echo "end=$(date)"

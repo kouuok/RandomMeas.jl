@@ -266,6 +266,48 @@ end
 theory_var(absA, P, Δ, nu, nm) = (((3.0^absA - 1)*P^2 + 3.0^absA*(1-P^2)/nm)/nu,
                                   ((3.0^absA - 1)*Δ^2 + 3.0^absA*(1-P^2)/nm)/nu)
 
+# ------------------------------------------------------------
+# サンプリング本体 (実験サンプルを全priorで共有)
+# ------------------------------------------------------------
+function run_locals(ρw, Nw, obs_w, Pσ_all, trOσ_all; nu, nm, n_repeat, seed)
+    Random.seed!(seed)
+    nobs = length(obs_w); np = length(Pσ_all)
+    bits = zeros(Int, Nw)
+    # 3^Nw 通りの基底は高々 3^4=81 通り。累積確率を事前計算しておけば
+    # サンプリングは 1 回あたり二分探索のみになる。
+    cum_cache = Dict{Vector{Int},Vector{Float64}}()
+    est_std = zeros(n_repeat, nobs); est_crm = zeros(n_repeat, nobs, np)
+    xs = zeros(nobs)
+    for rep in 1:n_repeat
+        acc_s = zeros(nobs); acc_c = zeros(nobs, np)
+        for _ in 1:nu
+            basis = rand(1:3, Nw)
+            cum = get!(cum_cache, copy(basis)) do
+                cumsum(basis_probs(ρw, basis))
+            end
+            fill!(xs, 0.0)
+            for _ in 1:nm
+                draw_bits!(bits, cum)
+                for k in 1:nobs
+                    xs[k] += estimate_obs(obs_w[k], basis, bits)
+                end
+            end
+            for k in 1:nobs
+                mρ = xs[k] / nm
+                acc_s[k] += mρ
+                for p in 1:np
+                    acc_c[k, p] += mρ - exact_prior_mean(obs_w[k], basis, Pσ_all[p][k])
+                end
+            end
+        end
+        est_std[rep, :] .= acc_s ./ nu
+        for p in 1:np, k in 1:nobs
+            est_crm[rep, k, p] = acc_c[k, p] / nu + trOσ_all[p][k]
+        end
+    end
+    return est_std, est_crm
+end
+
 const NBOOT = parse(Int, get(ENV, "NBOOT", "600"))
 
 function boot_ratio(a::Vector{Float64}, b::Vector{Float64}; nboot=NBOOT, q=(0.16, 0.84), rng=MersenneTwister(1))
