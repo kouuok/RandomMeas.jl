@@ -84,12 +84,44 @@ $$E[X_\sigma|u] \;=\; \sum_t c_t\,\mathbf{1}[\text{基底一致}]\,3^{|A_t|}\,\l
 
 ### 2.2 分散の閉形式理論
 
-ランダムPauli測定では、基底が $P$ の台 $A$ 上で一致する確率が $3^{-|A|}$、一致時のスナップショット値が $3^{|A|}\times(\pm1)$、不一致時は厳密に 0 になることから、
+**原論文の枠組みからの導出**(論文§2.3に詳述。ここでは骨子のみ)
 
-- ユニタリ揺らぎ: $V_u = (3^{|A|}-1)\langle P\rangle^2$(CRMでは $\langle P\rangle^2 \to \Delta^2$ に置換)
-- 条件付きショットノイズ: $E_u[\mathrm{Var}(X|u)] = 3^{|A|}(1-\langle P\rangle^2)$(CRMでは不変・打ち消し不可)
+*出発点(原論文)*: 設定 $u=\bigotimes_q u_q$($u_q$ は X/Y/Z 基底への回転)で測定してビット列 $b$ を得たとき、逆チャネルを通したスナップショット
 
-これから要旨の $G$ 式と、**飽和則** $G_{\max}(n_m) = 1 + n_m\,\frac{(3^{|A|}-1)\langle P\rangle^2}{3^{|A|}(1-\langle P\rangle^2)}$ (Δ→0 の上限、$n_m$ に線形) が従う。**CRMは「少ない設定 × 多ショット」の予算配分で最大化される**(Fig 2b)。
+$$\hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger|b_q\rangle\langle b_q|u_q - I\bigr), \qquad E[\hat\rho]=\rho$$
+
+が $\rho$ の不偏推定量になる。観測量の推定値は $X(b,u)=\mathrm{Tr}[O\hat\rho(b,u)]$。
+
+*ステップ1: 局所Pauli列に対する閉形式*。$P=\bigotimes_{q\in A}\sigma^{a_q}_q$ とすると、$\mathrm{Tr}[\sigma^a]=0$ より各因子は $3\,\mathrm{Tr}[\sigma^{a_q}u_q^\dagger|b_q\rangle\langle b_q|u_q]$ になる。測定基底 $\beta_q$ が $a_q$ と一致すれば $3s_q$($s_q=\pm1$ は測定結果)、不一致なら 0。よって
+
+$$X(b,u) = 3^{|A|}\Bigl(\prod_{q\in A}s_q\Bigr)\mathbf 1[\text{基底が }A\text{ 上で全一致}]$$
+
+で、一致確率は各量子ビット独立に 1/3 なので $3^{-|A|}$。
+
+*ステップ2: 全分散の公式*。一致時 $E[\prod s_q]=\langle P\rangle$、$\prod s_q\in\{\pm1\}$ より $\mathrm{Var}(\prod s_q)=1-\langle P\rangle^2$。したがって条件付き期待値は $E[X|u]=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle$ で、$u$ 平均は $3^{|A|}\cdot3^{-|A|}\langle P\rangle=\langle P\rangle$(不偏)。$\mathrm{Var}(X)=\mathrm{Var}_u(E[X|u])+E_u[\mathrm{Var}(X|u)]$ の2項は
+
+- ユニタリ揺らぎ: $V_u = 3^{2|A|}\langle P\rangle^2\cdot3^{-|A|}-\langle P\rangle^2 = (3^{|A|}-1)\langle P\rangle^2$
+- 条件付きショットノイズ: $E_u[\mathrm{Var}(X|u)] = 3^{-|A|}\cdot3^{2|A|}(1-\langle P\rangle^2) = 3^{|A|}(1-\langle P\rangle^2)$
+
+*ステップ3: CRMは第1項だけを置き換える*。同一の $u$ で prior 側の条件付き期待値 $Y(u)=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle_\sigma$ を引く。これは **$u$ が決まれば確定値**(サンプルしない)なので:
+
+- $E[Z|u]=3^{|A|}\mathbf 1[\text{一致}]\Delta$ より、同じ計算で $V_u^{\rm CRM}=(3^{|A|}-1)\Delta^2$
+- $Y(u)$ が確定値なので条件付き分散は不変 → ショットノイズはそのまま残る
+
+$n_u$ 設定・各 $n_m$ ショットで平均すると
+
+$$\mathrm{Var}[\text{標準}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\langle P\rangle^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr],\qquad
+\mathrm{Var}[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]$$
+
+比を取ると $1/n_u$ が約分されて要旨の $G$ 式になる。
+
+*系(§2.1の修正の意味)*: もし $Y(u)$ を $\sigma$ からの $n_m$ ショットで**推定**すると、$\bar X_\rho(u)$ と独立なので条件付き分散が加算され、ショットノイズ床が
+
+$$\frac{3^{|A|}(1-\langle P\rangle_\rho^2) + 3^{|A|}(1-\langle P\rangle_\sigma^2)}{n_m} \approx 2\times$$
+
+とほぼ2倍になる。$\Delta$ がどれほど小さくてもショットノイズ支配域では $G<1$ になり、CRMが標準に負ける。これが先行実装の不可解な挙動の正体だった。
+
+ここから要旨の $G$ 式と、**飽和則** $G_{\max}(n_m) = 1 + n_m\,\frac{(3^{|A|}-1)\langle P\rangle^2}{3^{|A|}(1-\langle P\rangle^2)}$ (Δ→0 の上限、$n_m$ に線形) が従う。**CRMは「少ない設定 × 多ショット」の予算配分で最大化される**(Fig 2b)。
 
 **2つの律速レジームと診断法**(査読者の自然な疑問「$|\langle P\rangle|$ が大きいと $\Delta$ も比例して大きくなり比は変わらないのでは?」への回答): 信号項 $S=(3^{|A|}-1)\langle P\rangle^2$ とショット床 $v_s$ の比 $g\equiv S/v_s$、相対誤差 $\varepsilon=\Delta/\langle P\rangle$ を使うと
 $$G = \frac{g+1}{\varepsilon^2 g + 1}$$

@@ -101,16 +101,63 @@ $\Tr[O\sigma]$ を足し戻すので\emph{期待値は不変(不偏推定量)}�
 
 \subsection{分散の閉形式と利得法則}
 \label{sec:variance}
-ランダム Pauli 測定では、基底が台 $A$ 上で一致する確率が $3^{-|A|}$、一致時のスナップショット値が $3^{|A|}\times(\pm1)$、不一致時は厳密に $0$ であることから、
-\begin{align}
-  V_u &= (3^{|A|}-1)\,\ev{P}^2 && (\text{ユニタリ揺らぎ}),\\
-  E_u[\Var(X|u)] &= 3^{|A|}\bigl(1-\ev{P}^2\bigr) && (\text{条件付きショットノイズ}).
-\end{align}
-CRM は $\ev{P}^2$ を $\Delta^2$ に置き換え、ショットノイズは不変に残す。ここで
+原論文の枠組みから\eqref{eq:gainlaw}を導く。出発点は古典シャドウの逆チャネルである。設定 $u=\bigotimes_q u_q$($u_q$ は $X/Y/Z$ 基底への回転)で測定してビット列 $b$ を得たとき、スナップショット
 \begin{equation}
-  \Delta \equiv \ev{P}_\rho - \ev{P}_\sigma
+  \hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger\ket{b_q}\bra{b_q}u_q - I\bigr),
+  \qquad \mathbb E[\hat\rho]=\rho
+  \label{eq:snapshot-p}
 \end{equation}
-は prior の\emph{局所}誤差である。したがって利得
+が $\rho$ の不偏推定量になる。観測量 $O$ の推定値は $X(b,u)=\Tr[O\hat\rho(b,u)]$ である。
+
+\paragraph{ステップ 1: 局所 Pauli 列に対するスナップショットの閉形式.}
+$P=\bigotimes_{q\in A}\sigma^{a_q}_q$ とする。$\Tr[\sigma^{a}]=0$ なので\eqref{eq:snapshot-p}の各因子は $3\,\Tr[\sigma^{a_q}u_q^\dagger\ket{b_q}\bra{b_q}u_q]$ となる。測定基底を $\beta_q$ と書くと、$\beta_q=a_q$ のときこれは $3s_q$($s_q=\pm1$ は測定結果)、$\beta_q\ne a_q$ のときは $0$ である。よって
+\begin{equation}
+  X(b,u) = 3^{|A|}\Bigl(\prod_{q\in A}s_q\Bigr)\mathbf 1[\text{基底が }A\text{ 上で全一致}],
+  \label{eq:snapdef}
+\end{equation}
+一致する確率は各量子ビット独立に $1/3$ なので $3^{-|A|}$ である。
+
+\paragraph{ステップ 2: 全分散の公式で 2 つに分ける.}
+一致した設定では $\mathbb E[\prod_q s_q]=\ev{P}$、$\prod_q s_q\in\{\pm1\}$ なので $\Var(\prod s_q)=1-\ev{P}^2$。したがって条件付き期待値は
+\begin{equation}
+  \mathbb E[X|u] = 3^{|A|}\,\mathbf 1[\text{一致}]\,\ev{P}
+  \label{eq:condmean-p}
+\end{equation}
+であり、$u$ で平均すると $3^{|A|}\cdot3^{-|A|}\ev{P}=\ev{P}$ で\emph{不偏}である。$\Var(X)=\Var_u(\mathbb E[X|u])+\mathbb E_u[\Var(X|u)]$ の 2 項はそれぞれ
+\begin{align}
+  V_u &= \mathbb E_u\bigl[(3^{|A|}\mathbf 1\,\ev{P})^2\bigr]-\ev{P}^2
+       = 3^{2|A|}\ev{P}^2\cdot3^{-|A|}-\ev{P}^2
+       = (3^{|A|}-1)\,\ev{P}^2, \label{eq:Vu-p}\\
+  \mathbb E_u[\Var(X|u)] &= 3^{-|A|}\cdot 3^{2|A|}\bigl(1-\ev{P}^2\bigr)
+       = 3^{|A|}\bigl(1-\ev{P}^2\bigr). \label{eq:vs-p}
+\end{align}
+$n_u$ 設定・各 $n_m$ ショットで平均すれば
+\begin{equation}
+  \Var[\text{標準}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\ev{P}^2 + \frac{3^{|A|}(1-\ev{P}^2)}{n_m}\Bigr].
+  \label{eq:varstd-p}
+\end{equation}
+
+\paragraph{ステップ 3: CRM は第 1 項だけを置き換える.}
+CRM \eqref{eq:crm} は\emph{同一の $u$} で prior 側の条件付き期待値を引く。\eqref{eq:condmean-p}を $\sigma$ に適用すると
+\begin{equation}
+  Y(u)\equiv\mathbb E[X_\sigma|u] = 3^{|A|}\,\mathbf 1[\text{一致}]\,\ev{P}_\sigma
+\end{equation}
+であり、これは\emph{$u$ が決まれば確定値}である(サンプルしない)。したがって設定ごとの量 $Z(u)=\bar X_\rho(u)-Y(u)$ について
+\begin{itemize}
+  \item 条件付き期待値は $\mathbb E[Z|u]=3^{|A|}\mathbf 1[\text{一致}]\,\Delta$ となり、\eqref{eq:Vu-p}と同じ計算で $V_u^{\rm CRM}=(3^{|A|}-1)\Delta^2$。ここで $\Delta\equiv\ev{P}_\rho-\ev{P}_\sigma$ は prior の\emph{局所}誤差である。
+  \item $Y(u)$ が確定値なので条件付き分散は変わらず、ショットノイズ\eqref{eq:vs-p}は $3^{|A|}(1-\ev{P}_\rho^2)$ のまま残る。
+\end{itemize}
+この最後の点が、第\ref{sec:methods}節で述べた「prior 側を厳密に計算する」ことの意味である。もし $Y(u)$ を $\sigma$ からの $n_m$ ショットで\emph{推定}すると、それは $\bar X_\rho(u)$ と独立なので条件付き分散が加算され、
+\begin{equation}
+  \Var[\text{CRM}_{\text{旧}}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\ev{P}_\rho^2) + 3^{|A|}(1-\ev{P}_\sigma^2)}{n_m}\Bigr]
+\end{equation}
+となる。ショットノイズ床が\emph{ほぼ 2 倍}になるので、$\Delta$ がどれほど小さくてもショットノイズ支配域では $G<1$、すなわち CRM が標準シャドウに負ける。これが先行実装で観測された不可解な挙動の正体であった。
+すなわち
+\begin{equation}
+  \Var[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\ev{P}^2)}{n_m}\Bigr].
+  \label{eq:varcrm-p}
+\end{equation}
+\eqref{eq:varstd-p}と\eqref{eq:varcrm-p}の比を取ると $1/n_u$ が約分され、利得
 \begin{equation}
   \boxed{\;G = \frac{(3^{|A|}-1)\,\ev{P}^2 + v_s}{(3^{|A|}-1)\,\Delta^2 + v_s},\qquad v_s = \frac{3^{|A|}\bigl(1-\ev{P}^2\bigr)}{n_m}\;}
   \label{eq:gainlaw}

@@ -88,6 +88,37 @@ $$G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s}, \qu
 
 
   が **G ≈ 0.005 から ≈ 1000 まで約5桁で経験値と一致**。
+
+<details>
+<summary><b>導出(原論文の枠組みから)</b> — クリックで展開</summary>
+
+**出発点**: 設定 $u=\bigotimes_q u_q$($u_q$ は X/Y/Z 基底への回転)で測定しビット列 $b$ を得たとき、逆チャネルを通したスナップショット
+
+$$\hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger|b_q\rangle\langle b_q|u_q - I\bigr), \qquad E[\hat\rho]=\rho$$
+
+が $\rho$ の不偏推定量になる。観測量の推定値は $X(b,u)=\mathrm{Tr}[O\hat\rho(b,u)]$。
+
+**ステップ1(局所Pauli列の閉形式)**: $P=\bigotimes_{q\in A}\sigma^{a_q}_q$ とすると $\mathrm{Tr}[\sigma^a]=0$ より各因子は $3\,\mathrm{Tr}[\sigma^{a_q}u_q^\dagger|b_q\rangle\langle b_q|u_q]$。測定基底が $a_q$ と一致すれば $3s_q$($s_q=\pm1$ は測定結果)、不一致なら 0。よって
+
+$$X(b,u) = 3^{|A|}\Bigl(\prod_{q\in A}s_q\Bigr)\mathbf 1[\text{基底が }A\text{ 上で全一致}]$$
+
+一致確率は各量子ビット独立に 1/3 なので $3^{-|A|}$ である。
+
+**ステップ2(全分散の公式)**: 一致時 $E[\prod s_q]=\langle P\rangle$、$\prod s_q\in\{\pm1\}$ より $\mathrm{Var}=1-\langle P\rangle^2$。条件付き期待値は $E[X|u]=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle$ で、$u$ 平均すると $3^{|A|}\cdot3^{-|A|}\langle P\rangle=\langle P\rangle$(不偏)。$\mathrm{Var}(X)=\mathrm{Var}_u(E[X|u])+E_u[\mathrm{Var}(X|u)]$ の2項は
+
+$$V_u = 3^{2|A|}\langle P\rangle^2\cdot3^{-|A|}-\langle P\rangle^2 = (3^{|A|}-1)\langle P\rangle^2$$
+$$E_u[\mathrm{Var}(X|u)] = 3^{-|A|}\cdot3^{2|A|}(1-\langle P\rangle^2) = 3^{|A|}(1-\langle P\rangle^2)$$
+
+**ステップ3(CRMは第1項だけを置き換える)**: 同一の $u$ で prior 側の条件付き期待値 $Y(u)=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle_\sigma$ を引く。これは **$u$ が決まれば確定値**(サンプルしない)なので、$E[Z|u]=3^{|A|}\mathbf 1[\text{一致}]\Delta$ より $V_u^{\rm CRM}=(3^{|A|}-1)\Delta^2$ となる一方、条件付き分散は変わらずショットノイズはそのまま残る。したがって
+
+$$\mathrm{Var}[\text{標準}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\langle P\rangle^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]$$
+$$\mathrm{Var}[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]$$
+
+比を取ると $1/n_u$ が約分されて $G$ の式になる。
+
+**系**: $Y(u)$ を $\sigma$ から $n_m$ ショットで**推定**すると、$\bar X_\rho(u)$ と独立なので条件付き分散が加算されショットノイズ床がほぼ2倍になる。$\Delta$ がどれほど小さくてもショットノイズ支配域で $G<1$ となり、CRMが標準に負ける — これが先行実装のバグの正体である(上記「旧実装はCRMを系統的に損なう」)。
+
+</details>
 - 副産物: U=8では忠実度が0.35に落ちたpriorでも局所ZZの利得は約950倍。逆に、粒子・正孔対称性で $\langle Z\rangle=0$ が厳密な観測量では、UHFが対称性を破って $\Delta$ を作るためCRMが**損**をする(G=0.05)— これも理論式の予言通り。
 
 ### 解釈
