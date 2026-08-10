@@ -115,12 +115,36 @@ CRM は $\ev{P}^2$ を $\Delta^2$ に置き換え、ショットノイズは不�
   \boxed{\;G = \frac{(3^{|A|}-1)\,\ev{P}^2 + v_s}{(3^{|A|}-1)\,\Delta^2 + v_s},\qquad v_s = \frac{3^{|A|}\bigl(1-\ev{P}^2\bigr)}{n_m}\;}
   \label{eq:gainlaw}
 \end{equation}
-が得られる。\eqref{eq:gainlaw} には prior のグローバル忠実度が\emph{一切現れない}。$\Delta\to0$ の上限として飽和則
+が得られる。記号の定義を明示しておく:
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+記号 & 定義 \\
+\midrule
+$P$ & 推定したい局所 Pauli 演算子(Pauli 列)。例:$Z_1Z_2$ \\
+$A$ & $P$ の\emph{台} --- 恒等演算子でない Pauli が載る量子ビットの集合。$|A|$ はその個数 \\
+$\rho$ & 実験状態(本研究では擬似実験として DMRG で作った参照状態) \\
+$\sigma$ & prior --- 古典計算で作った $\rho$ の近似(切断 MPS、UHF 平均場など) \\
+$\ev{P}$ & 実験状態での期待値 $\ev{P}_\rho=\Tr[P\rho]$。添字を省いたものは常に $\rho$ 側 \\
+$\ev{P}_\sigma$ & prior での期待値 $\Tr[P\sigma]$ \\
+$\Delta$ & prior の\emph{局所誤差} $\ev{P}_\rho-\ev{P}_\sigma$ --- その観測量について prior がどれだけ外しているか \\
+$n_m$ & 1 つの測定設定あたりのショット数 \\
+$n_u$ & 測定設定(ランダム基底の選び方)の数。両分散が $1/n_u$ に比例するので比 $G$ には現れない \\
+$v_s$ & ショットノイズ床 --- 有限ショットに由来し prior では打ち消せない分散 \\
+$3^{|A|}$ & 逆測定チャネルの増幅率(一致確率 $3^{-|A|}$、一致時の推定値 $3^{|A|}(\pm1)$) \\
+$G$ & 利得 $=\Var[\text{標準シャドウ}]/\Var[\text{CRM}]$。$G>1$ で得、$G<1$ で損 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent 分子の $(3^{|A|}-1)\ev{P}^2$ は「ランダムに選んだ基底が当たるか外れるか」による設定間の揺らぎで、CRM が打ち消す対象である。分母ではこれが $\Delta^2$ に置き換わる --- prior が当たっていれば($\Delta\to0$)この揺らぎは消える。$v_s$ は分子・分母の\emph{両方に同じ形で入る}ので決して打ち消せない床である。
+
+\eqref{eq:gainlaw} には prior のグローバル忠実度が\emph{一切現れない}。$\Delta\to0$ の上限として飽和則
 \begin{equation}
   G_{\max}(n_m) = 1 + n_m\,\frac{(3^{|A|}-1)\ev{P}^2}{3^{|A|}(1-\ev{P}^2)}
   \label{eq:saturation}
 \end{equation}
-が従い、CRM は「少ない設定 $\times$ 多ショット」の予算配分で最大化される。
+が従う。ただし\emph{$G$ の最大化は誤差の最小化ではない}: 総ショット数 $B=n_un_m$ を固定すると $\Var[\text{CRM}]=\frac1B[(3^{|A|}-1)\Delta^2n_m+3^{|A|}(1-\ev{P}^2)]$ は $n_m$ に単調増加する。正しい指針は、$n_m$ がショットノイズ支配の閾値 $n_m^\ast=3^{|A|}(1-\ev{P}^2)/[(3^{|A|}-1)\Delta^2]$ 以下なら分散をほとんど損なわずに $G$ だけが伸びる、というものである。
 
 \paragraph{2 つの律速レジームと診断法.}式\eqref{eq:gainlaw}は、相対誤差 $\varepsilon\equiv\Delta/\ev{P}$ と信号対床比 $g\equiv(3^{|A|}-1)\ev{P}^2/v_s$ を使うと
 \begin{equation}

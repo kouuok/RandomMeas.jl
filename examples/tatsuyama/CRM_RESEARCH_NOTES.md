@@ -12,6 +12,26 @@
    \Delta \equiv \langle P\rangle_\rho - \langle P\rangle_\sigma, \quad
    v_s = \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}$$
 
+   **記号の定義**
+
+   | 記号 | 定義 |
+   |---|---|
+   | $P$ | 推定したい局所Pauli演算子(Pauli列)。例: $Z_1Z_2$ |
+   | $A$ | $P$ の**台** — 恒等演算子でないPauliが載る量子ビットの集合。$\lvert A\rvert$ はその個数 |
+   | $\rho$ | 実験状態(本研究では擬似実験としてDMRGで作った参照状態) |
+   | $\sigma$ | **prior** — 古典計算で作った $\rho$ の近似(切断MPS、UHF平均場など) |
+   | $\langle P\rangle$ | 実験状態での期待値 $\langle P\rangle_\rho=\mathrm{Tr}[P\rho]$。添字を省いたものは常に $\rho$ 側 |
+   | $\langle P\rangle_\sigma$ | prior での期待値 $\mathrm{Tr}[P\sigma]$ |
+   | $\Delta$ | **priorの局所誤差** $\langle P\rangle_\rho-\langle P\rangle_\sigma$ — その観測量について prior がどれだけ外しているか |
+   | $n_m$ | 1つの測定設定あたりのショット数 |
+   | $n_u$ | 測定設定(ランダム基底の選び方)の数。標準・CRM双方の分散が $1/n_u$ に比例するので、比である $G$ には現れない |
+   | $v_s$ | **ショットノイズ床** — 有限ショットに由来し、priorでは打ち消せない分散 |
+   | $3^{\lvert A\rvert}$ | 逆測定チャネルの増幅率。基底が $A$ 上で全一致する確率が $3^{-\lvert A\rvert}$、一致時の推定値が $3^{\lvert A\rvert}(\pm1)$ |
+   | $G$ | **利得** $=\mathrm{Var}[\text{標準シャドウ}]/\mathrm{Var}[\text{CRM}]$。$G>1$ で得、$G<1$ で損 |
+
+   **式の読み方**: 分子の $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ は「ランダムに選んだ基底が当たるか外れるか」による**設定間の揺らぎ**で、CRMが打ち消す対象である。分母ではこれが $\Delta^2$ に置き換わる — priorが当たっていれば($\Delta\to0$)この揺らぎは消える。$v_s$ は分子・分母の**両方に同じ形で入る**ので決して打ち消せない床であり、$\Delta\to0$ でも $G$ は $1+(3^{\lvert A\rvert}-1)\langle P\rangle^2/v_s$ で頭打ちになる。
+
+
    で与えられ、数値的に **G ≈ 0.005 から ≈ 1000 まで約5桁**にわたり検証された(Fig 1)。利得を決めるのは prior のグローバル忠実度ではなく、**その観測量に対する prior の局所誤差 Δ** である。より正確には、利得を支配するのは**相対誤差 $\varepsilon=\Delta/\langle P\rangle$** であり($v_s\to0$ で $G\to1/\varepsilon^2$、$\langle P\rangle$ のスケールは消える)、$|\langle P\rangle|$ の大きさ自体は「利得の天井」を上げるだけである(§2.2)。
 
 2. **局所性**: グローバル忠実度が系サイズとともに指数的に崩壊しても($L=32$ 鎖で $F=0.007$)、局所観測量の利得は **L に依存せず生き残る**(G ≈ 12–57、Fig 2a)。忠実度推定そのものは局所Pauliシャドウでは量子ビット数に対し指数的に破綻するため、大きい系では局所観測量への適用が本筋である。

@@ -310,9 +310,30 @@ $\ev{Z_\up Z_\up}$ & $-0.398$ & $+0.128$ & $+0.081$ & $+0.047$ \\
 \end{equation}
 となり、CRM は近似 $\sigma$ を使って第 1 項の $\ev{P}$ を\emph{局所誤差} $\Delta=\ev{P}_\rho-\ev{P}_\sigma$ に置き換える。結果として利得は
 \begin{equation}
-  G = \frac{(3^{|A|}-1)\ev{P}^2+v_s}{(3^{|A|}-1)\Delta^2+v_s}
+  G = \frac{(3^{|A|}-1)\ev{P}^2+v_s}{(3^{|A|}-1)\Delta^2+v_s},
+  \qquad v_s=\frac{3^{|A|}(1-\ev{P}^2)}{n_m}
 \end{equation}
-となる。これを観測量の性質と結びつけると、次の 3 つの「効きどころ」が読める。
+となる。記号を整理しておく:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+記号 & 定義 \\
+\midrule
+$P$ & 測りたい局所パウリ列。例:$Z_1Z_2$ \\
+$A$ & $P$ の\emph{台} --- 恒等演算子でないパウリが載る量子ビットの集合。$|A|$ はその個数 \\
+$\rho,\ \sigma$ & 実験状態と prior(古典計算で作った $\rho$ の近似) \\
+$\ev{P}$ & 実験状態での期待値 $\Tr[P\rho]$(添字を省いたものは常に $\rho$ 側) \\
+$\Delta$ & prior の\emph{局所誤差} $\ev{P}_\rho-\ev{P}_\sigma$ \\
+$n_m$ & 1 つの測定設定あたりのショット数 \\
+$v_s$ & ショットノイズ床(prior では打ち消せない分散) \\
+$3^{|A|}$ & 逆測定チャネルの増幅率(一致確率 $3^{-|A|}$、一致時の推定値 $3^{|A|}(\pm1)$) \\
+$G$ & 利得 $=\Var[\text{標準}]/\Var[\text{CRM}]$。$G>1$ で得、$G<1$ で損 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent 設定数 $n_u$ が式に現れないのは、標準・CRM のどちらの分散も $1/n_u$ に比例し、比を取ると約分されるためである。これを観測量の性質と結びつけると、次の 3 つの「効きどころ」が読める。
 
 \begin{center}
 \begin{tabular}{@{}p{0.24\linewidth}p{0.28\linewidth}p{0.40\linewidth}@{}}
