@@ -16,4 +16,6 @@ LuaLaTeX + luatexja(Harano Aji フォント同梱、TeX Live に標準)で日本
 
 `crm_observables.tex` — 本研究で推定している各物理量(観測量)の物理的意味を初歩から解説。占有数・オンサイトZZ・二重占有率・スピン相関・電荷相関・ホッピング(運動エネルギー)・全エネルギー・忠実度について、定義、量子ビット表現、物理的な読み方、本研究での実測値、そして「なぜ観測量ごとに測定効率(CRM利得)が違うのか」を整理する。同じく `lualatex crm_observables.tex` を2回でPDF化(9ページ)。
 
+`crm_double_occupancy.tex` — 二重占有率 $D=\langle n_\uparrow n_\downarrow\rangle$ に特化した詳細解説。定義とサイト4状態、無相関値 $n^2/4$、モット物理と仮想二重占有 $(t/U)^2$、超交換との関係 $D\simeq\frac{4t^2}{U^2N_s}\sum(1/4-\langle S\cdot S\rangle)$、局所モーメント $m_{\rm loc}^2=n-2D$、電荷揺らぎ、温度依存とポメランチュク効果、ドーピング、引力$U<0$、秩序変数としての限界、数値計算法・実験測定法、解釈の落とし穴、そして本研究での測定(多項観測量としての構造とCRM利得)まで。`lualatex` 2回でPDF化(12ページ)。
+
 内容の対応: 詳細な実験記録は `../README.md`、論文の主張構成・査読対応は `../CRM_RESEARCH_NOTES.md`。

@@ -1,0 +1,502 @@
+\documentclass[11pt,a4paper]{ltjsarticle}
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=25mm]{geometry}
+\usepackage{mdframed}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\allowdisplaybreaks
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\cd}{c^\dagger}
+\newcommand{\up}{\uparrow}
+\newcommand{\dn}{\downarrow}
+\newcommand{\Sv}{\mathbf S}
+
+\newmdenv[linecolor=gray!60,linewidth=0.6pt,backgroundcolor=gray!6,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{keybox}
+\newmdenv[linecolor=blue!35,linewidth=0.8pt,backgroundcolor=blue!4,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{exbox}
+\newmdenv[linecolor=orange!45,linewidth=0.8pt,backgroundcolor=orange!5,
+  innertopmargin=6pt,innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{cautionbox}
+
+\title{\bfseries 二重占有率とは何か\\[3pt]
+\large — ハバード模型から見る局所相関・モット物理・磁性、\\そして本研究における測定 —}
+\author{}
+\date{2026年7月}
+
+\begin{document}
+\maketitle
+\vspace{-1.8em}
+\begin{center}\small
+(自習用ノート第 3 弾。CRM 研究の観測量のうち、物理的に最も内容の豊かな\emph{二重占有率}に特化した解説。
+他の観測量は \texttt{crm\_observables.tex}、理論の導出は \texttt{crm\_tutorial.tex} を参照。)
+\end{center}
+
+\tableofcontents
+
+\begin{keybox}
+\textbf{一言でいうと.}二重占有率 $D=\ev{n_\up n_\dn}$ は、格子上の同一サイトをスピンの異なる 2 個のフェルミ粒子が同時に占有する確率である。ハバード模型において電子相関の強さを最も直接的に反映する局所物理量の一つで、
+\begin{itemize}\itemsep2pt
+  \item $D$ が大きい:電子が同じサイトに入ることをあまり嫌がらない(遍歴的)
+  \item $D$ が小さい:オンサイト斥力によって電子が互いを強く避けている
+  \item $D$ がほぼゼロ:電荷揺らぎが凍結し、局在モーメントが形成されている
+\end{itemize}
+と読める。単なる確率ではなく、\textbf{相互作用エネルギーそのもの}であり、\textbf{$U$ に共役な熱力学量}であり、強結合では\textbf{短距離スピン相関の反映}でもある。
+\end{keybox}
+
+% ==========================================================
+\section{ハバード模型における定義}
+
+単一バンド・ハバード模型を
+\begin{equation}
+  H = -t\!\!\sum_{\langle i,j\rangle,\sigma}\!\!\bigl(\cd_{i\sigma}c_{j\sigma}+\mathrm{h.c.}\bigr)
+    + U\sum_i n_{i\up}n_{i\dn} - \mu\sum_i n_i
+  \label{eq:hubbard}
+\end{equation}
+とする。ここで $t$ はサイト間のホッピング振幅、$U$ は同一サイト上のオンサイト相互作用、$\cd_{i\sigma}$ はサイト $i$ にスピン $\sigma$ の電子を生成する演算子、$n_{i\sigma}=\cd_{i\sigma}c_{i\sigma}$、$n_i=n_{i\up}+n_{i\dn}$、$\mu$ は化学ポテンシャルである。ハバード模型は強相関電子系を記述する代表的な最小模型であり、モット転移・磁性・非従来型超伝導などを考える基礎となっている。
+
+サイト $i$ における\emph{二重占有演算子}は
+\begin{equation}
+  \hat d_i = n_{i\up}n_{i\dn}
+\end{equation}
+である。フェルミオンの数演算子の固有値は $0$ または $1$ なので、
+\begin{equation}
+  n_{i\up}n_{i\dn} =
+  \begin{cases}
+    1 & \up,\dn\ \text{の両方が存在}\\
+    0 & \text{それ以外}
+  \end{cases}
+\end{equation}
+となる。したがって局所二重占有率は
+\begin{equation}
+  \boxed{\ D_i = \ev{n_{i\up}n_{i\dn}}\ }
+\end{equation}
+で定義される。並進対称な一様系ではサイトによらず
+\begin{equation}
+  D = \ev{n_{i\up}n_{i\dn}} = \frac{1}{N_s}\sum_i \ev{n_{i\up}n_{i\dn}}
+\end{equation}
+である($N_s$ は格子サイト数)。
+
+\begin{cautionbox}
+\textbf{定義の揺れに注意.}文献によっては $N_d=\sum_i\ev{n_{i\up}n_{i\dn}}=N_sD$ を「二重占有数」と呼び、さらに粒子数で規格化した量を「二重占有率」と呼ぶこともある。議論の際は、\emph{1 サイト当たり}なのか、\emph{全サイトの総和}なのか、\emph{全粒子数で割ったもの}なのかを常に確認する必要がある。本稿および本研究では一貫して 1 サイト当たりの $D=\ev{n_\up n_\dn}$ を用いる。
+\end{cautionbox}
+
+% ==========================================================
+\section{サイト上の 4 状態と二重占有}
+
+単一バンドの各サイトで可能な状態は
+\begin{equation}
+  \ket{0},\qquad \ket{\up},\qquad \ket{\dn},\qquad \ket{\up\dn}
+\end{equation}
+の 4 つである。二重占有演算子の作用は
+\begin{equation}
+  \hat d_i\ket{0}=0,\qquad \hat d_i\ket{\up}=0,\qquad \hat d_i\ket{\dn}=0,\qquad
+  \hat d_i\ket{\up\dn}=\ket{\up\dn}
+\end{equation}
+すなわち $\ket{\up\dn}$ だけを拾う射影演算子である。局所密度行列がこれらの状態に対して確率 $P_0,P_\up,P_\dn,P_2$ を持つなら
+\begin{equation}
+  \boxed{\ D = P_2\ }
+\end{equation}
+となる。つまり二重占有率は、\textbf{局所密度行列における $\ket{\up\dn}$ 状態の重みそのもの}である。
+
+一方、平均粒子数は
+\begin{equation}
+  n = P_\up + P_\dn + 2P_2
+\end{equation}
+である。半充填 $n=1$ で二重占有が抑制されると、粒子数保存から同時に空サイトも抑制され($P_0=P_2$)、各サイトが主として $\ket{\up}$ か $\ket{\dn}$ のどちらかを取るようになる。これが\emph{モット局在と局所磁気モーメント形成}の基本像である。
+
+% ==========================================================
+\section{無相関系における二重占有率}
+\label{sec:uncorrelated}
+
+上向きスピンと下向きスピンが統計的に独立であれば
+\begin{equation}
+  \ev{n_{i\up}n_{i\dn}} = \ev{n_{i\up}}\ev{n_{i\dn}}
+\end{equation}
+である。常磁性状態では $\ev{n_{i\up}}=\ev{n_{i\dn}}=n/2$ なので
+\begin{equation}
+  \boxed{\ D_0 = \frac{n^2}{4}\ }
+\end{equation}
+となる。特に半充填 $n=1$ では
+\begin{equation}
+  \boxed{\ D_0 = \frac14\ }
+\end{equation}
+である。これは「各サイトについて上向き電子がいる確率が $1/2$、下向き電子がいる確率も $1/2$ で、両方が同時にいる確率が $1/4$」という意味である。
+
+ただし、有限磁化 $m=\ev{n_\up-n_\dn}$ がある無相関状態では
+$n_\up=(n+m)/2$、$n_\dn=(n-m)/2$ より
+\begin{equation}
+  D_0 = n_\up n_\dn = \frac{n^2-m^2}{4}
+\end{equation}
+となる。そのため、\emph{二重占有率の低下が必ずしも相関効果だけを意味するとは限らず、スピン分極によっても低下する}。この点は第\ref{sec:caution}節で改めて注意する。
+
+% ==========================================================
+\section{斥力 $U>0$ が二重占有を抑制する仕組み}
+
+相互作用項は $H_U=U\sum_i n_{i\up}n_{i\dn}$ である。二重占有サイト 1 個につきエネルギー $U$ が必要なので、$U>0$ では系は二重占有を避けようとする。一方で、電子が格子上を動くためには二重占有状態を経由することがある。したがって基底状態は
+\begin{itemize}
+  \item 運動エネルギーを下げるために電子を非局在化したい
+  \item 相互作用エネルギーを下げるために二重占有を避けたい
+\end{itemize}
+という\emph{競合}によって決まる。模式的には
+\begin{align}
+  \text{ホッピング } t &\ \Longleftrightarrow\ \text{非局在化・二重占有の生成}\\
+  \text{斥力 } U &\ \Longleftrightarrow\ \text{局在化・二重占有の抑制}
+\end{align}
+であり、本質的な無次元パラメータは $U/W$ あるいは $U/t$($W$ は非相互作用バンド幅)である。
+
+% ==========================================================
+\section{二重占有率は相互作用エネルギーそのもの}
+\label{sec:thermo}
+
+相互作用エネルギー期待値は
+\begin{equation}
+  E_{\rm int} = \Bigl\langle U\sum_i n_{i\up}n_{i\dn}\Bigr\rangle = U N_s D
+\end{equation}
+であり、1 サイト当たりでは
+\begin{equation}
+  \boxed{\ \frac{E_{\rm int}}{N_s} = U D\ }
+\end{equation}
+となる。この意味で、二重占有率は単なる確率ではなく、\textbf{オンサイト相互作用エネルギーを直接決める物理量}である。
+
+さらに、自由エネルギー $F$ にヘルマン--ファインマンの関係を用いると
+\begin{equation}
+  \boxed{\ \frac{1}{N_s}\frac{\partial F}{\partial U} = D\ }
+\end{equation}
+が得られる。零温度では自由エネルギーを基底状態エネルギー $E_0$ に置き換えて
+\begin{equation}
+  \boxed{\ D = \frac{1}{N_s}\frac{\partial E_0}{\partial U}\ }
+\end{equation}
+である。したがって $D$ は、\emph{相互作用 $U$ を変えたときに系のエネルギーがどれだけ変化するかを表す、$U$ に共役な一般化力}である。
+
+また
+\begin{equation}
+  \frac{\partial D}{\partial U} = \frac{1}{N_s}\frac{\partial^2F}{\partial U^2}
+\end{equation}
+なので、二重占有率の傾きや不連続性はモット転移やクロスオーバーを調べる有力な診断量になる。DMFT およびクラスター DMFT では、常磁性モット転移が有限温度で一次転移となる領域や、その終端となる臨界点が現れ、二重占有率にも急激な変化やヒステリシスが現れ得る。
+
+% ==========================================================
+\section{モット絶縁体との関係}
+
+\subsection{半充填・弱相関}
+$n=1$, $U\ll W$ では電子は主に遍歴的である。常磁性かつ無相関極限では $D\simeq1/4$ であり、弱い斥力を導入すると $D<1/4$ となるが、依然として電荷揺らぎは大きく残る。
+
+\subsection{半充填・強相関}
+$U\gg t$ では、二重占有には大きなエネルギー $U$ が必要なので $D\ll1/4$ となる。各サイトはほぼ 1 電子ずつ占有され、電荷自由度が凍結する。
+
+しかし重要なのは
+\begin{equation}
+  \boxed{\ \text{有限の } t/U \text{ では、モット絶縁体でも } D=0 \text{ とは限らない}\ }
+\end{equation}
+ことである。隣接サイトに逆向きスピンがある場合、
+\begin{equation}
+  \ket{\up_i,\dn_j}\ \to\ \ket{\up\dn_i,0_j}\ \to\ \ket{\dn_i,\up_j}
+\end{equation}
+のような\emph{仮想ホッピング}が起こる。中間状態はエネルギー $U$ だけ高いものの、量子力学的に完全には排除されない。その振幅はおおよそ $t/U$ なので、二重占有確率は
+\begin{equation}
+  \boxed{\ D\sim\Bigl(\frac{t}{U}\Bigr)^{2}\ }
+  \label{eq:D-strong}
+\end{equation}
+のオーダーで残る。
+
+つまりモット絶縁体とは「二重占有が厳密にゼロの状態」ではなく、
+\begin{center}
+\emph{実在的な低エネルギー電荷揺らぎは抑制されているが、超交換を生む仮想的二重占有は残っている状態}
+\end{center}
+と考える方が正確である。モット転移では電荷励起にギャップが生じる一方、スピン励起は低エネルギーに残り得る。
+
+\begin{exbox}
+\textbf{本研究の実測値で確認.}$1$ 次元 $L=16$ 鎖($U=4$)で $D=0.100$、2 次元 $W=4$ シリンダー($U=8$)で $D=0.053$、$W=6$($U=8$)で $D=0.052$ が得られた。無相関値 $1/4$ から確かに減少しており、かつ\emph{ゼロではない}。強結合公式\eqref{eq:D-strong}の目安 $(t/U)^2=1/64\approx0.016$ と同じオーダー(数値係数は配位数と次元による)で、仮想ホッピングによる残留二重占有を捉えている。
+\end{exbox}
+
+% ==========================================================
+\section{超交換相互作用と二重占有}
+\label{sec:superexchange}
+
+半充填かつ $U\gg t$ で二重占有状態を摂動的に消去すると、低エネルギー有効模型としてハイゼンベルク模型
+\begin{equation}
+  H_{\rm eff} = J\sum_{\langle i,j\rangle}\Bigl(\Sv_i\cdot\Sv_j-\tfrac14 n_in_j\Bigr),
+  \qquad \boxed{\ J=\frac{4t^2}{U}\ }
+\end{equation}
+が得られる。基底状態エネルギーの主要な相関部分は
+\begin{equation}
+  E_0 \simeq \frac{4t^2}{U}\sum_{\langle i,j\rangle}\Bigl\langle \Sv_i\cdot\Sv_j-\tfrac14\Bigr\rangle
+\end{equation}
+と書ける。これを第\ref{sec:thermo}節の関係 $D=\frac{1}{N_s}\partial E_0/\partial U$ に従って $U$ で微分すると
+\begin{equation}
+  \boxed{\ D \simeq \frac{4t^2}{U^2N_s}\sum_{\langle i,j\rangle}\Bigl(\frac14-\ev{\Sv_i\cdot\Sv_j}\Bigr)\ }
+  \label{eq:D-spin}
+\end{equation}
+となる。
+
+この式は非常に重要で、\textbf{強結合領域では二重占有率が単なる電荷物理量ではなく、短距離スピン相関も測っている}ことを意味する。反強磁性的相関が強いと $\ev{\Sv_i\cdot\Sv_j}<0$ なので、仮想ホッピングによる二重占有が\emph{増える}。逆向きスピンは同一サイトへ仮想的に移動できるが、同じ向きのスピン同士はパウリ原理によってその過程が阻害されるためである。
+
+したがって
+\begin{itemize}
+  \item $U$ の増大そのものは二重占有を\emph{抑制}する
+  \item 反強磁性相関の発達は仮想二重占有を\emph{促進}する
+\end{itemize}
+という 2 つの効果が競合する。
+
+% ==========================================================
+\section{局所磁気モーメントとの厳密な関係}
+\label{sec:moment}
+
+局所スピン偏極の二乗を $m_{\rm loc}^2=\ev{(n_{i\up}-n_{i\dn})^2}$ とする。数演算子について $n_{i\sigma}^2=n_{i\sigma}$(固有値が $0,1$ なので)が成り立つから
+\begin{equation}
+  (n_{i\up}-n_{i\dn})^2 = n_{i\up}^2 + n_{i\dn}^2 - 2n_{i\up}n_{i\dn}
+  = n_{i\up}+n_{i\dn}-2n_{i\up}n_{i\dn}.
+\end{equation}
+よって
+\begin{equation}
+  \boxed{\ m_{\rm loc}^2 = n - 2D\ }
+\end{equation}
+という\emph{厳密な}関係が得られる。半充填では $m_{\rm loc}^2=1-2D$。したがって
+\begin{itemize}
+  \item 無相関半充填系:$D=1/4$ より $m_{\rm loc}^2=1/2$
+  \item 強結合モット極限:$D\to0$ より $m_{\rm loc}^2\to1$
+\end{itemize}
+となる。二重占有の抑制と局所モーメントの成長は、同じ現象の裏表である。
+
+\begin{cautionbox}
+\textbf{局所モーメント形成 $\neq$ 長距離磁気秩序.}ここでの局所モーメント形成は、必ずしも長距離反強磁性秩序を意味しない。二重占有率は局所量なので、局所モーメントの形成には敏感だが、磁気秩序の\emph{空間的な位相関係}を直接は測らない。長距離秩序の判定にはスピン構造因子 $S(\mathbf q)$ や距離依存の相関関数が必要である。
+\end{cautionbox}
+
+% ==========================================================
+\section{電荷揺らぎとの関係}
+\label{sec:charge}
+
+局所粒子数の二乗は、$n_{i\sigma}^2=n_{i\sigma}$ を使って
+\begin{equation}
+  n_i^2 = (n_{i\up}+n_{i\dn})^2 = n_i + 2n_{i\up}n_{i\dn}
+\end{equation}
+であるから $\ev{n_i^2}=n+2D$。局所電荷分散は $\ev{(\Delta n_i)^2}=\ev{n_i^2}-\ev{n_i}^2$ なので
+\begin{equation}
+  \boxed{\ \ev{(\Delta n_i)^2} = n + 2D - n^2\ }
+\end{equation}
+となる。半充填 $n=1$ なら
+\begin{equation}
+  \boxed{\ \ev{(\Delta n_i)^2} = 2D\ }
+\end{equation}
+である。これは、\textbf{半充填において二重占有率が局所電荷揺らぎを直接表す}ことを意味する。
+\begin{itemize}
+  \item 金属:$D$ が比較的大きく、局所電荷揺らぎが大きい
+  \item モット絶縁体:$D$ が小さく、局所電荷揺らぎが凍結
+\end{itemize}
+という対応がある。ただしモット転移を厳密に判定するには、$D$ だけでなく圧縮率・電荷ギャップ・スペクトル関数・DC 伝導度・準粒子重みなども併せて調べる必要がある。
+
+% ==========================================================
+\section{温度依存性は単調とは限らない}
+
+\paragraph{高温側.}高温になると熱励起によって高エネルギーの二重占有状態が占有されやすくなるため、通常は $D$ が増える傾向がある。原子極限 $t=0$、半充填、$\mu=U/2$ では、局所状態の分配関数から
+\begin{equation}
+  D = \frac{1}{2\bigl(1+e^{\beta U/2}\bigr)}
+\end{equation}
+が得られる。したがって $T\to0$ で $D\to0$、$T\to\infty$ で $D\to1/4$ である。
+
+\paragraph{低温強結合側.}強結合では、温度を下げて反強磁性的な短距離スピン相関が発達すると、\eqref{eq:D-spin}の通り超交換を生む仮想ホッピングが増えるため、\emph{低温で $D$ が再び増える}場合がある。つまり
+\begin{equation}
+  \Bigl(\frac{\partial D}{\partial T}\Bigr)_U < 0
+\end{equation}
+という一見「異常」な領域が現れ得る。二重占有率の温度微分の符号は、電荷揺らぎが支配的な弱結合領域と、超交換スピン物理が支配的な強結合領域を区別する指標として研究されている。
+
+% ==========================================================
+\section{エントロピーとポメランチュク効果}
+
+自由エネルギーの微分関係 $D=\frac{1}{N_s}\partial F/\partial U$ と $S=-\partial F/\partial T$ から、マクスウェル関係
+\begin{equation}
+  \boxed{\ \Bigl(\frac{\partial S}{\partial U}\Bigr)_T = -N_s\Bigl(\frac{\partial D}{\partial T}\Bigr)_U\ }
+\end{equation}
+が得られる。したがって $(\partial D/\partial T)_U<0$ なら $(\partial S/\partial U)_T>0$ であり、これは\emph{相互作用を強めることで局所スピン自由度にエントロピーを蓄えられる}ことを意味する。
+
+等エントロピー過程では
+\begin{equation}
+  \Bigl(\frac{dT}{dU}\Bigr)_S = \frac{N_sT}{C_U}\Bigl(\frac{\partial D}{\partial T}\Bigr)_U
+\end{equation}
+なので、$(\partial D/\partial T)_U<0\ \Rightarrow\ (dT/dU)_S<0$。つまり\textbf{断熱的に $U$ を増やすと系が冷却される}可能性がある。これは電子系・冷却原子系における\emph{ポメランチュク冷却}の考え方と結びついている。
+
+% ==========================================================
+\section{ドーピングした場合}
+\label{sec:doping}
+
+半充填から粒子数をずらすと、空サイトまたは二重占有サイトが\emph{実在的な}キャリアとして導入される。
+
+\paragraph{ホールドーピング($n<1$).}空サイトが増える。強結合極限では、電子は空サイトを利用して移動できるため、必ずしも高エネルギーの二重占有を作る必要がない。そのため $D$ は一般に小さいままである。
+
+\paragraph{電子ドーピング($n>1$).}単一バンド模型では鳩ノ巣原理により二重占有が不可避になる。局所確率について
+\begin{equation}
+  n = P_\up+P_\dn+2P_2,\qquad P_0+P_\up+P_\dn+P_2=1
+\end{equation}
+から $P_2-P_0=n-1$ なので
+\begin{equation}
+  \boxed{\ D \ge n-1\qquad (n>1)\ }
+\end{equation}
+という下限がある。粒子--正孔対称な格子では、電子ドープ側の二重占有とホールドープ側の空サイト確率が対応する。
+
+なお、ドープされた 2 次元ハバード模型では、二重占有率は短距離スピン相関・擬ギャップ・金属状態間のクロスオーバーや一次転移などを追跡する熱力学量としても使われる。
+
+\begin{exbox}
+\textbf{本研究のドープ実験.}$1/8$ ホールドープ($n=0.875$)の $W=4$ シリンダー($U=8$)で $D=0.042$、$W=6$ で $D=0.038$。half-filling の $0.053$/$0.052$ より小さく、上の議論の通りホールドープでは $D$ が小さいままであることを確認できる(ホールは空サイトを使って動けるので、高エネルギーの二重占有を作る必要がない)。なお本研究の関心は $D$ の値そのものより\emph{近似状態(prior)が $D$ をどれだけ正確に予言できるか}にあり、その観点ではドープ系で平均場の精度が落ちる(第\ref{sec:thiswork}節)。
+\end{exbox}
+
+% ==========================================================
+\section{引力ハバード模型 $U<0$}
+
+$U<0$ では、同一サイトに上下スピンの粒子が入るとエネルギーを得するため $D>D_0$ となる傾向がある。強い引力では $\ket{\up\dn}$ というオンサイト対が形成され、この場合の二重占有率は\emph{局所ペア形成の指標}になる。
+
+ただし、$D$ が大きいことは局所ペアの存在を示しても、直ちに超伝導長距離秩序を意味するわけではない。超伝導を判定するには
+\begin{equation}
+  \ev{c_{i\dn}c_{i\up}\cd_{j\up}\cd_{j\dn}}
+\end{equation}
+のようなペア相関関数や超流動剛性を調べる必要がある。
+
+% ==========================================================
+\section{二重占有率はモット転移の秩序変数か}
+
+結論から言えば
+\begin{equation}
+  \boxed{\ \text{一般には厳密な対称性の破れに対応する秩序変数ではない}\ }
+\end{equation}
+である。モット転移は、通常の磁性転移のように明白な対称性の破れを伴わないことがある。そのため二重占有率は「秩序変数」そのものというより、
+\begin{itemize}
+  \item 相互作用 $U$ に共役な熱力学量
+  \item 電荷揺らぎの局所的尺度
+  \item モット転移に敏感な診断量
+\end{itemize}
+と見るのが適切である。また、絶縁体側でも仮想ホッピングによって有限の $D$ が残るので、$D=0\Leftrightarrow$ モット絶縁体ではない。
+
+DMFT 型の有限温度一次モット転移では $D$ が不連続に変化することがあるが、反強磁性秩序を許した場合や低次元系では、磁気相関が常磁性モット転移を覆い隠したり、単なるクロスオーバーに変えたりすることがある。フラストレーションや、計算で課す対称性条件にも結果が依存する。
+
+% ==========================================================
+\section{数値計算ではどのように求めるか}
+
+二重占有率は\emph{局所的な等時相関関数}なので、比較的計算しやすい観測量である。
+
+\paragraph{厳密対角化.}基底状態または熱平衡状態から直接 $D=\frac{1}{N_s}\sum_i\ev{n_{i\up}n_{i\dn}}$ を評価する。
+
+\paragraph{量子モンテカルロ法.}補助場量子モンテカルロ法や行列式量子モンテカルロ法では、等時グリーン関数から密度相関を計算する。ただしドープされた斥力ハバード模型ではフェルミオン符号問題が深刻になる場合がある。
+
+\paragraph{DMFT.}単一サイト DMFT では格子模型を自己無撞着なアンダーソン不純物模型へ写像し、$D=\ev{n_\up n_\dn}_{\rm imp}$ として求める。DMFT は局所量である二重占有率の計算と特に相性がよく、金属解と絶縁体解の共存・一次転移・臨界終点の解析に使われる。短距離空間相関を含めるにはクラスター DMFT などが必要である。
+
+\paragraph{DMRG・テンソルネットワーク.}1 次元系やシリンダー形状では高精度に $\ev{n_{i\up}n_{i\dn}}$ を評価できる。非一様系では位置依存する $D_i$ を調べることで、端・ストライプ・不純物周辺の局所相関を可視化できる。\emph{本研究の参照状態はこの方法(ITensorMPS による DMRG)で作っている。}
+
+% ==========================================================
+\section{実験ではどう測るか}
+
+通常の固体電子系では、二重占有率をそのまま直接測定するのは容易ではない。主に光電子分光・光学伝導度・ラマン散乱・X 線分光・相互作用エネルギーに関係する熱力学測定などから\emph{間接的に}推定する。
+
+一方、光格子中の超低温フェルミ原子では、二重占有サイトを分子的状態へ変換したり、相互作用シフトを分光的に識別したりすることで、二重占有率を比較的\emph{直接}測定できる。また、格子深さを周期変調してホッピングを変調すると、エネルギー $U$ に対応する周波数付近で二重占有が動的に生成される。この動的二重占有生成は、冷却原子系におけるモット相関のプローブとして提案・利用されている。
+
+\begin{cautionbox}
+\textbf{トラップ中の空間平均に注意.}調和トラップ中では密度が空間的に不均一なので、測定値は $D_{\rm meas}=\frac{1}{N_s}\sum_i D_i$ のような空間平均である。中心部がモット領域で外側が金属領域という殻構造が存在する場合、均一系の $D$ と単純には比較できない。
+\end{cautionbox}
+
+% ==========================================================
+\section{本研究における二重占有率の測定}
+\label{sec:thiswork}
+
+ここからは、本研究(CRM シャドウによる測定効率化)の文脈で $D$ がどう扱われるかを述べる。
+
+\subsection{量子ビット表現と「多項観測量」であること}
+Jordan--Wigner 変換により占有数は $n_q=(1-Z_q)/2$ と書けるので
+\begin{equation}
+  n_\up n_\dn = \frac{(1-Z_\up)(1-Z_\dn)}{4}
+  = \frac14\bigl(I - Z_\up - Z_\dn + Z_\up Z_\dn\bigr)
+  \label{eq:docc-pauli}
+\end{equation}
+となり、$D$ は\emph{4 つのパウリ項の和}(多項観測量)として測られる。定数項 $I/4$ は測定不要、残り 3 項をランダム測定のデータから推定する。関連して、半充填では
+\begin{equation}
+  \ev{Z_\up Z_\dn} = 4D-1
+\end{equation}
+なので、オンサイト $ZZ$ 相関と $D$ は 1 対 1 に対応する(前者の方が単一パウリ列なので、理論式の検証にはそちらを使っている)。
+
+\subsection{CRM 利得の観点から見た $D$}
+本研究の中心的な結論は、ランダム測定における分散削減率(利得 $G$)が、近似状態 prior の\emph{グローバルな}良さではなく、\emph{その観測量に対する局所誤差} $\Delta=\ev{P}_\rho-\ev{P}_\sigma$ だけで決まるというものである。$D$ について実測された値は次の通り。
+
+\begin{center}\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+系(すべて UHF prior) & $U$ & $D$(真値) & $\Delta$ & CRM 利得 $G$ \\
+\midrule
+2 次元 $W=4$(half-filling) & 4 & 0.128 & $-0.0059$ & 6.6 \\
+2 次元 $W=4$(half-filling) & 8 & 0.053 & $+0.0028$ & 15.9 \\
+2 次元 $W=6$(half-filling) & 8 & 0.052 & $+0.0015$ & 32.0 \\
+2 次元 $W=4$($1/8$ ドープ) & 8 & 0.042 & $-0.0067$ & 1.0 \\
+2 次元 $W=6$($1/8$ ドープ) & 8 & 0.038 & $-0.0154$ & 2.0 \\
+\midrule
+1 次元 $L=16$($\chi{=}8$ MPS prior) & 4 & 0.100 & --- & 21.4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+注目すべきは、\textbf{平均場(UHF)prior が $D$ を非常に高い精度で予言する}ことである(half-filling で $\Delta\sim10^{-3}$、真値に対する相対誤差 $3$--$5\%$)。理由は本稿の物理から明快である:平均場近似は「オンサイト斥力によって二重占有が抑制される」という $D$ を決める\emph{主要な}物理を、まさにその形($\ev{n_\up}\ev{n_\dn}$ 型の分解、第\ref{sec:uncorrelated}節)で取り込んでいるからである。取りこぼすのは\eqref{eq:D-spin}が示す「短距離スピン相関による仮想二重占有」の補正だが、これは $(t/U)^2$ の小さな寄与に留まる。
+
+一方でドープ系では $\Delta$ が $2$--$5$ 倍に悪化し($-0.0067$, $-0.0154$)、利得も $G\approx1$--$2$ まで落ちる。これは、ドープにより導入されたホールがどこに分布するか(ストライプ)を平均場が正しく捉えられないため、その場所の $\ev{n_\up}\ev{n_\dn}$ がずれることによる。$D$ の予言精度そのものが、その系の物理を平均場がどこまで捉えているかの\emph{診断}になっている例である。
+
+\subsection{対称性回復 prior での退行:項ごとの $\Delta$}
+一方で本研究は、$D$ について興味深い例外も見つけた。スピン回転平均した prior(UHF-sym)を使うと、$W=4$, $U=4$ で利得が $6.6\to3.4$ と\emph{下がった}。$D$ は SU(2) 対称な演算子なので観測量全体の $\Delta$ は両 prior で完全に同一($-0.0059$)であるにもかかわらず、である。
+
+原因は\eqref{eq:docc-pauli}の\emph{多項}構造にある。利得は合計 $\Delta$ ではなく\emph{項ごとの} $\Delta$(すなわち $\ev{Z_\up}$, $\ev{Z_\dn}$, $\ev{Z_\up Z_\dn}$ 各々の誤差)に依存する。参照状態である DMRG 基底状態自身が Néel 対称性を破っているため、項ごとの $\ev{Z_q}$(副格子磁化に相当)は\emph{共線}UHF の方がよく合う。対称化 prior は合計を変えずに項ごとの誤差を増やしてしまったのである。
+
+\begin{keybox}
+\textbf{この例から学べること.}「観測量」を 1 つの量として見るだけでなく、\emph{どのパウリ項の集合として測られるか}を意識する必要がある。また、prior の対称性は実験状態(参照状態)の対称性の破れ方に合わせるべきであり、より対称な prior が常に良いわけではない。本研究ではこの不確実性への保険として、係数をデータから推定する「最適 $\beta$ CRM」を導入している。
+\end{keybox}
+
+% ==========================================================
+\section{二重占有率を解釈するときの注意点}
+\label{sec:caution}
+
+\paragraph{① 小さい $D$ だけではモット絶縁体とは断定できない.}低密度なら、単に 2 粒子が同じサイトで出会う確率が低いため $D$ は小さくなる。そこで無相関値と比較した
+\begin{equation}
+  g^{(2)}_{\up\dn}(0) = \frac{\ev{n_{i\up}n_{i\dn}}}{\ev{n_{i\up}}\ev{n_{i\dn}}}
+\end{equation}
+を使うことがある。無相関で $g^{(2)}=1$、斥力相関で $g^{(2)}<1$、引力・ペア相関で $g^{(2)}>1$ である。
+
+\paragraph{② 磁化によっても $D$ は減る.}完全スピン分極状態では一方のスピン成分が存在しないため $D=0$ である。しかしこれはモット局在ではなくパウリ原理によるものである(第\ref{sec:uncorrelated}節)。
+
+\paragraph{③ $D$ は局所量である.}二重占有率だけでは、反強磁性長距離秩序・超伝導秩序・電荷密度波・ストライプ秩序の\emph{空間構造}は分からない。これらには対応する 2 点相関関数や構造因子が必要である。本研究でも、ストライプの検出にはサイト分解密度 $\ev{n_i}$ を別途観測量に加えている。
+
+\paragraph{④ 有限の $D$ は金属性を意味しない.}モット絶縁体にも仮想二重占有が存在するため、$D>0$ でも絶縁体であり得る。
+
+% ==========================================================
+\section{要点のまとめ}
+
+二重占有率の中心的な関係式をまとめる:
+\begin{gather}
+  D = \ev{n_{i\up}n_{i\dn}},\qquad
+  \frac{E_{\rm int}}{N_s} = UD,\qquad
+  D = \frac{1}{N_s}\frac{\partial F}{\partial U},\\[2pt]
+  m_{\rm loc}^2 = n-2D,\qquad
+  \ev{(\Delta n_i)^2} = n+2D-n^2.
+\end{gather}
+半充填では特に
+\begin{equation}
+  D_{U=0}=\frac14,\qquad m_{\rm loc}^2 = 1-2D,\qquad \ev{(\Delta n_i)^2}=2D,
+\end{equation}
+強結合では
+\begin{equation}
+  D\sim\Bigl(\frac{t}{U}\Bigr)^2,\qquad J=\frac{4t^2}{U}.
+\end{equation}
+
+したがって二重占有率は、\emph{局所電荷揺らぎの大きさ}であり、\emph{オンサイト相互作用エネルギー}であり、\emph{局所モーメント形成の尺度}であり、強結合では\emph{短距離スピン相関を反映する量}である。ハバード模型の観点から最も重要なのは、単に「電子が同じサイトに 2 個いる確率」と見るだけでなく、
+\begin{equation}
+  \boxed{\ D\ \text{は運動エネルギー}\ t\ \text{と相互作用}\ U\ \text{の競合を局所的に可視化する物理量}\ }
+\end{equation}
+と理解することである。
+
+そして本研究の文脈では、この「主要な物理が平均場レベルで既に捉えられている」という事実こそが、\textbf{安価な平均場 prior が $D$ の測定コストを大きく削減できる}理由になっている(第\ref{sec:thiswork}節)。
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\\
+\footnotesize 関連文書:他の観測量 \texttt{crm\_observables.tex}、理論の導出 \texttt{crm\_tutorial.tex}、研究本体 \texttt{crm\_hubbard.tex}、実験の詳細 \texttt{../README.md}。
+数値はすべて本研究の DMRG 参照状態に対する実測値。
+
+\end{document}
