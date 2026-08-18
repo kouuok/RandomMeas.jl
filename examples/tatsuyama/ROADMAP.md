@@ -34,8 +34,7 @@ $$G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s},\qqu
 
 **式の読み方**: 分子の $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ は「ランダムに選んだ基底が当たるか外れるか」による**設定間の揺らぎ**で、CRMが打ち消す対象である。分母ではこれが $\Delta^2$ に置き換わる — priorが当たっていれば($\Delta\to0$)この揺らぎは消える。$v_s$ は分子・分母の**両方に同じ形で入る**ので決して打ち消せない床であり、$\Delta\to0$ でも $G$ は $1+(3^{\lvert A\rvert}-1)\langle P\rangle^2/v_s$ で頭打ちになる。
 
-
-で与えられ、$G\approx0.005$ から $\approx1000$ まで経験値と一致する。**priorのグローバル忠実度は式に現れない**。
+この法則は $G\approx0.005$ から $\approx1000$ まで経験値と一致する。**priorのグローバル忠実度は式に現れない**。
 
 **2つの律速レジーム**: $\varepsilon=\Delta/\langle P\rangle$、$g=(3^{|A|}-1)\langle P\rangle^2/v_s$ とすると $G=(g+1)/(\varepsilon^2 g+1)$。$G\approx G_{\max}=1+g$ ならショットノイズ律速($n_m$ を増やすべき)、$G\ll G_{\max}$ なら $\Delta$ 律速(prior改善の余地)。
 
