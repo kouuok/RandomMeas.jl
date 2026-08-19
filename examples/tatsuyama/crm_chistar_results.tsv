@@ -1,0 +1,361 @@
+U	doping	L	observable	target	chi_star
+1.0	0.0	16	DoubleOcc	0.1	4
+1.0	0.0	16	DoubleOcc	0.01	8
+1.0	0.0	16	DoubleOcc	0.001	24
+1.0	0.0	16	ZZ onsite	0.1	8
+1.0	0.0	16	ZZ onsite	0.01	24
+1.0	0.0	16	ZZ onsite	0.001	24
+1.0	0.0	16	SzSz r=1	0.1	6
+1.0	0.0	16	SzSz r=1	0.01	16
+1.0	0.0	16	SzSz r=1	0.001	48
+1.0	0.0	16	ZZ up-up r=1	0.1	6
+1.0	0.0	16	ZZ up-up r=1	0.01	24
+1.0	0.0	16	ZZ up-up r=1	0.001	48
+1.0	0.0	16	hop up r=1	0.1	6
+1.0	0.0	16	hop up r=1	0.01	16
+1.0	0.0	16	hop up r=1	0.001	24
+1.0	0.0	32	DoubleOcc	0.1	4
+1.0	0.0	32	DoubleOcc	0.01	16
+1.0	0.0	32	DoubleOcc	0.001	24
+1.0	0.0	32	ZZ onsite	0.1	8
+1.0	0.0	32	ZZ onsite	0.01	24
+1.0	0.0	32	ZZ onsite	0.001	48
+1.0	0.0	32	SzSz r=1	0.1	12
+1.0	0.0	32	SzSz r=1	0.01	32
+1.0	0.0	32	SzSz r=1	0.001	64
+1.0	0.0	32	ZZ up-up r=1	0.1	8
+1.0	0.0	32	ZZ up-up r=1	0.01	32
+1.0	0.0	32	ZZ up-up r=1	0.001	64
+1.0	0.0	32	hop up r=1	0.1	6
+1.0	0.0	32	hop up r=1	0.01	16
+1.0	0.0	32	hop up r=1	0.001	32
+1.0	0.0	64	DoubleOcc	0.1	4
+1.0	0.0	64	DoubleOcc	0.01	16
+1.0	0.0	64	DoubleOcc	0.001	24
+1.0	0.0	64	ZZ onsite	0.1	16
+1.0	0.0	64	ZZ onsite	0.01	24
+1.0	0.0	64	ZZ onsite	0.001	48
+1.0	0.0	64	SzSz r=1	0.1	12
+1.0	0.0	64	SzSz r=1	0.01	48
+1.0	0.0	64	SzSz r=1	0.001	96
+1.0	0.0	64	ZZ up-up r=1	0.1	12
+1.0	0.0	64	ZZ up-up r=1	0.01	32
+1.0	0.0	64	ZZ up-up r=1	0.001	96
+1.0	0.0	64	hop up r=1	0.1	6
+1.0	0.0	64	hop up r=1	0.01	24
+1.0	0.0	64	hop up r=1	0.001	64
+1.0	0.0	128	DoubleOcc	0.1	4
+1.0	0.0	128	DoubleOcc	0.01	16
+1.0	0.0	128	DoubleOcc	0.001	48
+1.0	0.0	128	ZZ onsite	0.1	16
+1.0	0.0	128	ZZ onsite	0.01	48
+1.0	0.0	128	ZZ onsite	0.001	64
+1.0	0.0	128	SzSz r=1	0.1	12
+1.0	0.0	128	SzSz r=1	0.01	48
+1.0	0.0	128	SzSz r=1	0.001	128
+1.0	0.0	128	ZZ up-up r=1	0.1	12
+1.0	0.0	128	ZZ up-up r=1	0.01	64
+1.0	0.0	128	ZZ up-up r=1	0.001	128
+1.0	0.0	128	hop up r=1	0.1	6
+1.0	0.0	128	hop up r=1	0.01	24
+1.0	0.0	128	hop up r=1	0.001	64
+2.0	0.0	16	DoubleOcc	0.1	4
+2.0	0.0	16	DoubleOcc	0.01	8
+2.0	0.0	16	DoubleOcc	0.001	24
+2.0	0.0	16	ZZ onsite	0.1	8
+2.0	0.0	16	ZZ onsite	0.01	16
+2.0	0.0	16	ZZ onsite	0.001	24
+2.0	0.0	16	SzSz r=1	0.1	8
+2.0	0.0	16	SzSz r=1	0.01	16
+2.0	0.0	16	SzSz r=1	0.001	32
+2.0	0.0	16	ZZ up-up r=1	0.1	8
+2.0	0.0	16	ZZ up-up r=1	0.01	16
+2.0	0.0	16	ZZ up-up r=1	0.001	32
+2.0	0.0	16	hop up r=1	0.1	8
+2.0	0.0	16	hop up r=1	0.01	16
+2.0	0.0	16	hop up r=1	0.001	32
+2.0	0.0	32	DoubleOcc	0.1	4
+2.0	0.0	32	DoubleOcc	0.01	16
+2.0	0.0	32	DoubleOcc	0.001	24
+2.0	0.0	32	ZZ onsite	0.1	8
+2.0	0.0	32	ZZ onsite	0.01	24
+2.0	0.0	32	ZZ onsite	0.001	32
+2.0	0.0	32	SzSz r=1	0.1	8
+2.0	0.0	32	SzSz r=1	0.01	16
+2.0	0.0	32	SzSz r=1	0.001	48
+2.0	0.0	32	ZZ up-up r=1	0.1	8
+2.0	0.0	32	ZZ up-up r=1	0.01	24
+2.0	0.0	32	ZZ up-up r=1	0.001	48
+2.0	0.0	32	hop up r=1	0.1	8
+2.0	0.0	32	hop up r=1	0.01	16
+2.0	0.0	32	hop up r=1	0.001	32
+2.0	0.0	64	DoubleOcc	0.1	4
+2.0	0.0	64	DoubleOcc	0.01	16
+2.0	0.0	64	DoubleOcc	0.001	32
+2.0	0.0	64	ZZ onsite	0.1	8
+2.0	0.0	64	ZZ onsite	0.01	16
+2.0	0.0	64	ZZ onsite	0.001	48
+2.0	0.0	64	SzSz r=1	0.1	8
+2.0	0.0	64	SzSz r=1	0.01	32
+2.0	0.0	64	SzSz r=1	0.001	64
+2.0	0.0	64	ZZ up-up r=1	0.1	8
+2.0	0.0	64	ZZ up-up r=1	0.01	32
+2.0	0.0	64	ZZ up-up r=1	0.001	64
+2.0	0.0	64	hop up r=1	0.1	8
+2.0	0.0	64	hop up r=1	0.01	24
+2.0	0.0	64	hop up r=1	0.001	48
+2.0	0.0	128	DoubleOcc	0.1	4
+2.0	0.0	128	DoubleOcc	0.01	16
+2.0	0.0	128	DoubleOcc	0.001	32
+2.0	0.0	128	ZZ onsite	0.1	8
+2.0	0.0	128	ZZ onsite	0.01	24
+2.0	0.0	128	ZZ onsite	0.001	48
+2.0	0.0	128	SzSz r=1	0.1	8
+2.0	0.0	128	SzSz r=1	0.01	32
+2.0	0.0	128	SzSz r=1	0.001	96
+2.0	0.0	128	ZZ up-up r=1	0.1	8
+2.0	0.0	128	ZZ up-up r=1	0.01	32
+2.0	0.0	128	ZZ up-up r=1	0.001	96
+2.0	0.0	128	hop up r=1	0.1	8
+2.0	0.0	128	hop up r=1	0.01	24
+2.0	0.0	128	hop up r=1	0.001	48
+4.0	0.0	16	DoubleOcc	0.1	8
+4.0	0.0	16	DoubleOcc	0.01	8
+4.0	0.0	16	DoubleOcc	0.001	24
+4.0	0.0	16	ZZ onsite	0.1	6
+4.0	0.0	16	ZZ onsite	0.01	8
+4.0	0.0	16	ZZ onsite	0.001	24
+4.0	0.0	16	SzSz r=1	0.1	8
+4.0	0.0	16	SzSz r=1	0.01	8
+4.0	0.0	16	SzSz r=1	0.001	16
+4.0	0.0	16	ZZ up-up r=1	0.1	8
+4.0	0.0	16	ZZ up-up r=1	0.01	12
+4.0	0.0	16	ZZ up-up r=1	0.001	24
+4.0	0.0	16	hop up r=1	0.1	8
+4.0	0.0	16	hop up r=1	0.01	16
+4.0	0.0	16	hop up r=1	0.001	24
+4.0	0.0	32	DoubleOcc	0.1	8
+4.0	0.0	32	DoubleOcc	0.01	16
+4.0	0.0	32	DoubleOcc	0.001	24
+4.0	0.0	32	ZZ onsite	0.1	8
+4.0	0.0	32	ZZ onsite	0.01	16
+4.0	0.0	32	ZZ onsite	0.001	24
+4.0	0.0	32	SzSz r=1	0.1	8
+4.0	0.0	32	SzSz r=1	0.01	16
+4.0	0.0	32	SzSz r=1	0.001	24
+4.0	0.0	32	ZZ up-up r=1	0.1	6
+4.0	0.0	32	ZZ up-up r=1	0.01	16
+4.0	0.0	32	ZZ up-up r=1	0.001	32
+4.0	0.0	32	hop up r=1	0.1	8
+4.0	0.0	32	hop up r=1	0.01	12
+4.0	0.0	32	hop up r=1	0.001	24
+4.0	0.0	64	DoubleOcc	0.1	8
+4.0	0.0	64	DoubleOcc	0.01	16
+4.0	0.0	64	DoubleOcc	0.001	32
+4.0	0.0	64	ZZ onsite	0.1	8
+4.0	0.0	64	ZZ onsite	0.01	16
+4.0	0.0	64	ZZ onsite	0.001	32
+4.0	0.0	64	SzSz r=1	0.1	8
+4.0	0.0	64	SzSz r=1	0.01	16
+4.0	0.0	64	SzSz r=1	0.001	32
+4.0	0.0	64	ZZ up-up r=1	0.1	6
+4.0	0.0	64	ZZ up-up r=1	0.01	16
+4.0	0.0	64	ZZ up-up r=1	0.001	32
+4.0	0.0	64	hop up r=1	0.1	8
+4.0	0.0	64	hop up r=1	0.01	12
+4.0	0.0	64	hop up r=1	0.001	32
+4.0	0.0	128	DoubleOcc	0.1	8
+4.0	0.0	128	DoubleOcc	0.01	16
+4.0	0.0	128	DoubleOcc	0.001	32
+4.0	0.0	128	ZZ onsite	0.1	8
+4.0	0.0	128	ZZ onsite	0.01	16
+4.0	0.0	128	ZZ onsite	0.001	32
+4.0	0.0	128	SzSz r=1	0.1	6
+4.0	0.0	128	SzSz r=1	0.01	16
+4.0	0.0	128	SzSz r=1	0.001	48
+4.0	0.0	128	ZZ up-up r=1	0.1	6
+4.0	0.0	128	ZZ up-up r=1	0.01	16
+4.0	0.0	128	ZZ up-up r=1	0.001	32
+4.0	0.0	128	hop up r=1	0.1	8
+4.0	0.0	128	hop up r=1	0.01	12
+4.0	0.0	128	hop up r=1	0.001	48
+8.0	0.0	16	DoubleOcc	0.1	NaN
+8.0	0.0	16	DoubleOcc	0.01	NaN
+8.0	0.0	16	DoubleOcc	0.001	NaN
+8.0	0.0	16	ZZ onsite	0.1	NaN
+8.0	0.0	16	ZZ onsite	0.01	NaN
+8.0	0.0	16	ZZ onsite	0.001	NaN
+8.0	0.0	16	SzSz r=1	0.1	NaN
+8.0	0.0	16	SzSz r=1	0.01	NaN
+8.0	0.0	16	SzSz r=1	0.001	NaN
+8.0	0.0	16	ZZ up-up r=1	0.1	NaN
+8.0	0.0	16	ZZ up-up r=1	0.01	NaN
+8.0	0.0	16	ZZ up-up r=1	0.001	NaN
+8.0	0.0	16	hop up r=1	0.1	NaN
+8.0	0.0	16	hop up r=1	0.01	NaN
+8.0	0.0	16	hop up r=1	0.001	NaN
+8.0	0.0	32	DoubleOcc	0.1	NaN
+8.0	0.0	32	DoubleOcc	0.01	NaN
+8.0	0.0	32	DoubleOcc	0.001	NaN
+8.0	0.0	32	ZZ onsite	0.1	NaN
+8.0	0.0	32	ZZ onsite	0.01	NaN
+8.0	0.0	32	ZZ onsite	0.001	NaN
+8.0	0.0	32	SzSz r=1	0.1	NaN
+8.0	0.0	32	SzSz r=1	0.01	NaN
+8.0	0.0	32	SzSz r=1	0.001	NaN
+8.0	0.0	32	ZZ up-up r=1	0.1	NaN
+8.0	0.0	32	ZZ up-up r=1	0.01	NaN
+8.0	0.0	32	ZZ up-up r=1	0.001	NaN
+8.0	0.0	32	hop up r=1	0.1	NaN
+8.0	0.0	32	hop up r=1	0.01	NaN
+8.0	0.0	32	hop up r=1	0.001	NaN
+8.0	0.0	64	DoubleOcc	0.1	8
+8.0	0.0	64	DoubleOcc	0.01	16
+8.0	0.0	64	DoubleOcc	0.001	32
+8.0	0.0	64	ZZ onsite	0.1	4
+8.0	0.0	64	ZZ onsite	0.01	12
+8.0	0.0	64	ZZ onsite	0.001	16
+8.0	0.0	64	SzSz r=1	0.1	4
+8.0	0.0	64	SzSz r=1	0.01	12
+8.0	0.0	64	SzSz r=1	0.001	16
+8.0	0.0	64	ZZ up-up r=1	0.1	4
+8.0	0.0	64	ZZ up-up r=1	0.01	12
+8.0	0.0	64	ZZ up-up r=1	0.001	24
+8.0	0.0	64	hop up r=1	0.1	4
+8.0	0.0	64	hop up r=1	0.01	16
+8.0	0.0	64	hop up r=1	0.001	24
+8.0	0.0	128	DoubleOcc	0.1	8
+8.0	0.0	128	DoubleOcc	0.01	16
+8.0	0.0	128	DoubleOcc	0.001	48
+8.0	0.0	128	ZZ onsite	0.1	4
+8.0	0.0	128	ZZ onsite	0.01	12
+8.0	0.0	128	ZZ onsite	0.001	16
+8.0	0.0	128	SzSz r=1	0.1	4
+8.0	0.0	128	SzSz r=1	0.01	16
+8.0	0.0	128	SzSz r=1	0.001	24
+8.0	0.0	128	ZZ up-up r=1	0.1	4
+8.0	0.0	128	ZZ up-up r=1	0.01	16
+8.0	0.0	128	ZZ up-up r=1	0.001	24
+8.0	0.0	128	hop up r=1	0.1	4
+8.0	0.0	128	hop up r=1	0.01	16
+8.0	0.0	128	hop up r=1	0.001	32
+4.0	0.125	16	DoubleOcc	0.1	8
+4.0	0.125	16	DoubleOcc	0.01	12
+4.0	0.125	16	DoubleOcc	0.001	24
+4.0	0.125	16	ZZ onsite	0.1	6
+4.0	0.125	16	ZZ onsite	0.01	12
+4.0	0.125	16	ZZ onsite	0.001	16
+4.0	0.125	16	SzSz r=1	0.1	6
+4.0	0.125	16	SzSz r=1	0.01	12
+4.0	0.125	16	SzSz r=1	0.001	32
+4.0	0.125	16	ZZ up-up r=1	0.1	8
+4.0	0.125	16	ZZ up-up r=1	0.01	16
+4.0	0.125	16	ZZ up-up r=1	0.001	48
+4.0	0.125	16	hop up r=1	0.1	8
+4.0	0.125	16	hop up r=1	0.01	16
+4.0	0.125	16	hop up r=1	0.001	32
+4.0	0.125	32	DoubleOcc	0.1	8
+4.0	0.125	32	DoubleOcc	0.01	16
+4.0	0.125	32	DoubleOcc	0.001	32
+4.0	0.125	32	ZZ onsite	0.1	6
+4.0	0.125	32	ZZ onsite	0.01	12
+4.0	0.125	32	ZZ onsite	0.001	32
+4.0	0.125	32	SzSz r=1	0.1	6
+4.0	0.125	32	SzSz r=1	0.01	24
+4.0	0.125	32	SzSz r=1	0.001	48
+4.0	0.125	32	ZZ up-up r=1	0.1	8
+4.0	0.125	32	ZZ up-up r=1	0.01	32
+4.0	0.125	32	ZZ up-up r=1	0.001	64
+4.0	0.125	32	hop up r=1	0.1	8
+4.0	0.125	32	hop up r=1	0.01	24
+4.0	0.125	32	hop up r=1	0.001	48
+4.0	0.125	64	DoubleOcc	0.1	8
+4.0	0.125	64	DoubleOcc	0.01	16
+4.0	0.125	64	DoubleOcc	0.001	48
+4.0	0.125	64	ZZ onsite	0.1	8
+4.0	0.125	64	ZZ onsite	0.01	16
+4.0	0.125	64	ZZ onsite	0.001	48
+4.0	0.125	64	SzSz r=1	0.1	8
+4.0	0.125	64	SzSz r=1	0.01	32
+4.0	0.125	64	SzSz r=1	0.001	96
+4.0	0.125	64	ZZ up-up r=1	0.1	12
+4.0	0.125	64	ZZ up-up r=1	0.01	48
+4.0	0.125	64	ZZ up-up r=1	0.001	96
+4.0	0.125	64	hop up r=1	0.1	8
+4.0	0.125	64	hop up r=1	0.01	32
+4.0	0.125	64	hop up r=1	0.001	64
+4.0	0.125	128	DoubleOcc	0.1	12
+4.0	0.125	128	DoubleOcc	0.01	24
+4.0	0.125	128	DoubleOcc	0.001	64
+4.0	0.125	128	ZZ onsite	0.1	8
+4.0	0.125	128	ZZ onsite	0.01	24
+4.0	0.125	128	ZZ onsite	0.001	64
+4.0	0.125	128	SzSz r=1	0.1	8
+4.0	0.125	128	SzSz r=1	0.01	32
+4.0	0.125	128	SzSz r=1	0.001	128
+4.0	0.125	128	ZZ up-up r=1	0.1	12
+4.0	0.125	128	ZZ up-up r=1	0.01	48
+4.0	0.125	128	ZZ up-up r=1	0.001	128
+4.0	0.125	128	hop up r=1	0.1	12
+4.0	0.125	128	hop up r=1	0.01	32
+4.0	0.125	128	hop up r=1	0.001	96
+8.0	0.125	16	DoubleOcc	0.1	8
+8.0	0.125	16	DoubleOcc	0.01	16
+8.0	0.125	16	DoubleOcc	0.001	32
+8.0	0.125	16	ZZ onsite	0.1	4
+8.0	0.125	16	ZZ onsite	0.01	8
+8.0	0.125	16	ZZ onsite	0.001	16
+8.0	0.125	16	SzSz r=1	0.1	6
+8.0	0.125	16	SzSz r=1	0.01	12
+8.0	0.125	16	SzSz r=1	0.001	32
+8.0	0.125	16	ZZ up-up r=1	0.1	6
+8.0	0.125	16	ZZ up-up r=1	0.01	12
+8.0	0.125	16	ZZ up-up r=1	0.001	32
+8.0	0.125	16	hop up r=1	0.1	8
+8.0	0.125	16	hop up r=1	0.01	16
+8.0	0.125	16	hop up r=1	0.001	32
+8.0	0.125	32	DoubleOcc	0.1	12
+8.0	0.125	32	DoubleOcc	0.01	24
+8.0	0.125	32	DoubleOcc	0.001	48
+8.0	0.125	32	ZZ onsite	0.1	4
+8.0	0.125	32	ZZ onsite	0.01	12
+8.0	0.125	32	ZZ onsite	0.001	32
+8.0	0.125	32	SzSz r=1	0.1	6
+8.0	0.125	32	SzSz r=1	0.01	12
+8.0	0.125	32	SzSz r=1	0.001	48
+8.0	0.125	32	ZZ up-up r=1	0.1	6
+8.0	0.125	32	ZZ up-up r=1	0.01	16
+8.0	0.125	32	ZZ up-up r=1	0.001	48
+8.0	0.125	32	hop up r=1	0.1	12
+8.0	0.125	32	hop up r=1	0.01	32
+8.0	0.125	32	hop up r=1	0.001	48
+8.0	0.125	64	DoubleOcc	0.1	12
+8.0	0.125	64	DoubleOcc	0.01	48
+8.0	0.125	64	DoubleOcc	0.001	64
+8.0	0.125	64	ZZ onsite	0.1	4
+8.0	0.125	64	ZZ onsite	0.01	16
+8.0	0.125	64	ZZ onsite	0.001	48
+8.0	0.125	64	SzSz r=1	0.1	6
+8.0	0.125	64	SzSz r=1	0.01	24
+8.0	0.125	64	SzSz r=1	0.001	64
+8.0	0.125	64	ZZ up-up r=1	0.1	6
+8.0	0.125	64	ZZ up-up r=1	0.01	24
+8.0	0.125	64	ZZ up-up r=1	0.001	64
+8.0	0.125	64	hop up r=1	0.1	12
+8.0	0.125	64	hop up r=1	0.01	48
+8.0	0.125	64	hop up r=1	0.001	96
+8.0	0.125	128	DoubleOcc	0.1	12
+8.0	0.125	128	DoubleOcc	0.01	48
+8.0	0.125	128	DoubleOcc	0.001	128
+8.0	0.125	128	ZZ onsite	0.1	4
+8.0	0.125	128	ZZ onsite	0.01	16
+8.0	0.125	128	ZZ onsite	0.001	64
+8.0	0.125	128	SzSz r=1	0.1	6
+8.0	0.125	128	SzSz r=1	0.01	32
+8.0	0.125	128	SzSz r=1	0.001	96
+8.0	0.125	128	ZZ up-up r=1	0.1	6
+8.0	0.125	128	ZZ up-up r=1	0.01	32
+8.0	0.125	128	ZZ up-up r=1	0.001	96
+8.0	0.125	128	hop up r=1	0.1	12
+8.0	0.125	128	hop up r=1	0.01	48
+8.0	0.125	128	hop up r=1	0.001	128

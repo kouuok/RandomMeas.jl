@@ -26,13 +26,17 @@ const CHIS = [2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256]
 const TARGETS = [1e-1, 1e-2, 1e-3]
 
 """ε(χ) の列から χ*(target) を求める。非単調性に強い「最後の上向き交差」定義:
-   χ' ≥ χ の全てで ε(χ') < target となる最小の χ。存在しなければ NaN。"""
+   χ' ≥ χ の全てで ε(χ') < target となる最小の χ。存在しなければ NaN。
+
+   NaN(χ が maxlinkdim を超えて測っていない点)は「切断が厳密＝ε=0」なので
+   目標を満たすものとして扱う。ここを「失敗」と扱うと、ボンド次元が小さくて
+   済む強結合の系ほど χ* が >χ_max と誤って出る。"""
 function chi_star(chis, eps, target)
     n = length(chis)
     ok = true
     best = NaN
     for k in n:-1:1
-        if isnan(eps[k]) || eps[k] >= target
+        if !isnan(eps[k]) && eps[k] >= target
             ok = false
         end
         ok && (best = chis[k])
