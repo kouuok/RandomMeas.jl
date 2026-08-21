@@ -5,6 +5,11 @@
 #PBS -j oe
 #PBS -o crm_1dhf.log
 cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export L_LIST="8,16,32"
+export DOPE_LIST="0.0,0.125"
+export N_REPEAT="500"
+export ALLSITES="1"
+export CHI_EXP="256"
 export DMRG_BLAS=8
 export JULIA_NUM_THREADS=1
 export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
