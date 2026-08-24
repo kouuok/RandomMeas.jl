@@ -4,6 +4,8 @@
 
 ---
 
+> 1ページの要約は [SUMMARY.md](SUMMARY.md)。この文書は論文化のための詳細ノートである。
+
 ## 0. 要旨 — 論文の主張の骨子 (main claims)
 
 1. **利得法則**: 局所Pauli観測量 $P$($|A|$量子ビットに台を持つ)に対する CRM (common randomized measurements) の分散削減率は閉形式
