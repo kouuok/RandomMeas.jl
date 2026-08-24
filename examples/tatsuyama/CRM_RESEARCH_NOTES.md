@@ -67,6 +67,23 @@ $$\hat o_{\rm CRM} = \overline{X_\rho(u) - X_\sigma(u)} + \mathrm{Tr}[O\sigma]$$
 
 ## 2. 手法
 
+### 2.0 模型パラメータ(ホッピング $t$ の確認)
+
+全実験でハバード模型
+
+$$H = -t\sum_{\langle ij\rangle\sigma}(c^\dagger_{i\sigma}c_{j\sigma}+\mathrm{h.c.}) + U\sum_i n_{i\uparrow}n_{i\downarrow} - \mu\sum_{i\sigma}n_{i\sigma}$$
+
+を用いる。**ホッピングは §3.1 の8量子ビットED系を除きすべての計算で $t=1$**(エネルギーの単位)である。全スクリプトを走査して確認した結果:
+
+| $t$ | 該当スクリプト |
+|---|---|
+| **$t_L=1$(結合3本)/ $t_S=0.5$(結合1本)** | `crm_gain_verification.jl` のみ |
+| $t=1$ | 上記以外のすべて(`crm_mps_scaling`, `crm_site_resolved`, `crm_site_beta`, `crm_site_median`, `crm_1d_hf`, `crm_ed_reference`, `crm_ed_pbc`, `crm_pbc_check`, `crm_pbc_gain`, `crm_gap_scaling`, `crm_gap_conv`, `crm_gap_conv2`, `crm_chistar`, `crm_sensitivity`, `crm_sensitivity2`, `crm_param_sweep`, `crm_optimal_beta`, `crm_derand_benchmark`, `crm_matchgate`, `crm_matchgate_nm`, `crm_2d_cylinder`, `crm_2d_symuhf`, `crm_2d_site`, `crm_2d_w6`, `crm_2d_doped`, `crm_2d_w6_doped`, `crm_chain_common` の検証系) |
+
+**唯一の例外の中身**: `crm_gain_verification.jl` は4サイトリングで、結合 $1\text{--}2,\ 3\text{--}4,\ 4\text{--}1$ が $t_L=1$、$2\text{--}3$ の1本だけが $t_S=0.5$ である(コードの `edges_L`/`edges_S`)。**1本だけを弱めた形であって、強弱を交互に並べる本来の二量体化ではない**(README でこの点の記述を修正済み)。目的は並進対称性を壊して ED 基底状態の縮退を避けること — 縮退があると基底状態が一意に定まらず、「すべてを厳密に検算する」という本節の役割が成立しない。
+
+**2次元シリンダーは等方的**: 軸($x$)方向と円周($y$)方向のホッピングを区別していない(`hubbard_cyl_mpo` が `cyl_edges` の全辺に同じ $t$ を使う)。次近接ホッピング $t'$ は全実験で導入していない。
+
 ### 2.1 CRM推定器と prior 側の厳密化
 
 各ランダム設定 u (ランダムPauli基底、X/Y/Z を各量子ビット独立に選択) で実験状態から $n_m$ ショットを取得し、観測量ごとにスナップショット推定値 $X(b,u)$ を平均する。CRMではさらに prior 側の条件付き期待値 $E[X_\sigma|u]$ を引く。
