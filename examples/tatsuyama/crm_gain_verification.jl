@@ -257,23 +257,104 @@ end
 # ------------------------------------------------------------
 # 6. 実行
 # ------------------------------------------------------------
+"""1つのホッピング配置について全 (U, 設定) を回す。
+
+t_L=t_S=1 が本編(一様鎖)。t_S=0.5 は「結合を1本弱めた場合でも同じ結論か」を
+確かめるための補足で、以前はこちらが本編だった(弱化の理由づけが誤っていた
+経緯は README §1 を参照)。乱数種は配置に依存させないので、両者の違いは
+ハミルトニアンの違いだけから来る。"""
+function run_config(t_L, t_S, tag, obs_list, W, fid_idx, names, U_list, settings, n_repeat)
+    results = Dict()
+    for U in U_list
+        mu = U / 2               # half-filling
+        println("="^70)
+        @printf("[%s] U = %.1f  (t_L=%.1f, t_S=%.1f, mu=U/2)\n", tag, U, t_L, t_S)
+
+        H = build_hamiltonian(t_L, t_S, U, mu)
+        F = eigen(Symmetric(H))
+        ψρ = F.vectors[:, 1]
+        gap = F.values[2]-F.values[1]
+        @printf("  ED: E0=%.6f, gap=%.4f\n", F.values[1], gap)
+        @assert gap > 1e-6 "基底状態が縮退している (tag=$tag, U=$U)"
+
+        Cdag = get_creation_ops()
+        Nup_op = sum(Cdag["$(i)u"]*Cdag["$(i)u"]' for i in 1:4)
+        Ndn_op = sum(Cdag["$(i)d"]*Cdag["$(i)d"]' for i in 1:4)
+        Nup = round(Int, dot(ψρ, Nup_op*ψρ)); Ndn = round(Int, dot(ψρ, Ndn_op*ψρ))
+        @printf("  particle sector: (N_up, N_dn) = (%d, %d)\n", Nup, Ndn)
+
+        ev_up, ev_dn = solve_hf_orbitals(t_L, t_S, U, mu, Nup, Ndn)
+        ψσ = build_hf_state(ev_up, ev_dn, Nup, Ndn)
+        F_true = abs(dot(ψσ, ψρ))^2
+        @printf("  HF prior fidelity: %.4f\n", F_true)
+
+        Oρ = Float64[]; Oσ = Float64[]
+        for obs in obs_list
+            M = dense_matrix(obs)
+            push!(Oρ, real(dot(ψρ, M*ψρ))); push!(Oσ, real(dot(ψσ, M*ψσ)))
+        end
+        push!(Oρ, F_true); push!(Oσ, 1.0)
+
+        # 検証: 高速Pauli推定器 vs 密行列スナップショット
+        Random.seed!(1)
+        basis_t = rand(1:3, NQ); s_t = rand(0:DIM-1)
+        ρ̂ = ones(ComplexF64,1,1)
+        for pos in 1:NQ
+            b = (s_t >> (NQ-pos)) & 1
+            u = UBASIS[basis_t[pos]]
+            sb = b == 0 ? ComplexF64[1,0] : ComplexF64[0,1]
+            ρ̂ = kron(ρ̂, 3 .* (u'*(sb*sb')*u) .- ComplexF64[1 0; 0 1])
+        end
+        for (k, obs) in enumerate(obs_list)
+            @assert isapprox(pauli_estimate(obs, basis_t, s_t),
+                             real(tr(dense_matrix(obs)*ρ̂)); atol=1e-9) "fast-path mismatch"
+        end
+
+        for (si, st) in enumerate(settings)
+            est = run_experiment(ψρ, ψσ, obs_list, W, Oσ, fid_idx;
+                                 nu=st.nu, nm=st.nm, n_repeat=n_repeat,
+                                 rng_seed=1000*si + round(Int, 10U))
+            results[(U, st.nu, st.nm)] = (est=est, Oρ=Oρ, Oσ=Oσ, F_true=F_true, gap=gap)
+
+            @printf("\n  --- nu=%d, nm=%d (total shots %d), n_repeat=%d ---\n",
+                    st.nu, st.nm, st.nu*st.nm, n_repeat)
+            @printf("  %-18s %9s | %-19s %-19s %-19s | %7s %7s %8s\n",
+                    "observable", "true", "std shadow", "CRM old(sampled)", "CRM new(exact)",
+                    "G_emp", "G_theo", "Delta")
+            for k in 1:fid_idx
+                m = [mean(est[:,k,e]) for e in 1:3]
+                sd = [std(est[:,k,e])  for e in 1:3]
+                G_emp = (sd[3] > 0) ? (sd[1]/sd[3])^2 : NaN
+                G_theo = NaN; Δ = Oρ[k] - Oσ[k]
+                if k <= length(obs_list) && length(obs_list[k].terms) == 1
+                    absA = length(obs_list[k].terms[1][2])
+                    vs, vc = theory_var(absA, Oρ[k], Δ, st.nu, st.nm)
+                    G_theo = vs / vc
+                end
+                @printf("  %-18s %9.4f | %8.4f ± %-8.4f %8.4f ± %-8.4f %8.4f ± %-8.4f | %7.2f %7.2f %8.4f\n",
+                        names[k], Oρ[k], m[1], sd[1], m[2], sd[2], m[3], sd[3],
+                        G_emp, G_theo, Δ)
+            end
+        end
+    end
+    return results
+end
+
 function main()
-    # リング4本の結合のうち 2--3 の1本だけを弱める。
-    # 注: 当初コメントは「縮退回避のため」としていたが、これは誤りだった。
-    # 半充填・U>0 の4サイトリングは二部格子(|A|=|B|=2)なので Lieb の定理から
-    # 基底状態は一意な singlet で、一様(t_S=1)でも縮退しない。数値でも
-    # E1-E0 = 4.8e-2 (U=1), 3.3e-1 (U=8) と有限。縮退するのは U=0 の開殻だけで、
-    # ここでは使わない。実際の効果は U=1 でギャップを約8倍に広げること
-    # (4.8e-2 -> 3.7e-1)のみ。U=8 では一様の方がむしろ広い(0.33 対 0.29)。
-    t_L, t_S = 1.0, 0.5
+    # ホッピング配置。**本編は一様 (t_L=t_S=1)**。
+    # t_S=0.5(結合 2--3 を1本だけ弱める)は補足で、以前はこちらを本編にしていた。
+    # 当初のコメントは「二量体化で縮退を回避」としていたが誤りで、4サイトリングは
+    # 二部格子(|A|=|B|=2)なので Lieb の定理から半充填・U>0 の基底状態は一意な
+    # singlet であり、一様でも縮退しない(E1-E0 = 4.8e-2 @U=1, 3.3e-1 @U=8)。
+    # 縮退するのは U=0 の開殻だけで、ここでは使わない。詳細は
+    # crm_plaquette_degeneracy.jl と README §1。
+    configs  = [("uniform", 1.0, 1.0), ("weak", 1.0, 0.5)]
     U_list   = [1.0, 8.0]        # 弱相関 / 強相関 (HF priorの質が変わる)
     settings = [(nu=50, nm=10), (nu=50, nm=100), (nu=50, nm=1000)]
     n_repeat = 200
 
     W = build_W()
 
-    # ---- 観測量 (Pauli表現) ----
-    # n_q = (I - Z_q)/2,  S^z_i = (Z_{i,dn} - Z_{i,up})/4  ※qpos("1u")=8 など
     p1u, p1d = qpos("1u"), qpos("1d")
     p3u, p3d = qpos("3u"), qpos("3d")
     obs_list = PauliObs[
@@ -288,136 +369,108 @@ function main()
     fid_idx = length(obs_list) + 1
     names = vcat([o.name for o in obs_list], "Fidelity")
 
-    results = Dict()
-
-    for U in U_list
-        mu = U / 2               # half-filling
-        println("="^70)
-        @printf("U = %.1f  (t_L=%.1f, t_S=%.1f, mu=U/2)\n", U, t_L, t_S)
-
-        H = build_hamiltonian(t_L, t_S, U, mu)
-        F = eigen(Symmetric(H))
-        ψρ = F.vectors[:, 1]
-        @printf("  ED: E0=%.6f, gap=%.4f\n", F.values[1], F.values[2]-F.values[1])
-
-        # 粒子数セクター
-        Cdag = get_creation_ops()
-        Nup_op = sum(Cdag["$(i)u"]*Cdag["$(i)u"]' for i in 1:4)
-        Ndn_op = sum(Cdag["$(i)d"]*Cdag["$(i)d"]' for i in 1:4)
-        Nup = round(Int, dot(ψρ, Nup_op*ψρ)); Ndn = round(Int, dot(ψρ, Ndn_op*ψρ))
-        @printf("  particle sector: (N_up, N_dn) = (%d, %d)\n", Nup, Ndn)
-
-        ev_up, ev_dn = solve_hf_orbitals(t_L, t_S, U, mu, Nup, Ndn)
-        ψσ = build_hf_state(ev_up, ev_dn, Nup, Ndn)
-        F_true = abs(dot(ψσ, ψρ))^2
-        @printf("  HF prior fidelity: %.4f\n", F_true)
-
-        # 厳密期待値と Tr[Oσ]
-        Oρ = Float64[]; Oσ = Float64[]
-        for obs in obs_list
-            M = dense_matrix(obs)
-            push!(Oρ, real(dot(ψρ, M*ψρ))); push!(Oσ, real(dot(ψσ, M*ψσ)))
-        end
-        push!(Oρ, F_true); push!(Oσ, 1.0)   # 忠実度: Tr[|ψσ><ψσ| σ] = 1
-
-        # --- 検証: 高速Pauli推定器 vs 密行列スナップショット ---
-        Random.seed!(1)
-        basis_t = rand(1:3, NQ); s_t = rand(0:DIM-1)
-        ρ̂ = ones(ComplexF64,1,1)
-        for pos in 1:NQ
-            b = (s_t >> (NQ-pos)) & 1
-            u = UBASIS[basis_t[pos]]
-            sb = b == 0 ? ComplexF64[1,0] : ComplexF64[0,1]
-            ρ̂ = kron(ρ̂, 3 .* (u'*(sb*sb')*u) .- ComplexF64[1 0; 0 1])
-        end
-        for (k, obs) in enumerate(obs_list)
-            x_fast = pauli_estimate(obs, basis_t, s_t)
-            x_ref  = real(tr(dense_matrix(obs)*ρ̂))
-            @assert isapprox(x_fast, x_ref; atol=1e-9) "fast-path mismatch: $(obs.name)"
-        end
-
-        for (si, st) in enumerate(settings)
-            est = run_experiment(ψρ, ψσ, obs_list, W, Oσ, fid_idx;
-                                 nu=st.nu, nm=st.nm, n_repeat=n_repeat,
-                                 rng_seed=1000*si + round(Int, 10U))
-            results[(U, st.nu, st.nm)] = (est=est, Oρ=Oρ, Oσ=Oσ, F_true=F_true)
-
-            @printf("\n  --- nu=%d, nm=%d (total shots %d), n_repeat=%d ---\n",
-                    st.nu, st.nm, st.nu*st.nm, n_repeat)
-            @printf("  %-18s %9s | %-19s %-19s %-19s | %7s %7s %8s\n",
-                    "observable", "true", "std shadow", "CRM old(sampled)", "CRM new(exact)",
-                    "G_emp", "G_theo", "Delta")
-            for k in 1:fid_idx
-                m = [mean(est[:,k,e]) for e in 1:3]
-                s = [std(est[:,k,e])  for e in 1:3]
-                G_emp = (s[3] > 0) ? (s[1]/s[3])^2 : NaN
-                # 理論値は単一Pauli列のみ
-                G_theo = NaN; Δ = Oρ[k] - Oσ[k]
-                if k <= length(obs_list) && length(obs_list[k].terms) == 1
-                    absA = length(obs_list[k].terms[1][2])
-                    vs, vc = theory_var(absA, Oρ[k], Δ, st.nu, st.nm)
-                    G_theo = vs / vc
-                end
-                @printf("  %-18s %9.4f | %8.4f ± %-8.4f %8.4f ± %-8.4f %8.4f ± %-8.4f | %7.2f %7.2f %8.4f\n",
-                        names[k], Oρ[k], m[1], s[1], m[2], s[2], m[3], s[3],
-                        G_emp, G_theo, Δ)
-            end
-        end
+    all_results = Dict{String,Any}()
+    for (tag, tL, tS) in configs
+        all_results[tag] = run_config(tL, tS, tag, obs_list, W, fid_idx, names,
+                                      U_list, settings, n_repeat)
     end
-    return results, names, obs_list, settings, n_repeat
+    return all_results, names, obs_list, settings, n_repeat, configs
 end
 
-results, names, obs_list, settings, n_repeat = main()
+all_results, names, obs_list, settings, n_repeat, configs = main()
 
 # ------------------------------------------------------------
-# 7. プロット
+# 7. 結果の書き出し (README/論文の表はここから作る)
+# ------------------------------------------------------------
+open(joinpath(@__DIR__, "crm_gain_verification_results.tsv"), "w") do io
+    println(io, "config\tt_L\tt_S\tU\tnu\tnm\tobservable\ttrue\tprior\tDelta\t" *
+                "sd_std\tsd_crm_old\tsd_crm_new\tG_emp\tG_theo\tHF_fid\tgap")
+    for (tag, tL, tS) in configs, U in [1.0, 8.0], st in settings
+        r = all_results[tag][(U, st.nu, st.nm)]
+        for k in 1:length(names)
+            sd = [std(r.est[:,k,e]) for e in 1:3]
+            G_emp = sd[3] > 0 ? (sd[1]/sd[3])^2 : NaN
+            G_theo = NaN
+            if k <= length(obs_list) && length(obs_list[k].terms) == 1
+                absA = length(obs_list[k].terms[1][2])
+                vs, vc = theory_var(absA, r.Oρ[k], r.Oρ[k]-r.Oσ[k], st.nu, st.nm)
+                G_theo = vs/vc
+            end
+            println(io, join((tag, tL, tS, U, st.nu, st.nm, names[k],
+                              r.Oρ[k], r.Oσ[k], r.Oρ[k]-r.Oσ[k],
+                              sd[1], sd[2], sd[3], G_emp, G_theo, r.F_true, r.gap), "\t"))
+        end
+    end
+end
+println("\nresults saved: crm_gain_verification_results.tsv")
+
+# 一様 vs 弱化 の比較サマリ
+println("\n" * "="^70)
+println("一様 (t=1) と 1本弱化 (t_S=0.5) の比較")
+@printf("%-6s %-5s %10s %10s | %-18s %10s %10s\n",
+        "config","U","ED gap","HF忠実度","observable","G_emp","G_theo")
+for (tag, _, _) in configs, U in [1.0, 8.0]
+    r = all_results[tag][(U, 50, 100)]
+    for (k, o) in enumerate(obs_list)
+        length(o.terms) == 1 || continue
+        sd = [std(r.est[:,k,e]) for e in 1:3]
+        absA = length(o.terms[1][2])
+        vs, vc = theory_var(absA, r.Oρ[k], r.Oρ[k]-r.Oσ[k], 50, 100)
+        @printf("%-6s %-5.0f %10.4f %10.4f | %-18s %10.2f %10.2f\n",
+                tag, U, r.gap, r.F_true, o.name, (sd[1]/sd[3])^2, vs/vc)
+    end
+end
+
+# ------------------------------------------------------------
+# 8. プロット (配置ごとに1枚)
 # ------------------------------------------------------------
 using Plots
 
-U_list = [1.0, 8.0]
-plots_fid = []
-for U in U_list
-    nms  = [st.nm for st in settings]
-    shots = [st.nu*st.nm for st in settings]
-    s_std = Float64[]; s_old = Float64[]; s_new = Float64[]
-    local F_true = 0.0
-    for st in settings
+for (tag, tL, tS) in configs
+    results = all_results[tag]
+    plots_fid = []
+    for U in [1.0, 8.0]
+        shots = [st.nu*st.nm for st in settings]
+        s_std = Float64[]; s_old = Float64[]; s_new = Float64[]
+        local F_true = 0.0
+        for st in settings
+            r = results[(U, st.nu, st.nm)]
+            k = length(names)
+            push!(s_std, std(r.est[:,k,1])); push!(s_old, std(r.est[:,k,2]))
+            push!(s_new, std(r.est[:,k,3])); F_true = r.F_true
+        end
+        p = plot(shots, s_std, marker=:circle, label="Standard shadow",
+                 xscale=:log10, yscale=:log10, lw=2, color=:steelblue)
+        plot!(p, shots, s_old, marker=:utriangle, label="CRM old (sampled prior)", lw=2, color=:gray)
+        plot!(p, shots, s_new, marker=:square, label="CRM new (exact prior)", lw=2, color=:firebrick)
+        title!(p, @sprintf("Fidelity est.  U=%.0f  (HF fid=%.3f)", U, F_true))
+        xlabel!(p, "total shots (nu*nm, nu=50)"); ylabel!(p, "std error")
+        push!(plots_fid, p)
+    end
+
+    gx = Float64[]; gy = Float64[]
+    for U in [1.0, 8.0], st in settings
         r = results[(U, st.nu, st.nm)]
-        k = length(names)   # fidelity index
-        push!(s_std, std(r.est[:,k,1])); push!(s_old, std(r.est[:,k,2])); push!(s_new, std(r.est[:,k,3]))
-        F_true = r.F_true
+        for (k, obs) in enumerate(obs_list)
+            length(obs.terms) == 1 || continue
+            absA = length(obs.terms[1][2])
+            vs, vc = theory_var(absA, r.Oρ[k], r.Oρ[k]-r.Oσ[k], st.nu, st.nm)
+            push!(gx, vs/vc); push!(gy, var(r.est[:,k,1]) / var(r.est[:,k,3]))
+        end
     end
-    p = plot(shots, s_std, marker=:circle, label="Standard shadow",
-             xscale=:log10, yscale=:log10, lw=2, color=:steelblue)
-    plot!(p, shots, s_old, marker=:utriangle, label="CRM old (sampled prior)", lw=2, color=:gray)
-    plot!(p, shots, s_new, marker=:square, label="CRM new (exact prior)", lw=2, color=:firebrick)
-    title!(p, @sprintf("Fidelity est.  U=%.0f  (HF fid=%.3f)", U, F_true))
-    xlabel!(p, "total shots (nu*nm, nu=50)"); ylabel!(p, "std error")
-    push!(plots_fid, p)
-end
+    lims = (0.5*min(minimum(gx), minimum(gy)), 2*max(maximum(gx), maximum(gy)))
+    p3 = scatter(gx, gy, xscale=:log10, yscale=:log10, xlims=lims, ylims=lims,
+                 label="single Pauli strings", color=:firebrick, ms=6, alpha=0.8)
+    plot!(p3, [lims...], [lims...], label="y = x", color=:black, ls=:dash)
+    ttl = tag == "uniform" ? "CRM gain: empirical vs theory (uniform t=1)" :
+                             "CRM gain: empirical vs theory (one bond t=0.5)"
+    title!(p3, ttl)
+    xlabel!(p3, "G theory = Var_std/Var_CRM"); ylabel!(p3, "G empirical")
 
-# G(経験) vs G(理論): 単一Pauli列 × 全設定 × 全U
-gx = Float64[]; gy = Float64[]
-for U in U_list, st in settings
-    r = results[(U, st.nu, st.nm)]
-    for (k, obs) in enumerate(obs_list)
-        length(obs.terms) == 1 || continue
-        absA = length(obs.terms[1][2])
-        Δ = r.Oρ[k] - r.Oσ[k]
-        vs, vc = theory_var(absA, r.Oρ[k], Δ, st.nu, st.nm)
-        push!(gx, vs/vc)
-        push!(gy, var(r.est[:,k,1]) / var(r.est[:,k,3]))
-    end
+    final = plot(plots_fid..., p3, layout=(1,3), size=(1500, 420),
+                 margin=6Plots.mm, legend=:bottomleft)
+    fn = tag == "uniform" ? "crm_gain_verification.png" : "crm_gain_verification_weak.png"
+    out = joinpath(@__DIR__, fn)
+    savefig(final, out)
+    println("Figure saved: $out")
 end
-lims = (0.5*min(minimum(gx), minimum(gy)), 2*max(maximum(gx), maximum(gy)))
-p3 = scatter(gx, gy, xscale=:log10, yscale=:log10, xlims=lims, ylims=lims,
-             label="single Pauli strings", color=:firebrick, ms=6, alpha=0.8)
-plot!(p3, [lims...], [lims...], label="y = x", color=:black, ls=:dash)
-title!(p3, "CRM gain: empirical vs theory")
-xlabel!(p3, "G theory = Var_std/Var_CRM"); ylabel!(p3, "G empirical")
-
-final = plot(plots_fid..., p3, layout=(1,3), size=(1500, 420),
-             margin=6Plots.mm, legend=:bottomleft)
-out = joinpath(@__DIR__, "crm_gain_verification.png")
-savefig(final, out)
-println("\nFigure saved: $out")

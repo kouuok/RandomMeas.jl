@@ -32,7 +32,7 @@
    **式の読み方**: 分子の $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ は「ランダムに選んだ基底が当たるか外れるか」による**設定間の揺らぎ**で、CRMが打ち消す対象である。分母ではこれが $\Delta^2$ に置き換わる — priorが当たっていれば($\Delta\to0$)この揺らぎは消える。$v_s$ は分子・分母の**両方に同じ形で入る**ので決して打ち消せない床であり、$\Delta\to0$ でも $G$ は $1+(3^{\lvert A\rvert}-1)\langle P\rangle^2/v_s$ で頭打ちになる。
 
 
-   で与えられ、数値的に **G ≈ 0.005 から ≈ 1000 まで約5桁**にわたり検証された(Fig 1)。利得を決めるのは prior のグローバル忠実度ではなく、**その観測量に対する prior の局所誤差 Δ** である。より正確には、利得を支配するのは**相対誤差 $\varepsilon=\Delta/\langle P\rangle$** であり($v_s\to0$ で $G\to1/\varepsilon^2$、$\langle P\rangle$ のスケールは消える)、$|\langle P\rangle|$ の大きさ自体は「利得の天井」を上げるだけである(§2.2)。
+   で与えられ、数値的に **$G\approx1.8\times10^{-3}$ から $1.3\times10^{3}$ まで約5.9桁**にわたり検証された(Fig 1)。利得を決めるのは prior のグローバル忠実度ではなく、**その観測量に対する prior の局所誤差 Δ** である。より正確には、利得を支配するのは**相対誤差 $\varepsilon=\Delta/\langle P\rangle$** であり($v_s\to0$ で $G\to1/\varepsilon^2$、$\langle P\rangle$ のスケールは消える)、$|\langle P\rangle|$ の大きさ自体は「利得の天井」を上げるだけである(§2.2)。
 
 2. **局所性**: グローバル忠実度が系サイズとともに指数的に崩壊しても($L=32$ 鎖で $F=0.007$)、局所観測量の利得は **L に依存せず生き残る**(G ≈ 12–57、Fig 2a)。忠実度推定そのものは局所Pauliシャドウでは量子ビット数に対し指数的に破綻するため、大きい系では局所観測量への適用が本筋である。
 
@@ -77,10 +77,20 @@ $$H = -t\sum_{\langle ij\rangle\sigma}(c^\dagger_{i\sigma}c_{j\sigma}+\mathrm{h.
 
 | $t$ | 該当スクリプト |
 |---|---|
-| **$t_L=1$(結合3本)/ $t_S=0.5$(結合1本)** | `crm_gain_verification.jl` のみ |
-| $t=1$ | 上記以外のすべて(`crm_mps_scaling`, `crm_site_resolved`, `crm_site_beta`, `crm_site_median`, `crm_1d_hf`, `crm_ed_reference`, `crm_ed_pbc`, `crm_pbc_check`, `crm_pbc_gain`, `crm_gap_scaling`, `crm_gap_conv`, `crm_gap_conv2`, `crm_chistar`, `crm_sensitivity`, `crm_sensitivity2`, `crm_param_sweep`, `crm_optimal_beta`, `crm_derand_benchmark`, `crm_matchgate`, `crm_matchgate_nm`, `crm_2d_cylinder`, `crm_2d_symuhf`, `crm_2d_site`, `crm_2d_w6`, `crm_2d_doped`, `crm_2d_w6_doped`, `crm_chain_common` の検証系) |
+| $t=1$ | **すべて**(`crm_gain_verification.jl` の本編を含む)(`crm_mps_scaling`, `crm_site_resolved`, `crm_site_beta`, `crm_site_median`, `crm_1d_hf`, `crm_ed_reference`, `crm_ed_pbc`, `crm_pbc_check`, `crm_pbc_gain`, `crm_gap_scaling`, `crm_gap_conv`, `crm_gap_conv2`, `crm_chistar`, `crm_sensitivity`, `crm_sensitivity2`, `crm_param_sweep`, `crm_optimal_beta`, `crm_derand_benchmark`, `crm_matchgate`, `crm_matchgate_nm`, `crm_2d_cylinder`, `crm_2d_symuhf`, `crm_2d_site`, `crm_2d_w6`, `crm_2d_doped`, `crm_2d_w6_doped`, `crm_chain_common` の検証系) |
 
-**唯一の例外の中身**: `crm_gain_verification.jl` は4サイトリングで、結合 $1\text{--}2,\ 3\text{--}4,\ 4\text{--}1$ が $t_L=1$、$2\text{--}3$ の1本だけが $t_S=0.5$ である(コードの `edges_L`/`edges_S`)。**1本だけを弱めた形であって、強弱を交互に並べる本来の二量体化ではない**。
+**唯一の非一様な配置(現在は対照)**: `crm_gain_verification.jl` は、一様 $t=1$(**本編**)と、$2\text{--}3$ の1本だけを $t_S=0.5$ にした配置(**補足**)の両方を同一乱数種で回す。以前は後者を本編にしていたが、下記の理由で誤りだったので入れ替えた。
+
+**両配置の結果**($n_u=50, n_m=100$、単一Pauli列):
+
+| 配置 | $U$ | ギャップ | UHF忠実度 | $G(Z_{1\uparrow})$ | $G$(onsite $ZZ$) | $G(ZZZZ)$ |
+|---|---|---|---|---|---|---|
+| 一様 | 1 | 0.0479 | **0.4934** | 0.06 | 9.03 | 1.19 |
+| 1本0.5 | 1 | 0.3727 | 0.8855 | 0.39 | 1.24 | 1.00 |
+| 一様 | 8 | 0.3323 | **0.3696** | 0.02 | 183 | 104 |
+| 1本0.5 | 8 | 0.2872 | 0.3518 | 0.02 | 146 | 107 |
+
+$U=8$ では両者ほぼ同じ。$U=1$ で差が出るのは、一様リングのギャップが狭く(0.048)真の基底状態が単一Slater行列式から遠いため **UHF 忠実度が 0.49 に落ちる**から(弱化版は 0.886)。つまり**一様版の方が prior にとって厳しい**。利得法則の検証は両配置で成立(一様: 18点で $1.8\times10^{-3}$–$1.3\times10^3$、弱化版: $1.7\times10^{-3}$–$9.5\times10^2$)。
 
 **この弱化の理由は誤って記録されていた(訂正)**: コード内コメント・README・両論文はいずれも「基底状態の縮退を避けるため」としていたが、**誤りである**。4サイトリングは二部格子($|A|=|B|=2$)なので **Lieb の定理により半充填・$U>0$ の基底状態は $S=0$ の一意な singlet** で、一様でも縮退しない。$\mu=U/2$・全256次元で直接確認:
 
@@ -216,7 +226,7 @@ CRMは制御変量法のβ=1特殊例: $\hat o(\beta) = \bar m_\rho - \beta(\bar
 
 ### 3.1 利得法則の検証 — Fig 1 (`crm_fig1_gainlaw.png`)
 
-1D L掃引(70点)・ショット配分掃引(100点)・2Dシリンダー(48点)の全純Pauli列で、経験利得が理論式の y=x 線上に乗る(約4桁)。8量子ビットED系(`crm_gain_verification.jl`)を含めると約5桁。**法則は次元・系サイズ・prior種に依存しない** — 古典計算が届かない領域への外挿の根拠。
+1D L掃引(70点)・ショット配分掃引(100点)・2Dシリンダー(48点)の全純Pauli列 計218点で、経験利得が理論式の y=x 線上に乗る(実測 $G=0.53$–$932$、**3.2桁**)。8量子ビットED系(`crm_gain_verification.jl`、一様 $t=1$、18点)を足すと $1.8\times10^{-3}$–$1.3\times10^{3}$ で **5.9桁**に広がる。**法則は次元・系サイズ・prior種に依存しない** — 古典計算が届かない領域への外挿の根拠。
 
 ### 3.2 局所性 — Fig 2a (`crm_fig2_locality.png`)
 
