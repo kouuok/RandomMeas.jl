@@ -290,9 +290,11 @@ function main()
     @printf("  E0=%.6f  prior fids: %s\n", pt.E,
             join([@sprintf("chi=%d: %.4f", c, f) for (c,f) in zip(chi_priors, pt.fids)], ", "))
     flush(stdout)
-    nm_list = [10, 30, 100, 300, 1000]
+    # n_m=1 は標準的な古典シャドウの設定そのもので、総ショット数を固定したときの
+    # 最適点でもある(README §0.5b)。当初この掃引から抜けていたので加えた。
+    nm_list = [1, 3, 10, 30, 100, 300, 1000]
     for nm in nm_list
-        n_repeat = nm >= 1000 ? 50 : 100
+        n_repeat = nm >= 1000 ? 50 : (nm <= 3 ? 400 : 100)
         tstart = time()
         est_std, est_crm = run_locals(pt.wtens, pt.cum_pl, pt.obs_w, pt.Pσ_all, pt.trOσ_all;
                                       nu, nm, n_repeat, seed=7000 + nm)

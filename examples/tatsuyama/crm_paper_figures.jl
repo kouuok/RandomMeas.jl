@@ -33,7 +33,7 @@ read_tsv(f) = readdlm(joinpath(dir, f), '\t'; header=true)
 # Fig 1: 利得法則マスタープロット
 # ============================================================
 sets = [("crm_mps_scaling_results.tsv", "1D chain (L = 8–32)", 8, 9),
-        ("crm_sweep_nm.tsv",            "1D shot sweep (nm = 10–1000)", 7, 8),
+        ("crm_sweep_nm.tsv",            "1D shot sweep (nm = 1–1000)", 7, 8),
         ("crm_2d_symuhf_results.tsv",   "2D cylinder (W = 4, U = 4, 8)", 8, 9)]
 
 p1 = plot(xscale=:log10, yscale=:log10, legend=:topleft, size=(560, 520),
