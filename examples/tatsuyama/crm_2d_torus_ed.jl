@@ -438,7 +438,9 @@ function main()
                 r[1], r[3], r[4], r[5], r[6], r[7], r[10])
     end
 
-    out = joinpath(@__DIR__, @sprintf("crm_2d_torus_ed_U%s.tsv", replace(@sprintf("%.1f",U),"."=>"p")))
+    # 出力名に格子形状を入れる(入れ忘れて 4x3 の結果を 2x6 が上書きした)
+    out = joinpath(@__DIR__, @sprintf("crm_2d_ed_W%dL%d_U%s.tsv", W, LX,
+                                      replace(@sprintf("%.1f",U),"."=>"p")))
     open(out,"w") do io
         println(io, "geometry\trho\tU\tsite\tobservable\tprior\ttrue\tDelta\trelerr\tG\tG_max")
         for r in rows; println(io, join(r,"\t")); end
