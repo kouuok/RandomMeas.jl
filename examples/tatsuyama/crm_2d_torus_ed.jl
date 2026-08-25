@@ -39,7 +39,11 @@ function lat_edges(Lx, W; pbc_x::Bool)
         elseif pbc_x && Lx > 2
             push!(edges, minmax(s, sidx(1, y)))
         end
-        W > 2 && push!(edges, minmax(s, sidx(x, y == W ? 1 : y + 1)))
+        if W > 2
+            push!(edges, minmax(s, sidx(x, y == W ? 1 : y + 1)))
+        elseif W == 2 && y == 1
+            push!(edges, minmax(s, sidx(x, 2)))      # ラダーの桟は1本だけ
+        end
     end
     return unique(edges)
 end
@@ -316,7 +320,21 @@ function main()
     for pbc_x in (false, true)
         geo = pbc_x ? "torus" : "cylinder"
         bonds = lat_edges(LX, W; pbc_x)
-        @printf("\n%s\n[%s] ボンド数 %d\n", "="^92, geo, length(bonds)); flush(stdout)
+        # 二部格子か(奇環がないか)を2彩色で判定する。奇環があると反強磁性が
+        # フラストレートし、<P> 自体が潰れて「prior の良し悪し」の比較にならない。
+        col = fill(-1, n); col[1] = 0; stack = [1]; bip = true
+        adj = [Int[] for _ in 1:n]
+        for (u,v) in bonds; push!(adj[u], v); push!(adj[v], u); end
+        while !isempty(stack)
+            u = pop!(stack)
+            for v in adj[u]
+                if col[v] == -1; col[v] = 1 - col[u]; push!(stack, v)
+                elseif col[v] == col[u]; bip = false; end
+            end
+        end
+        @printf("\n%s\n[%s] ボンド数 %d  二部格子: %s\n", "="^92, geo, length(bonds),
+                bip ? "はい" : "**いいえ(奇環あり → 反強磁性がフラストレート)**")
+        flush(stdout)
 
         t0 = time()
         E_ed, E1, vsec, nres = lanczos_gs(S, bonds, t, U, mu)
