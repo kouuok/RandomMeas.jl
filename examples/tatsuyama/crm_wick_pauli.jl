@@ -105,10 +105,17 @@ function majorana_M(C::AbstractMatrix)
     return M
 end
 
+# Pauli 列 → Majorana 単項式の変換は状態に依らないので使い回す。
+# 回転平均のように同じ Pauli 列を多数の状態で評価する場合に効く。
+const _PM_CACHE = Dict{Vector{Tuple{Int,Int}},Tuple{ComplexF64,Vector{Int}}}()
+
 """Gauss 状態での任意 Pauli 列の期待値。"""
 function gauss_pauli_expect(sup, M::AbstractMatrix)
     isempty(sup) && return 1.0
-    c, v = pauli_majorana(sup)
+    key = sort(collect(sup), by = first)
+    c, v = get!(_PM_CACHE, key) do
+        pauli_majorana(key)
+    end
     isempty(v) && return real(c)
     isodd(length(v)) && return 0.0
     m = length(v) ÷ 2

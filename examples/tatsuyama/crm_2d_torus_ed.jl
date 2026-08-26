@@ -121,7 +121,10 @@ function apply_H!(w, v, S::Sector, bonds, tabs, t, U, mu)
     return w
 end
 
-function lanczos_gs(S::Sector, bonds, t, U, mu; m=60, maxrestart=80, tol=1e-11, seed=1234)
+function lanczos_gs(S::Sector, bonds, t, U, mu;
+                    m=parse(Int, get(ENV, "LANCZOS_M", "60")),
+                    maxrestart=parse(Int, get(ENV, "LANCZOS_RESTART", "80")),
+                    tol=1e-11, seed=1234)
     D = length(S); tabs = [BondTab(S, s1, s2) for (s1,s2) in bonds]
     Random.seed!(seed)
     v = randn(D); v ./= norm(v); Eprev = Inf; w = similar(v); E1 = NaN
@@ -175,6 +178,66 @@ function window_rdm_full(full, N, q1, q2)
     perm = [begin x=s-1; y=0; for k in 0:Nw-1; y |= ((x>>k)&1)<<(Nw-1-k); end; y+1 end for s in 1:dw]
     R = ρ[perm,perm]
     Hermitian((R + R')/2)
+end
+
+"""セクター表現のまま窓の縮約密度行列を作る(全ベクトル展開を避ける)。
+
+4x4 (32量子ビット) では全ベクトルが 2^32 * 16 バイト = 68 GB で載らない。
+窓はサイト i, i+1 の up/dn 占有 4 量子ビットなので、状態を
+ψ[ia, ib](up配位 × dn配位の行列)として持てば
+    ρ_w[(au,bu),(au',bu')] = Σ_{aenv} Σ_{benv}
+        conj(ψ[ia(aenv,au), ib(benv,bu)]) ψ[ia(aenv,au'), ib(benv,bu')]
+と書け、部分行列2枚のフロベニウス内積になる。粒子数保存から
+popcount(au)=popcount(au') かつ popcount(bu)=popcount(bu') のブロックだけ残る。
+
+窓内のビット順は window_rdm_full と同じ規約に合わせる:
+    s = a_i*8 + b_i*4 + a_{i+1}*2 + b_{i+1}
+"""
+function window_rdm_sector(v::AbstractVector, S::Sector, i::Int)
+    n = S.n; nd = length(S.dns)
+    @inline ψ(ia, ib) = @inbounds v[(ia-1)*nd + ib]
+    mask = (1 << (i-1)) | (1 << i)                    # サイト i, i+1
+    # 各配位を (窓の2ビット, 環境ランク) に分解する
+    function split(cfgs)
+        wv = Vector{Int}(undef, length(cfgs))
+        env = Vector{Int}(undef, length(cfgs))
+        seen = Dict{Int,Int}()
+        for (k, x) in enumerate(cfgs)
+            wv[k] = (bit(x,i) << 1) | bit(x, i+1)
+            e = x & ~mask
+            env[k] = get!(seen, e, length(seen)+1)
+        end
+        wv, env, length(seen)
+    end
+    wa, ea, nea = split(S.ups)
+    wb, eb, neb = split(S.dns)
+    # (窓ビット値) -> 環境ランクごとの行/列番号
+    rows = [fill(0, nea) for _ in 0:3]; cols = [fill(0, neb) for _ in 0:3]
+    for k in 1:length(wa); rows[wa[k]+1][ea[k]] = k; end
+    for k in 1:length(wb); cols[wb[k]+1][eb[k]] = k; end
+
+    sidxw(au, bu) = ((au >> 1) << 3) | ((bu >> 1) << 2) | ((au & 1) << 1) | (bu & 1)
+    ρ = zeros(ComplexF64, 16, 16)
+    for au in 0:3, au2 in 0:3
+        count_ones(au) == count_ones(au2) || continue
+        ra, ra2 = rows[au+1], rows[au2+1]
+        for bu in 0:3, bu2 in 0:3
+            count_ones(bu) == count_ones(bu2) || continue
+            cb, cb2 = cols[bu+1], cols[bu2+1]
+            acc = zero(ComplexF64)
+            @inbounds for f in 1:neb
+                c1 = cb[f]; c2 = cb2[f]
+                (c1 == 0 || c2 == 0) && continue
+                for e in 1:nea
+                    r1 = ra[e]; r2 = ra2[e]
+                    (r1 == 0 || r2 == 0) && continue
+                    acc += conj(ψ(r1, c1)) * ψ(r2, c2)
+                end
+            end
+            ρ[sidxw(au,bu)+1, sidxw(au2,bu2)+1] = acc
+        end
+    end
+    Hermitian((ρ + ρ')/2)
 end
 
 # ---------------- DMRG / UHF ----------------
@@ -341,7 +404,7 @@ function main()
         @printf("  ED: E0=%.10f  E1-E0=%.3e  restart=%d (%.0fs)\n",
                 E_ed, E1-E_ed, nres, time()-t0); flush(stdout)
         @assert E1 - E_ed > 1e-6 "基底状態が縮退している"
-        full = expand_full(vsec, S); vsec = nothing; GC.gc()
+        GC.gc()   # Lanczos の Krylov 基底を解放してから測定に入る
 
         t1 = time()
         E_dm, ψ, nel = ground_state_2d(LX, W, t, U, mu; chi_max=chi_exp, pbc_x)
@@ -374,7 +437,7 @@ function main()
             obs = obs_by_site[si]; q1,q2 = windows[si]; Nw = q2-q1+1
             ow = shift_obs(obs, q1-1)
             Mats = [[term_window_matrix(tm, Nw) for tm in o.terms] for o in ow]
-            ρ_ed = window_rdm_full(full, N, q1, q2)
+            ρ_ed = window_rdm_sector(vsec, S, s)
             Pσ_all = Vector{Vector{Vector{Float64}}}(); trOσ_all = Vector{Vector{Float64}}()
             for p in 1:length(priors)
                 Pσ = [[expect_rdm(rdm_p[p][si], M) for M in Ms] for Ms in Mats]
@@ -410,7 +473,7 @@ function main()
                 end
             end
         end
-        full = nothing; GC.gc()
+        vsec = nothing; GC.gc()
         @printf("  局所観測量の ED vs DMRG 最大差: %.3e\n", maxdiff); flush(stdout)
         push!(meta, (geo, U, E_ed, E_dm, abs(E_dm-E_ed), maxlinkdim(ψ), Sc, uhf.E, uhf.m, maxdiff))
 
@@ -447,4 +510,4 @@ function main()
     end
     println("\nresults saved: $out")
 end
-main()
+get(ENV, "NO_MAIN", "0") == "1" || main()
