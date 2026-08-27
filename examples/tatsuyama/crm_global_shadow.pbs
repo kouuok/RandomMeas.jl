@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N crmglobsh
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=72:00:00
+#PBS -j oe
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export L=8 U=4.0 NM=100 N_REPEAT=300
+export NU_LIST="50,100,200,400,800,1600"
+export DMRG_BLAS=8
+export JULIA_NUM_THREADS=1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+echo "host=$(hostname) start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_global_shadow.jl 2>&1 | tee crm_global_shadow_progress.log
+echo "end=$(date)"
