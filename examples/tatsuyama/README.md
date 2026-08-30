@@ -2420,6 +2420,18 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 
 ---
 
+## 図: 今回追加した結果
+
+スクリプト: [crm_new_figures.jl](crm_new_figures.jl)(既存の §1〜§9 の図は [crm_paper_figures.jl](crm_paper_figures.jl) 側)
+
+| 図 | 節 | 何を示すか |
+|---|---|---|
+| [crm_new_fig_shotsplit.png](crm_new_fig_shotsplit.png) | §0.5b | 総ショット数を固定して配分だけを変えると、CRM の誤差はほぼ不変で標準シャドウだけが20倍悪化する。 $G$ が伸びるのはその効果 |
+| [crm_new_fig_geometry.png](crm_new_fig_geometry.png) | §2k | 周期境界にすると MPS prior が半減し平均場が逆転する(4×4、32量子ビット、ED参照)。右は同じ $\chi$ での DMRG 誤差が幾何で $10^2$〜 $10^5$ 倍になること |
+| [crm_new_fig_symmetry.png](crm_new_fig_symmetry.png) | §2i, §2j | UHF が SU(2) を破って縦横を 7.1倍取り違えること、および並進平均がタダで厳密 prior に届くこと |
+| [crm_new_fig_supportfid.png](crm_new_fig_supportfid.png) | §2m | 台に絞ると単一Pauli列が上界 $\lvert\Delta\rvert=2D$ の上に乗る。UHF だけ乗らないのは距離が対称性破れの方向を向いているため |
+| [crm_new_fig_globalshadow.png](crm_new_fig_globalshadow.png) | §2L | 1つのシャドウを全観測量で共有すると、 $\chi_p=2$ で個々の項は全て得なのに84項の和である全エネルギーは損をする |
+
 ## 付録: GitHub で数式を正しく表示させるための書式規則
 
 この文書群は一度、**インライン数式のほとんどが GitHub 上で数式として認識されていなかった**。原因を `gh api /markdown`(GitHub 実物のレンダラ)に通して実測で特定したので、規則として残しておく。編集時はこれを守ること。検査は下記スクリプトで自動化できる。
