@@ -1,0 +1,10 @@
+#!/bin/bash
+#PBS -N crmfidvd
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=2:00:00
+#PBS -j oe
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+echo "host=$(hostname) start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_fidelity_vs_delta.jl 2>&1 | tee crm_fidelity_vs_delta.log
+echo "end=$(date)"
