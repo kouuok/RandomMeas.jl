@@ -73,13 +73,32 @@ def do_fix(path):
     open(path, 'w', encoding='utf-8').write('\n'.join(lines))
     print(f'{path}: 開き空白 {st["open"]} / 閉じ空白 {st["close"]} / エスケープ {st["esc"]}')
 
-def do_verify(path):
-    text = open(path, encoding='utf-8').read()
+def _render(text):
     p = subprocess.run(['gh', 'api', '-X', 'POST', '/markdown', '--input', '-'],
                        input=json.dumps({'text': text, 'mode': 'gfm'}),
                        capture_output=True, text=True)
     if p.returncode: sys.exit('gh api 失敗: ' + p.stderr[:300])
-    html = p.stdout
+    return p.stdout
+
+def _payload(text):
+    """API に送る JSON の実バイト数。日本語はユニコードエスケープに展開されて
+    約2倍になるので、生テキストの長さで測ると上限判定を誤る。"""
+    return len(json.dumps({'text': text, 'mode': 'gfm'}))
+
+def _chunks(text, limit=350_000):
+    """API の 400 KB 上限を避けて分割する。見出し境界で切るので
+    コードフェンスや <details> を途中で割らない。"""
+    parts, cur = [], []
+    for block in re.split(r'(?m)(?=^## )', text):
+        if cur and _payload(''.join(cur) + block) > limit:
+            parts.append(''.join(cur)); cur = []
+        cur.append(block)
+    if cur: parts.append(''.join(cur))
+    return parts
+
+def do_verify(path):
+    text = open(path, encoding='utf-8').read()
+    html = ''.join(_render(c) for c in _chunks(text))
     n = len(re.findall(r'<math-renderer', html))
     h = re.sub(r'<pre.*?</pre>', '', html, flags=re.S)
     h = re.sub(r'<code.*?</code>', '', h, flags=re.S)
