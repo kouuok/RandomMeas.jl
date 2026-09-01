@@ -1279,30 +1279,140 @@ $L=8$ 、 $U=4$ 、半充填、 $n_m=100$ 、n_repeat=300。 $G$ は $n_u=50$ �
 
 **これで $\Delta$ が決まるなら実務上とても有用である。** prior を1つ作ったら、部分系の距離を1回計算するだけで「どの観測量にどれだけ効くか」が分かることになる。観測量ごとに $\Delta$ を計算し直す必要がなくなる。
 
-### 準備: 縮約密度行列とトレース距離
+### 準備1: 縮約密度行列(部分系だけを見る)
 
-**縮約密度行列(RDM)** とは、着目する量子ビット以外を「積分し尽くした」状態のことである。観測量 $P$ がある量子ビットの集合 $A$(これを**台**と呼ぶ)にしか作用しないなら、その期待値は $A$ の RDM だけで決まる:
+系全体の状態を $\rho$ とする。着目する量子ビットの集合を $A$、それ以外を $B$ とすると、**$A$ の縮約密度行列**は
+
+```math
+\rho_A = \mathrm{Tr}_B[\rho]
+```
+
+で定義される。 $\mathrm{Tr}_B$ は「 $B$ の自由度を足し上げる(積分し尽くす)」操作で、**部分トレース**という。成分で書くと、 $\lvert a\rangle$ を $A$ の基底、 $\lvert b\rangle$ を $B$ の基底として
+
+```math
+(\rho_A)_{a a'} = \sum_b \langle a\,b\rvert\rho\lvert a'\,b\rangle
+```
+
+つまり $B$ の添字を対角で潰す。 $A$ が $\lvert A\rvert$ 量子ビットなら $\rho_A$ は $2^{\lvert A\rvert}\times2^{\lvert A\rvert}$ の行列で、系全体の $2^N\times2^N$ よりはるかに小さい。
+
+**重要な性質**: 観測量 $P$ が $A$ の上にしか作用しないなら、その期待値は $\rho_A$ だけで決まる。
 
 ```math
 \langle P\rangle_\rho = \mathrm{Tr}[P\,\rho] = \mathrm{Tr}_A[P\,\rho_A]
 ```
 
-つまり **$A$ の外の情報は $\langle P\rangle$ に一切入らない。** これが後で効く。
+**$A$ の外の情報は $\langle P\rangle$ に一切入らない。** だから「観測量が触る量子ビット(=台)」に絞った縮約密度行列こそが、その観測量にとっての「状態のすべて」である。
 
-**トレース距離**は2つの状態の「区別しやすさ」を測る量である:
+### 準備2: トレース距離
+
+行列 $M$ の**トレースノルム**を
+
+```math
+\lVert M\rVert_1 = \mathrm{Tr}\sqrt{M^\dagger M} = \sum_i \lvert\lambda_i\rvert
+\qquad(\lambda_i \text{ は } M \text{ の固有値、} M \text{ がエルミートのとき})
+```
+
+と定義する。これを使って2状態の**トレース距離**は
 
 ```math
 D_{\rm tr}(\rho_A,\sigma_A) = \tfrac12\lVert\rho_A-\sigma_A\rVert_1
-= \max_{0\le M\le I}\mathrm{Tr}\bigl[M(\rho_A-\sigma_A)\bigr]
 ```
 
-右辺の表式が重要で、**「あらゆる測定にわたる、期待値の差の最大値」**という意味を持つ。だから任意の Pauli 列 $P$ ($\lVert P\rVert_\infty=1$、固有値が $\pm1$) に対して
+である。 $0\le D_{\rm tr}\le1$ で、 $0$ は完全一致、 $1$ は台が直交(完全に区別できる)を意味する。
+
+**この量が本質的なのは、次の変分表示があるからである:**
 
 ```math
-\lvert\Delta\rvert = \bigl\lvert\mathrm{Tr}[P(\rho_A-\sigma_A)]\bigr\rvert \;\le\; 2D_{\rm tr}
+D_{\rm tr}(\rho_A,\sigma_A) = \max_{0\le M\le I}\ \mathrm{Tr}\bigl[M(\rho_A-\sigma_A)\bigr]
 ```
 
-が**厳密に**成り立つ。部分系のトレース距離は $\lvert\Delta\rvert$ の上界であり、利得法則を通じて $G$ の**下界**を与える。**問題はこの不等式がどれだけタイトか**である。緩ければ「部分系の距離では利得は決まらない」ことになる。
+右辺は「あらゆる測定 $M$ にわたって、期待値の差を最大にしたもの」である。つまり **トレース距離は「2つの状態を最も見分けやすい測定で見分けたときの差」** であり、 $\tfrac12$ が付いているのはこの最大値と一致させるためである。
+
+### 準備3: なぜ $\lvert\Delta\rvert\le 2D_{\rm tr}$ なのか
+
+Pauli 列 $P$ は固有値が $\pm1$ なので、 $+1$ 固有空間への射影を $\Pi$ として $P = 2\Pi - I$ と書ける。 $\rho_A$ と $\sigma_A$ はどちらもトレース1なので $\mathrm{Tr}[\rho_A-\sigma_A]=0$ であり、
+
+```math
+\Delta = \mathrm{Tr}[P(\rho_A-\sigma_A)]
+= 2\,\mathrm{Tr}[\Pi(\rho_A-\sigma_A)] - \underbrace{\mathrm{Tr}[\rho_A-\sigma_A]}_{=0}
+= 2\,\mathrm{Tr}[\Pi(\rho_A-\sigma_A)]
+```
+
+となる。 $\Pi$ は $0\le\Pi\le I$ を満たす測定の一種なので、上の変分表示から $\lvert\mathrm{Tr}[\Pi(\rho_A-\sigma_A)]\rvert\le D_{\rm tr}$ 。したがって
+
+```math
+\lvert\Delta\rvert \;\le\; 2D_{\rm tr}
+```
+
+**係数 2 は「Pauli 列の固有値が $\pm1$ の幅2を持つ」ことから来る。** そして等号が成り立つのは、 $\Pi$ が最大を達成する測定と一致するとき、すなわち **$P$ の固有値の符号パターンが $\rho_A-\sigma_A$ の固有値の符号パターンとちょうど揃うとき**である。後で見るように、半充填ではこれが自動的に起きる。
+
+### 準備4: 忠実度
+
+**Uhlmann 忠実度**は
+
+```math
+F(\rho_A,\sigma_A) = \Bigl(\mathrm{Tr}\sqrt{\sqrt{\rho_A}\,\sigma_A\sqrt{\rho_A}}\Bigr)^2
+```
+
+で定義される。 $0\le F\le1$ で、 $1$ が完全一致(トレース距離と逆向き)。特別な場合には簡単になる:
+
+- **純粋状態どうし**: $F=\lvert\langle\psi\vert\phi\rangle\rvert^2$ (よく使う「重なりの2乗」)
+- **可換な状態どうし**(同時対角化できる、確率分布 $p,q$ とみなせる場合): $F=\bigl(\sum_i\sqrt{p_i q_i}\bigr)^2$ (Bhattacharyya 係数の2乗)
+
+本節で扱う RDM は占有基底で対角なので、2番目の形が使える。
+
+忠実度は距離ではない(三角不等式を満たさない)が、トレース距離と **Fuchs–van de Graaf の不等式**
+
+```math
+1-\sqrt{F} \;\le\; D_{\rm tr} \;\le\; \sqrt{1-F}
+```
+
+で結ばれている。右側から $\lvert\Delta\rvert\le2D_{\rm tr}\le2\sqrt{1-F}$ が出るので、**忠実度からも上界は作れるが、必ずトレース距離版より緩い**。
+
+### 準備5: 具体例で確かめる
+
+以上を数値で追ってみる。 $U=4$ 半充填のサイト内2量子ビット $(q_\uparrow,q_\downarrow)$ を考える。後で示すように、この RDM は占有基底 $\lvert n_\uparrow n_\downarrow\rangle$ で対角で、二重占有 $D$ ただ1つで決まる:
+
+```math
+\rho_A = \mathrm{diag}(D,\ \tfrac12-D,\ \tfrac12-D,\ D)
+```
+
+実測値 $D_\rho=0.10$ とし、prior が $D_\sigma=0.11$ とわずかに外したとする。
+
+```math
+\rho_A = \mathrm{diag}(0.10,\,0.40,\,0.40,\,0.10), \qquad
+\sigma_A = \mathrm{diag}(0.11,\,0.39,\,0.39,\,0.11)
+```
+
+**トレース距離**:
+
+```math
+M=\rho_A-\sigma_A = \mathrm{diag}(-0.01,\,+0.01,\,+0.01,\,-0.01),\quad
+\lVert M\rVert_1 = 0.04,\quad D_{\rm tr}=0.02
+```
+
+**局所誤差** ( $Z_\uparrow Z_\downarrow$ の固有値は $(+1,-1,-1,+1)$ ):
+
+```math
+\Delta = \mathrm{Tr}[Z_\uparrow Z_\downarrow M] = (-0.01)-(+0.01)-(+0.01)+(-0.01) = -0.04
+```
+
+したがって $\lvert\Delta\rvert = 0.04 = 2D_{\rm tr}$ で、**上界がちょうど等号**になっている。 $M$ の符号パターン $(-,+,+,-)$ が $Z_\uparrow Z_\downarrow$ の符号パターン $(+,-,-,+)$ と(全体の符号を除いて)一致するためである。
+
+**忠実度**(可換なので Bhattacharyya):
+
+```math
+F = \bigl(2\sqrt{0.10\cdot0.11}+2\sqrt{0.40\cdot0.39}\bigr)^2 = (0.20976+0.78994)^2 = 0.99940
+```
+
+```math
+1-F = 6.0\times10^{-4},\qquad \sqrt{1-F}=0.0245,\qquad
+\frac{\lvert\Delta\rvert}{2\sqrt{1-F}} = \frac{0.04}{0.049} = 0.816
+```
+
+**忠実度版の上界は等号にならない**(0.816)。後で示す一般式 $2/\sqrt{\tfrac12(1/D+1/(\tfrac12-D))}$ に $D=0.1$ を入れると $2/\sqrt{6.25}=0.80$ で、この数値と合う。
+
+**この2つの違い — 距離版は状態によらず等号、忠実度版は $D$ に依存する係数が付く — が、本節の技術的な結論である。**
 
 ### 最初の測り方は間違っていた
 
@@ -1341,7 +1451,7 @@ $\chi_p=2$ から $\chi_p=32$ まで並べると、 $D_{\rm tr}$ も $\lvert\Del
 
 **単一Pauli列では比が 1.0000、つまり不等式が等号で成立する。**
 
-#### なぜ飽和するのか(手で追える)
+#### なぜ飽和するのか(準備5の具体例が一般に成り立つ理由)
 
 サイト $i$ の2量子ビット $(q_\uparrow, q_\downarrow)$ の RDM は $4\times4$ で、占有基底 $\lvert n_\uparrow n_\downarrow\rangle$ で対角である(粒子数が保存するので異なる占有どうしの非対角要素が立たない)。対角成分を $p_{00},p_{01},p_{10},p_{11}$ と書くと
 
@@ -1445,7 +1555,7 @@ D_{\rm tr} = \tfrac12(\lvert{-s}\rvert+\lvert s\rvert) = \lvert s\rvert,
 
 解析: [crm_fidelity_vs_delta.jl](crm_fidelity_vs_delta.jl) / [.pbs](crm_fidelity_vs_delta.pbs)
 
-ここまではトレース距離で測った。**忠実度 $F_A$ でも同じことが言えるのか**を確かめる。Fuchs–van de Graaf の不等式 $D_{\rm tr}\le\sqrt{1-F}$ を挟むと
+ここまではトレース距離で測った。**忠実度 $F_A$ (準備4)でも同じことが言えるのか**を確かめる。Fuchs–van de Graaf の不等式 $D_{\rm tr}\le\sqrt{1-F}$ を挟むと
 
 ```math
 \lvert\Delta\rvert \;\le\; 2D_{\rm tr} \;\le\; 2\sqrt{1-F_A}
