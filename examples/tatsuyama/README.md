@@ -1373,6 +1373,8 @@ F(\rho_A,\sigma_A) = \Bigl(\mathrm{Tr}\sqrt{\sqrt{\rho_A}\,\sigma_A\sqrt{\rho_A}
 
 準備3で $\lvert\Delta\rvert\le 2D_{\rm tr}$ を出したが、「忠実度でも同じことができるのでは」というのは自然な疑問である。**できない。しかもそれは好みの問題ではなく、量の種類が違うことによる。**
 
+> **先に断っておく。** 元論文(Vermersch *et al.*)は忠実度を prior の品質判定に実際に使っており、**その設定では正しい**。本節が否定するのは「混合 prior のもとで局所観測量の利得を定量予測する」という本研究の設定での使用である。元論文が何を指標にしているかは**準備4c**で原典を引いて整理した。
+
 以下は行列ノルムや双対性の言葉を使うが、**本節に出てくる行列はすべて対角**なので、実質は4成分のベクトルの話に落ちる。まず記号を全部定義し、実データから取った具体例を1つ用意して、それを使って説明する。
 
 #### 記号一覧
@@ -1717,6 +1719,110 @@ F\Bigl(\bigotimes_i\rho_i,\ \bigotimes_i\sigma_i\Bigr)=\prod_i F(\rho_i,\sigma_i
 | 等号は成り立つか | **成り立つ**(符号パターン一致、条件は $r\le1/4$ ) | 成り立たない(実測 最大 0.9875) |
 | $G$ の予測 | 5%以内 | 5〜14倍の不定性 |
 | 系サイズ | 指数崩壊しない | 乗法的に指数崩壊 |
+
+### 準備4c: 元論文は何を指標にしているか(一次資料で確認)
+
+準備4b は「忠実度ではなくトレース距離」という書き方をしたが、**元論文は忠実度を prior の品質指標として実際に使っている**。ただし本研究とは設定が違い、その設定では正しい。混同しないように、元論文の記述を原典で確認して整理する。
+
+対象: B. Vermersch, A. Rath, B. Sundar, C. Branciard, J. Preskill, A. Elben, *Enhanced Estimation of Quantum Properties with Common Randomized Measurements*, PRX Quantum **5**, 010352 (2024) / [arXiv:2304.12292](https://arxiv.org/abs/2304.12292)
+
+#### 分散保証に使われている量
+
+**式(4) — 単一コピーの Pauli 観測量:**
+
+```math
+\mathbb{V}[\hat O]\ \le\ \frac{3^{N_A}}{N_U}\left(\mathrm{Tr}\bigl[O(\rho-\sigma)\bigr]^2+\frac{1}{N_M}\right)
+```
+
+指標は $\mathrm{Tr}[O(\rho-\sigma)]$ 、**本研究の $\Delta$ そのもの**である。さらに本文は「標準シャドウより分散が小さくなるのは $\lvert\mathrm{Tr}[O(\rho-\sigma)]\rvert\le\lvert\mathrm{Tr}(O\rho)\rvert$ のとき」と明記しており、これは本研究の $\varepsilon=\Delta/\langle P\rangle\le1$ と同じ条件である。**§2 の利得法則はこの式(4)から出ている。**
+
+**式(6) — 多コピー観測量(MCO):**
+
+```math
+\mathbb{V}[\hat O]\ \le\ \frac{n^2\lVert O^{(1)}_A\rVert_2^2}{N_U}\left(3^{N_A}\lVert\rho_A-\sigma_A\rVert_2^2+\frac{2^{N_A}}{N_M}\right)+\mathcal{O}\!\left(\frac{1}{N_U^2}\right)
+```
+
+こちらは**観測量の台 $A$ に縮約した距離**だが、トレース距離ではなく **Hilbert–Schmidt ノルム**( $\lVert X\rVert_2=\sqrt{\mathrm{Tr}[X^2]}$ 、シャッテン2ノルム)である。つまり「台に縮約した距離で prior の質を測る」という発想は元論文に既にある。
+
+**「trace distance」という語は本文に一度も出てこない**(全文検索して0件)。
+
+#### 忠実度はどこに出てくるか
+
+忠実度は17箇所に現れ、**すべて Example 2(フィデリティ推定)**である。役割は2つある。
+
+**役割(a): 推定対象そのもの。** 「 $F_\psi=\langle\psi\vert\rho\vert\psi\rangle$ を推定する。すなわち $O=\lvert\psi\rangle\langle\psi\rvert$ という射影子を取る」と書かれている。つまりここでの忠実度は**射影子の期待値、すなわち単一コピー観測量**である。 $\lVert O\rVert_\infty=1$ なので、準備4b の議論が $P\to\lvert\psi\rangle\langle\psi\rvert$ とそのまま適用できる。**「状態間の距離の指標」として使われているのではない。**
+
+**役割(b): prior の良し悪しの判定基準。** ここが本題である。本文は「フィデリティ推定は適切な CRM prior $\sigma$ を見つけるのにも使える」と述べ、反復手順を与えている:
+
+> $F_\phi$ が閾値 $F\ge1/2$ を下回れば新しい prior を定義して繰り返す。十分高い $F_\phi$ を持つ prior $\sigma=\lvert\phi\rangle\langle\phi\rvert$ が見つかれば、任意の MCO $O$ について強化推定を行える。**性能保証は、測定した $F_\phi$ の値を用いて式(6)で与えられる。**
+
+**確かに忠実度を prior の品質指標として使っている。** ユーザの記憶は正しい。
+
+#### なぜ元論文の設定ではそれが正しいのか — prior が純粋だから
+
+決め手は $\sigma=\lvert\phi\rangle\langle\phi\rvert$ が**純粋状態**であることである。このとき $\mathrm{Tr}[\sigma^2]=1$ かつ $\mathrm{Tr}[\rho\sigma]=F_\phi$ なので
+
+```math
+\lVert\rho-\sigma\rVert_2^2=\mathrm{Tr}[\rho^2]-2\,\mathrm{Tr}[\rho\sigma]+\mathrm{Tr}[\sigma^2]
+=\mathrm{Tr}[\rho^2]-2F_\phi+1\ \le\ 2\,(1-F_\phi)
+```
+
+( $\mathrm{Tr}[\rho^2]\le1$ を使った。)つまり**純粋 prior では、忠実度が式(6)の距離を直接押さえる**。「測った $F_\phi$ で式(6)の保証が付く」は厳密に正しい。
+
+準備4b の理由3(忠実度は2次、 $\Delta$ は1次)がここで問題にならないのは、**式(6)の指標が距離の2乗** $\lVert\rho_A-\sigma_A\rVert_2^2$ **だから**である。2次の量を2次の量で押さえているので次数が合っている。準備4b が問題にしたのは1次の量 $\Delta$ を2次の量で予測しようとする場合である。
+
+#### なぜ本研究の設定には移せないのか
+
+| | 元論文 Example 2 | 本研究(§2m) |
+|---|---|---|
+| prior $\sigma$ | **純粋**( $\lvert\phi\rangle\langle\phi\rvert$ 、MPS) | **混合**(MPS/UHF を台に縮約した RDM) |
+| 見る領域 | 系全体( $N=30$ ) | 観測量の台(2〜4量子ビット) |
+| 推定対象 | 忠実度・MCO | 局所 Pauli 観測量 |
+| 問い | この prior を**使えるか**(go/no-go) | 利得が**何倍になるか**(定量予測) |
+
+3点とも効く:
+
+1. **prior が混合になると等式が壊れる。** 台に縮約した $\sigma_A$ は混合状態で $\mathrm{Tr}[\sigma_A^2]<1$ なので、上の $\lVert\rho-\sigma\rVert_2^2\le2(1-F)$ が使えない。準備4b の理由3・理由4がそのまま効いてくる。
+2. **大域忠実度は局所観測量では判定に使えない。** 元論文の $F_\phi$ は $N=30$ 量子ビット全体の忠実度で、 $\chi$ を上げれば上がる測定可能な量である。本研究の $L=128$ (256量子ビット)では $F$ が $10^{-17}$ まで落ちるが局所利得は無傷である(§2b)。**閾値 $F\ge1/2$ をそのまま持ち込むと、実際には有効な prior を全部棄却してしまう。**
+3. **go/no-go と定量予測は別の要求である。** 閾値判定なら緩い上界でも足りるが、利得の倍率を予測するには等号が要る。
+
+**元論文が間違っているのではなく、適用範囲が違う。** 本研究の寄与は、局所観測量・混合 prior の領域では忠実度による判定が働かないことを示し(§2, §2b)、代わりに使える量として台のトレース距離を与えたこと(§2m)である。
+
+#### 2ノルムと1ノルムはどう違うか(単一 Pauli 列の場合)
+
+元論文の式(6)は2ノルムなので、単一 Pauli 列に対して2ノルム版の上界を作るとどうなるかを見ておく。Cauchy–Schwarz(2ノルムでの Hölder)から
+
+```math
+\lvert\Delta\rvert\le\lVert P\rVert_2\lVert X\rVert_2=2\lVert X\rVert_2
+\qquad(\text{2量子ビットの Pauli 列は }\lVert P\rVert_2=\sqrt{\mathrm{Tr}[P^2]}=2)
+```
+
+準備4b と同じ $X=\mathrm{diag}(u,-u+s,-u-s,u)$ を入れると $\lVert X\rVert_2=\sqrt{4u^2+2s^2}$ なので
+
+```math
+\frac{\lvert\Delta\rvert}{\lVert P\rVert_2\lVert X\rVert_2}=\frac{1}{\sqrt{1+8r^2}}
+\qquad\text{対}\qquad
+\frac{\lvert\Delta\rvert}{2D_A}=\min\left(1,\frac{2}{1+4r}\right)
+```
+
+4×4 の実データで両方を確認する(どちらも閉形式と一致する):
+
+| 幾何 | prior | $r$ | 1ノルム 実測 | 1ノルム 式 | 2ノルム 実測 | 2ノルム 式 |
+|---|---|---|---|---|---|---|
+| シリンダー | χ_p=128 | 0.000 | **1.0000** | 1.0000 | **1.0000** | 1.0000 |
+| シリンダー | χ=1024 | 0.018 | **1.0000** | 1.0000 | 0.9987 | 0.9987 |
+| トーラス | χ_p=8 | 0.192 | **1.0000** | 1.0000 | 0.8783 | 0.8783 |
+| トーラス | χ_p=32 | 0.374 | 0.7900 | 0.8017 | 0.6872 | 0.6872 |
+| トーラス | χ_p=128 | 0.806 | 0.4757 | 0.4735 | 0.4017 | 0.4017 |
+| トーラス | UHF | 30.43 | 0.0163 | 0.0163 | 0.0116 | 0.0116 |
+
+$r=0$ では両方とも飽和する( $X\propto P$ なので Cauchy–Schwarz も等号)。 $r>0$ では**常に1ノルム版のほうが鋭い**。準備4b の理由1のとおり、単一 Pauli 列という「 $\lVert P\rVert_\infty=1$ の線形汎関数」に対しては1ノルムが双対ノルムであり、これが最良だからである。
+
+**ただしこれは優劣の話ではない。** 元論文の式(6)は MCO( $\rho$ について $n$ 次)の分散に対する保証で、そこでは推定量が2次形式になるため2ノルムが自然に現れる。線形汎関数に1ノルム、2次形式に2ノルム、というだけのことである。
+
+#### 後続研究
+
+CRM で忠実度を推定する方向はその後も進んでいる: Z. Yang, D. Chen, Z. Li, H. Zhu, *High-Precision Fidelity Estimation with Common Randomized Measurements*, [arXiv:2511.22509](https://arxiv.org/abs/2511.22509) (2025) は CRM を Clifford 群シャドウと組み合わせ、非忠実度を乗法的精度で推定する際の回路数を $O(1/\epsilon^2)$ から $O(1/\epsilon)$ に減らしている。ここでも**忠実度は推定対象**であり、prior の品質指標としてではない。
 
 ### 準備5: 具体例で確かめる
 
