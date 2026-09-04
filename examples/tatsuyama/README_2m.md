@@ -770,7 +770,61 @@ F(\rho_A,\sigma_A)=\Bigl(\mathrm{Tr}\sqrt{\sqrt{\rho_A}\,\sigma_A\sqrt{\rho_A}}\
 
 #### 観測量ごとの $F_{\text{台}}$ と $G$ の対応(全7観測量)
 
-上は ZZ onsite 1つの話だった。**7観測量すべてで同じ表を作ると、忠実度のより根本的な限界が見える。** L=16、site 2、半充填。 $\varepsilon=\lvert\Delta\rvert/\lvert\langle P\rangle\rvert$ は利得を決める相対誤差(§2)。
+上は ZZ onsite 1つの話だった。**7観測量すべてで同じ表を作ると、忠実度のより根本的な限界が見える。** L=16、site 2、半充填。
+
+##### 表の $\varepsilon$ とは何か
+
+```math
+\varepsilon \equiv \frac{\lvert\Delta\rvert}{\lvert\langle P\rangle\rvert}
+= \frac{\text{prior がその観測量で外している量}}{\text{その観測量の期待値そのものの大きさ}}
+```
+
+**prior の誤差を、観測量のスケールで割った相対誤差**である。 $\Delta$ そのままでは観測量ごとに比べられない — 例えば二重占有( $\langle P\rangle=0.099$ )の $\Delta=0.009$ と ZZ onsite( $\langle P\rangle=-0.603$ )の $\Delta=0.036$ は、絶対値では後者が大きいが、相対誤差では前者(9.1%)の方が後者(6.0%)より悪い。
+
+$\varepsilon$ を使う理由は、**利得法則が $\varepsilon$ だけで書き直せる**からである。利得法則の分子・分母を $\langle P\rangle^2$ で割ると
+
+```math
+G=\frac{(3^{\lvert A\rvert}-1)+w}{(3^{\lvert A\rvert}-1)\,\varepsilon^2+w},
+\qquad w\equiv\frac{v_s}{\langle P\rangle^2}
+```
+
+となり、 $\langle P\rangle$ の絶対的な大きさは消えて $\varepsilon$ だけが残る。逆数を取るともっと見やすい:
+
+```math
+\frac{1}{G}=\varepsilon^2\Bigl(1-\frac{1}{G_{\max}}\Bigr)+\frac{1}{G_{\max}}
+\qquad\simeq\qquad
+\underbrace{\varepsilon^2}_{\text{prior のせい}}+\underbrace{\frac{1}{G_{\max}}}_{\text{ショットノイズのせい}}
+```
+
+**「損失の逆数」が2つの独立な原因の和になる。** したがって:
+
+| $\varepsilon$ | 意味 | 利得 |
+|---|---|---|
+| $\varepsilon\ll1$ | prior が観測量のスケールに比べて十分正確 | 天井 $G_{\max}$ に張り付く(ショットノイズ律速) |
+| $\varepsilon\approx0.1$ | 10%外している | $G\approx100$ か天井の小さい方 |
+| $\varepsilon=1$ | 外し方が期待値と同じ大きさ | $G=1$ (**得も損もない**) |
+| $\varepsilon>1$ | 期待値より大きく外している | $G<1$ (**CRM が損をする**) |
+
+**$\varepsilon=1$ が損益分岐点**であり、これは元論文 式(4)の「CRM が標準シャドウより良くなる条件 $\lvert\mathrm{Tr}[O(\rho-\sigma)]\rvert\le\lvert\mathrm{Tr}(O\rho)\rvert$ 」と同じものである(準備4c)。
+
+実データで確認する( $n_m=100$ 、 $\lvert A\rvert=2$ ):
+
+| 観測量 | prior | $\varepsilon$ | $1/\varepsilon^2$ | $G_{\max}$ | $G$(実際) |
+|---|---|---|---|---|---|
+| ZZ onsite | χ_p=2 | 0.658 | 2.31 | 51.79 | **2.25** |
+| ZZ onsite | χ_p=4 | 0.060 | 279.7 | 51.79 | **43.83** |
+| ZZ onsite | χ_p=8 | 0.0036 | $7.7\times10^{4}$ | 51.79 | **51.76** |
+| ZZ up-up | χ_p=2 | 1.000 | 1.00 | 11.47 | **1.00** |
+| ZZ up-up | χ_p=4 | 0.884 | 1.28 | 11.47 | **1.25** |
+| ZZ up-up | **UHF** | **1.393** | **0.52** | 11.47 | **0.54** |
+
+**$G$ は $1/\varepsilon^2$ と天井 $G_{\max}$ の小さい方に近い値になる。** ε が大きい行では $1/\varepsilon^2$ がそのまま出ており(2.31→2.25、1.28→1.25、0.52→0.54)、ε が小さい行では天井で頭打ちになっている。UHF の ZZ up-up は $\varepsilon>1$ なので $G<1$ 、つまり**この観測量では CRM を使うと損をする**。
+
+> **注意: $\varepsilon$ が意味を持たない場合がある。** 下の表の $n$ と $S^z$ がそれで、どちらも $\varepsilon$ の値は無視してよい。
+> - **$S^z$**: $\langle P\rangle=0$ なので分母がゼロ。 $\varepsilon$ は定義できない。
+> - **$n$**: $\langle n\rangle=1$ だが、これは $n=I-(Z_a+Z_b)/2$ の**恒等演算子の部分**から来ている。恒等演算子は定数なので分散に寄与せず、揺らぐ部分の期待値は $\langle Z_a\rangle=\langle Z_b\rangle=0$ である。つまり利得法則の $\langle P\rangle$ に入れるべき量は $1$ ではなく $0$ で、そもそも減らせる分散がない。実測 $G=1.00$ はこれによる。
+>
+> どちらも「prior が悪いから利得が出ない」のではなく、**そもそも CRM が減らせる分散を持たない観測量**である。
 
 **(a) ZZ onsite** — 台=サイト内2量子ビット、 $\langle P\rangle=-0.6030$ 、単一 Pauli 列
 
