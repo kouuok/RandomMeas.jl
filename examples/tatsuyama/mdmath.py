@@ -100,14 +100,19 @@ def do_verify(path):
     text = open(path, encoding='utf-8').read()
     html = ''.join(_render(c) for c in _chunks(text))
     n = len(re.findall(r'<math-renderer', html))
+    # ```math が数式にならなかった場合 GitHub は <pre lang="math"> のまま返す。
+    # 下で <pre> を落とすので、先に数えておかないと見逃す。
+    dead = re.findall(r'<pre lang="math"[^>]*><code[^>]*>(.*?)</code></pre>', html, re.S)
     h = re.sub(r'<pre.*?</pre>', '', html, flags=re.S)
     h = re.sub(r'<code.*?</code>', '', h, flags=re.S)
     h = re.sub(r'<math-renderer[^>]*>.*?</math-renderer>', '', h, flags=re.S)
     h = re.sub(r'<[^>]+>', '', h)
     bad = [l.strip() for l in h.split('\n') if '$' in l]
-    print(f'{path}: 数式 {n}個がレンダリング / 未変換の $ を含む行 {len(bad)}個')
+    print(f'{path}: 数式 {n}個がレンダリング / 未変換の $ を含む行 {len(bad)}個'
+          f' / 表示されない math ブロック {len(dead)}個')
     for l in bad[:10]: print('   ', l[:120])
-    return len(bad)
+    for d in dead[:10]: print('    [math未描画]', d.strip()[:100])
+    return len(bad) + len(dead)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3: sys.exit(__doc__)

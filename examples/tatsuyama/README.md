@@ -557,45 +557,32 @@ G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s}, \quad
 
 **式の読み方**: 分子の $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ は「ランダムに選んだ基底が当たるか外れるか」による**設定間の揺らぎ**で、CRMが打ち消す対象である。分母ではこれが $\Delta^2$ に置き換わる — priorが当たっていれば($\Delta\to0$)この揺らぎは消える。 $v_s$ は分子・分母の**両方に同じ形で入る**ので決して打ち消せない床であり、 $\Delta\to0$ でも $G$ は $1+(3^{\lvert A\rvert}-1)\langle P\rangle^2/v_s$ で頭打ちになる。
 
-
-  が **$G\approx1.8\times10^{-3}$ から $1.3\times10^{3}$ まで約5.9桁で経験値と一致**(単一Pauli列18点、理論値は $1.7\times10^{-3}$– $1.4\times10^{3}$)。
+この式の予測が **$G\approx1.8\times10^{-3}$ から $1.3\times10^{3}$ まで約5.9桁で経験値と一致**(単一Pauli列18点、理論値は $1.7\times10^{-3}$– $1.4\times10^{3}$)。
 
 <details>
 <summary><b>導出(原論文の枠組みから)</b> — クリックで展開</summary>
 
 **出発点**: 設定 $u=\bigotimes_q u_q$($u_q$ は X/Y/Z 基底への回転)で測定しビット列 $b$ を得たとき、逆チャネルを通したスナップショット
 
-```math
-\hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger|b_q\rangle\langle b_q|u_q - I\bigr), \qquad E[\hat\rho]=\rho
-```
+$$\hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger|b_q\rangle\langle b_q|u_q - I\bigr), \qquad E[\hat\rho]=\rho$$
 
 が $\rho$ の不偏推定量になる。観測量の推定値は $X(b,u)=\mathrm{Tr}[O\hat\rho(b,u)]$。
 
 **ステップ1(局所Pauli列の閉形式)**: $P=\bigotimes_{q\in A}\sigma^{a_q}_q$ とすると $\mathrm{Tr}[\sigma^a]=0$ より各因子は $3\mathrm{Tr}[\sigma^{a_q}u_q^\dagger|b_q\rangle\langle b_q|u_q]$。測定基底が $a_q$ と一致すれば $3s_q$($s_q=\pm1$ は測定結果)、不一致なら 0。よって
 
-```math
-X(b,u) = 3^{|A|}\Bigl(\prod_{q\in A}s_q\Bigr)\mathbf 1[\text{基底が }A\text{ 上で全一致}]
-```
+$$X(b,u) = 3^{|A|}\Bigl(\prod_{q\in A}s_q\Bigr)\mathbf 1[\text{基底が }A\text{ 上で全一致}]$$
 
 一致確率は各量子ビット独立に 1/3 なので $3^{-|A|}$ である。
 
 **ステップ2(全分散の公式)**: 一致時 $E[\prod s_q]=\langle P\rangle$、 $\prod s_q\in\lbrace\pm1\rbrace$ より $\mathrm{Var}=1-\langle P\rangle^2$。条件付き期待値は $E[X|u]=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle$ で、 $u$ 平均すると $3^{|A|}\cdot3^{-|A|}\langle P\rangle=\langle P\rangle$(不偏)。 $\mathrm{Var}(X)=\mathrm{Var}_u(E[X|u])+E_u[\mathrm{Var}(X|u)]$ の2項は
 
-```math
-V_u = 3^{2|A|}\langle P\rangle^2\cdot3^{-|A|}-\langle P\rangle^2 = (3^{|A|}-1)\langle P\rangle^2
-```
-```math
-E_u[\mathrm{Var}(X|u)] = 3^{-|A|}\cdot3^{2|A|}(1-\langle P\rangle^2) = 3^{|A|}(1-\langle P\rangle^2)
-```
+$$V_u = 3^{2|A|}\langle P\rangle^2\cdot3^{-|A|}-\langle P\rangle^2 = (3^{|A|}-1)\langle P\rangle^2$$
+$$E_u[\mathrm{Var}(X|u)] = 3^{-|A|}\cdot3^{2|A|}(1-\langle P\rangle^2) = 3^{|A|}(1-\langle P\rangle^2)$$
 
 **ステップ3(CRMは第1項だけを置き換える)**: 同一の $u$ で prior 側の条件付き期待値 $Y(u)=3^{|A|}\mathbf 1[\text{一致}]\langle P\rangle_\sigma$ を引く。これは **$u$ が決まれば確定値**(サンプルしない)なので、 $E[Z|u]=3^{|A|}\mathbf 1[\text{一致}]\Delta$ より $V_u^{\rm CRM}=(3^{|A|}-1)\Delta^2$ となる一方、条件付き分散は変わらずショットノイズはそのまま残る。したがって
 
-```math
-\mathrm{Var}[\text{標準}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\langle P\rangle^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]
-```
-```math
-\mathrm{Var}[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]
-```
+$$\mathrm{Var}[\text{標準}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\langle P\rangle^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]$$
+$$\mathrm{Var}[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}\Bigr]$$
 
 比を取ると $1/n_u$ が約分されて $G$ の式になる。
 
@@ -4025,6 +4012,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 | 5 | **別行立ては `$$…$$` ではなくフェンス** ` ```math ` **を使う** | `$$…$$` は中身がインライン処理されるので規則3が効いてしまい、リスト内で複数行にまたがると数式として認識されない。フェンスなら中身が完全に保存される |
 | 6 | **`</details>` の直後には空行を入れる** | 空行がないと続く行が HTML ブロックの一部と見なされ、markdown も数式も処理されない |
 | 7 | **どうしても規則を満たせない式は退避形** `` $`…`$ `` **にする** | 前後を非英数字に挟まれた `_`(例 `C'_{aa}`、`\langle P\rangle\vert_{強}`)は強調として食われる。退避形なら中身がそのまま渡る |
+| 9 | **`<details>` の中では別行立てを ` ```math ` ではなく1行の `$$…$$` にする** | `<details>` 内にインライン数式 `$…$` を含む段落があると、それ以降の ` ```math ` フェンスが数式にならず `<pre lang="math">` のまま出る(段落に `$u$` が1つあるだけで再現。`$$` を独立行に置く形も不可、1行に収める必要がある)。規則5の唯一の例外 |
 | 8 | **独自マクロ(`\ev` など)を使わない** | MathJax は物理系パッケージのマクロを知らないので赤いエラーになる。`\langle\cdot\rangle` と書く |
 
 **検査・整形ツール**: [mdmath.py](mdmath.py) がこの規則を実装している。
@@ -4042,3 +4030,5 @@ gh api -X POST /markdown --input <(python3 -c "import json;print(json.dumps({'te
 ```
 
 出力から `<math-renderer>` の中身を除いたうえで `$` が残っていれば、そこが数式として認識されていない箇所である。
+
+**`<pre lang="math">` が残っていないかも同時に見る必要がある** — ` ```math ` フェンスが数式にならなかった場合、GitHub はこの形で返す。`<pre>` を落としてから `$` を探すだけの検査では規則9の失敗を見逃す(実際に6箇所見逃していた)。
