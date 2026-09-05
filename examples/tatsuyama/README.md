@@ -1330,7 +1330,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 
 ## 図: 今回追加した結果
 
-スクリプト: [crm_new_figures.jl](crm_new_figures.jl) / [crm_hf_locality_figure.jl](crm_hf_locality_figure.jl)(既存の §1〜§9 の図は [crm_paper_figures.jl](crm_paper_figures.jl) 側)
+スクリプト: [crm_new_figures.jl](crm_new_figures.jl) / [crm_hf_locality_figure.jl](crm_hf_locality_figure.jl) / [crm_2d_pbc_fid_figure.jl](crm_2d_pbc_fid_figure.jl)(既存の §1〜§9 の図は [crm_paper_figures.jl](crm_paper_figures.jl) 側)
 
 | 図 | 節 | 何を示すか |
 |---|---|---|
@@ -1339,6 +1339,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 | [crm_new_fig_symmetry.png](crm_new_fig_symmetry.png) | §2i, §2j | UHF が SU(2) を破って縦横を 7.1倍取り違えること、および並進平均がタダで厳密 prior に届くこと |
 | [crm_new_fig_supportfid.png](crm_new_fig_supportfid.png) | §2m | 台に絞ると単一Pauli列が上界 $\lvert\Delta\rvert=2D$ の上に乗る。UHF だけ乗らないのは距離が対称性破れの方向を向いているため |
 | [crm_new_fig_hf_locality.png](crm_new_fig_hf_locality.png) | §2, §4, §8 | **大域忠実度が低くても、局所観測量なら平均場 prior が働く。** (a) 同じ系(1D $L=8$)で UHF は大域忠実度 0.160 と全 prior 中で最低なのに onsite ZZ の利得は 188 — $F=0.579$ の $\chi_p=2$(29.4)を6倍上回る。同じ prior が $S^z$ では 0.05 まで落ち、**縦に4桁散らばる**。 (b) その UHF を観測量ごとに分解すると $10^{3.1}$ から $10^{-2.7}$ まで振れ、境目は $\varepsilon=1$ に対応する。 (c) 系を大きくすると、タダの平均場が MPS を追い越す — W=4 では $\chi=64$ 相当、W=6 では $\chi=128$ すら上回る |
+| [crm_new_fig_hf_locality_2d.png](crm_new_fig_hf_locality_2d.png) | §2k, §4 | **上の図の2次元版(4×4、32量子ビット、シリンダーとトーラス、いずれも二部格子)。** (a) UHF は大域忠実度 0.10〜0.12 なのに onsite ZZ の利得はシリンダーで 135(= $\chi=64$ 相当、忠実度は9分の1)、**トーラスでは 145 で $\chi=128$($F=0.930$)すら上回り全 prior 中で最良**。 (b) 同じ prior が $S^z$ では 0.05 まで落ちる — 損をするのはすべて対称性を破った方向。 (c) 機構: 周期境界にすると MPS の忠実度は落ちる($\chi=128$ で 0.987→0.930)が、**結合次元を持たない平均場は代金を払わない**(0.102→0.116)。これがトーラスでの逆転の理由 |
 | [crm_new_fig_globalshadow.png](crm_new_fig_globalshadow.png) | §2L | 1つのシャドウを全観測量で共有すると、 $\chi_p=2$ で個々の項は全て得なのに84項の和である全エネルギーは損をする |
 
 ## 付録: GitHub で数式を正しく表示させるための書式規則
