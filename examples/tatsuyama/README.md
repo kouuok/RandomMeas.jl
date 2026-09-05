@@ -1330,7 +1330,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 
 ## 図: 今回追加した結果
 
-スクリプト: [crm_new_figures.jl](crm_new_figures.jl)(既存の §1〜§9 の図は [crm_paper_figures.jl](crm_paper_figures.jl) 側)
+スクリプト: [crm_new_figures.jl](crm_new_figures.jl) / [crm_hf_locality_figure.jl](crm_hf_locality_figure.jl)(既存の §1〜§9 の図は [crm_paper_figures.jl](crm_paper_figures.jl) 側)
 
 | 図 | 節 | 何を示すか |
 |---|---|---|
@@ -1338,6 +1338,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 | [crm_new_fig_geometry.png](crm_new_fig_geometry.png) | §2k | 周期境界にすると MPS prior が半減し平均場が逆転する(4×4、32量子ビット、ED参照)。右は同じ $\chi$ での DMRG 誤差が幾何で $10^2$〜 $10^5$ 倍になること |
 | [crm_new_fig_symmetry.png](crm_new_fig_symmetry.png) | §2i, §2j | UHF が SU(2) を破って縦横を 7.1倍取り違えること、および並進平均がタダで厳密 prior に届くこと |
 | [crm_new_fig_supportfid.png](crm_new_fig_supportfid.png) | §2m | 台に絞ると単一Pauli列が上界 $\lvert\Delta\rvert=2D$ の上に乗る。UHF だけ乗らないのは距離が対称性破れの方向を向いているため |
+| [crm_new_fig_hf_locality.png](crm_new_fig_hf_locality.png) | §2, §4, §8 | **大域忠実度が低くても、局所観測量なら平均場 prior が働く。** (a) 同じ系(1D $L=8$)で UHF は大域忠実度 0.160 と全 prior 中で最低なのに onsite ZZ の利得は 188 — $F=0.579$ の $\chi_p=2$(29.4)を6倍上回る。同じ prior が $S^z$ では 0.05 まで落ち、**縦に4桁散らばる**。 (b) その UHF を観測量ごとに分解すると $10^{3.1}$ から $10^{-2.7}$ まで振れ、境目は $\varepsilon=1$ に対応する。 (c) 系を大きくすると、タダの平均場が MPS を追い越す — W=4 では $\chi=64$ 相当、W=6 では $\chi=128$ すら上回る |
 | [crm_new_fig_globalshadow.png](crm_new_fig_globalshadow.png) | §2L | 1つのシャドウを全観測量で共有すると、 $\chi_p=2$ で個々の項は全て得なのに84項の和である全エネルギーは損をする |
 
 ## 付録: GitHub で数式を正しく表示させるための書式規則
@@ -1353,7 +1354,7 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 | 5 | **別行立ては `$$…$$` ではなくフェンス** ` ```math ` **を使う** | `$$…$$` は中身がインライン処理されるので規則3が効いてしまい、リスト内で複数行にまたがると数式として認識されない。フェンスなら中身が完全に保存される |
 | 6 | **`</details>` の直後には空行を入れる** | 空行がないと続く行が HTML ブロックの一部と見なされ、markdown も数式も処理されない |
 | 7 | **どうしても規則を満たせない式は退避形** `` $`…`$ `` **にする** | 前後を非英数字に挟まれた `_`(例 `C'_{aa}`、`\langle P\rangle\vert_{強}`)は強調として食われる。退避形なら中身がそのまま渡る |
-| 9 | **`<details>` の中では別行立てを ` ```math ` ではなく1行の `$$…$$` にする** | `<details>` 内にインライン数式 `$…$` を含む段落があると、それ以降の ` ```math ` フェンスが数式にならず `<pre lang="math">` のまま出る(段落に `$u$` が1つあるだけで再現。`$$` を独立行に置く形も不可、1行に収める必要がある)。規則5の唯一の例外 |
+| 9 | **`<details>` の中では別行立てを ` ```math ` ではなく1行の `$$…$$` にする** | `<details>` 内にインライン数式 ` $…$` を含む段落があると、それ以降の ` ```math ` フェンスが数式にならず `<pre lang="math">` のまま出る(段落に `$u$` が1つあるだけで再現。`$$` を独立行に置く形も不可、1行に収める必要がある)。規則5の唯一の例外 |
 | 10 | **1ファイルの数式は 1400個程度までに抑える** | GitHub は1ページあたり **1497個目まで**しか描画せず、それ以降は全て `Unable to render expression.` になる(実測: 2887個中1390個が失敗、境界は完全に順序どおり)。式の書き方の問題ではないので、ローカルで KaTeX に通しても検出できない。超えたらファイルを分割する |
 | 8 | **独自マクロ(`\ev` など)を使わない** | MathJax は物理系パッケージのマクロを知らないので赤いエラーになる。`\langle\cdot\rangle` と書く |
 
