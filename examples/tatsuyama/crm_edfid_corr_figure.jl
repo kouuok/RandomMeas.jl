@@ -44,38 +44,37 @@ bar!(pa, (1:length(OB)) .+ w/2, ca_s, bar_width=w*0.9, color=:steelblue, lw=0, l
 for (i,v) in enumerate(ca_g); annotate!(pa, i-w/2, v+0.045, text(@sprintf("%.2f",v), 6, :center)); end
 for (i,v) in enumerate(ca_s); annotate!(pa, i+w/2, v+0.045, text(@sprintf("%.2f",v), 6, :center)); end
 
-# ---------- (b) prior 群で符号が変わる ----------
-OB2 = ["ZZ onsite","ZZ up-up nb"]; LAB2 = ["ZZ onsite","ZZ up-up"]
-grp = [("MPS priors", x -> x != "UHF"), ("UHF", x -> x == "UHF")]
-vals = Dict{String,Vector{Float64}}()
-for (gname, f2) in grp
-    v = Float64[]
-    for o in OB2
-        m = base .& (obs .== o) .& isfinite.(G) .& [f2(p) for p in pri]
-        push!(v, spear(fs[m], G[m]))
-    end
-    vals[gname] = v
-end
-pb = plot(xticks=(1:2, LAB2), ylabel="Spearman ρ  (support fidelity vs G)",
-          title="(b) the sign flips with the kind of prior", ylims=(-1.15,1.0), legend=:bottomleft)
-bar!(pb, (1:2) .- w/2, vals["MPS priors"], bar_width=w*0.9, color=:steelblue, lw=0, label="MPS priors")
-bar!(pb, (1:2) .+ w/2, vals["UHF"],        bar_width=w*0.9, color=:firebrick, lw=0, label="UHF (mean field)")
-hline!(pb, [0.0], color=:black, lw=1.2, label="")
-for (i,v) in enumerate(vals["MPS priors"]); annotate!(pb, i-w/2, v+0.07, text(@sprintf("%+.2f",v), 7, :center)); end
-for (i,v) in enumerate(vals["UHF"]);        annotate!(pb, i+w/2, v-0.09, text(@sprintf("%+.2f",v), 7, :center)); end
-
-# ---------- (c) UHF: 忠実度が高いほど利得が低い ----------
-pc = plot(yscale=:log10, xlabel="fidelity on the support  F_A", ylabel="gain G  (onsite ZZ)",
-          title="(c) UHF on the on-site ZZ: the relation runs backwards",
-          legend=:topright, ylims=(0.7, 900))
-UC = [(2.0,:steelblue,:circle),(4.0,:seagreen,:rect),(8.0,:goldenrod,:utriangle),(12.0,:firebrick,:diamond)]
-for (u,cl,mk) in UC
+# ---------- (b) 見かけの逆相関は天井の効果 ----------
+Us = [2.0,4.0,8.0,12.0]
+raw = Float64[]; norm = Float64[]
+for u in Us
     m = base .& (obs .== "ZZ onsite") .& (pri .== "UHF") .& (U .== u) .& isfinite.(G)
-    ρ = spear(fs[m], G[m])
-    scatter!(pc, fs[m], G[m], ms=6, mc=cl, marker=mk, msw=0.3, alpha=0.85,
-             label=@sprintf("U = %d   ρ = %+.3f", Int(u), ρ))
+    push!(raw,  spear(fs[m], G[m]))
+    push!(norm, spear(fs[m], G[m] ./ F("G_max")[m]))
 end
-annotate!(pc, 0.60, 1.6, text("higher fidelity, lower gain — at every U.\n(ZZ up-up stays positive: see panel b)", 7, :left, :black))
+pb = plot(xticks=(1:4, ["2","4","8","12"]), xlabel="interaction U / t", ylabel="Spearman ρ",
+          title="(b) the apparent inversion is the ceiling, not the prior",
+          ylims=(-1.15,1.0), legend=:bottomright)
+w = 0.8/2
+bar!(pb, (1:4) .- w/2, raw,  bar_width=w*0.9, color=:firebrick, lw=0, label="F_A  vs  G")
+bar!(pb, (1:4) .+ w/2, norm, bar_width=w*0.9, color=:steelblue, lw=0, label="F_A  vs  G / G_max")
+hline!(pb, [0.0], color=:black, lw=1.2, label="")
+for (i,v) in enumerate(raw);  annotate!(pb, i-w/2, v-0.09, text(@sprintf("%+.2f",v), 6, :center)); end
+for (i,v) in enumerate(norm); annotate!(pb, i+w/2, v+(v<0 ? -0.09 : 0.06), text(@sprintf("%+.2f",v), 6, :center)); end
+annotate!(pb, 2.5, 0.72, text("dividing out the ceiling\nflips the sign at U = 8, 12", 7, :center, :black))
+
+# ---------- (c) 1D では F_A がほとんど動いていない ----------
+pc = plot(xlabel="fidelity on the support  F_A", ylabel="gain G  (onsite ZZ)",
+          title="(c) UHF at U = 8: the 1D points span 1e-4 in F_A",
+          legend=:bottomleft, ylims=(120, 245), xlims=(0.554, 0.605),
+          yticks=(120:20:240))
+for (d,cl,mk,lab) in (("1D",:steelblue,:circle,"1D chains (10 systems)"),
+                      ("2D",:firebrick,:rect,"2D lattices (6 systems)"))
+    m = base .& (obs .== "ZZ onsite") .& (pri .== "UHF") .& (U .== 8.0) .& (S("dim") .== d)
+    scatter!(pc, fs[m], G[m], ms=7, mc=cl, marker=mk, msw=0.3, alpha=0.85, label=lab)
+end
+annotate!(pc, 0.5588, 205, text("all ten 1D systems\nsit in this column:\nF_A = 0.55768 … 0.55780", 7, :left, :steelblue))
+annotate!(pc, 0.5735, 238, text("2D: higher F_A (smaller UHF moment)\nbut lower G (|⟨ZZ⟩| sets a lower ceiling)\n— two unrelated trends, not a relation", 7, :left, :black))
 
 fig = plot(pa, pb, pc, layout=(1,3), size=(1680,470), margin=7Plots.mm, bottom_margin=10Plots.mm)
 savefig(fig, joinpath(DIR,"crm_new_fig_edfid_corr.png"))
