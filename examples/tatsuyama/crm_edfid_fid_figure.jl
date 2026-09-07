@@ -9,8 +9,9 @@ A, h = readdlm(joinpath(DIR,"crm_edfid_all.tsv"), '\t'; header=true)
 h = vec(h); c(n) = findfirst(==(n), h)
 S(n) = String.(A[:, c(n)]); F(n) = Float64.(A[:, c(n)])
 obs, pri, exa = S("observable"), S("prior"), S("exact")
+sp1 = A[:, c("single_pauli")] .== true
 gf, fs, eps, G, Gm = F("global_fid"), F("F_supp"), F("eps"), F("G"), F("G_max")
-ok = (exa .== "yes") .& isfinite.(Gm) .& isfinite.(eps) .& (eps .> 0)
+ok = (exa .== "yes") .& sp1 .& isfinite.(Gm) .& isfinite.(eps) .& (eps .> 0)
 @printf("点数 %d\n", sum(ok))
 
 function spearman(x, y)
@@ -21,9 +22,9 @@ function spearman(x, y)
     (rx' * ry) / sqrt((rx' * rx) * (ry' * ry))
 end
 
-OBS = ["ZZ onsite","ZZ up-up nb","SzSz nb","SxSx nb","DoubleOcc","Sz"]
-COL = [:darkorange, :steelblue, :mediumpurple, :seagreen, :goldenrod, :gray55]
-MK  = [:circle, :utriangle, :diamond, :star5, :rect, :xcross]
+OBS = ["ZZ onsite","ZZ up-up nb"]
+COL = [:darkorange, :steelblue]
+MK  = [:circle, :utriangle]
 
 function panel(xv, yv, xlab, ylab, ttl; xl, yl, leg=false)
     p = plot(xscale=:log10, yscale=:log10, xlabel=xlab, ylabel=ylab, title=ttl,
@@ -50,7 +51,7 @@ pb = panel(fs, G, "fidelity on the support  F_A", "gain G",
            "(b) fidelity on the observable's own support"; xl=(3e-3,1.6), yl=(0.3,3e3))
 hline!(pb, [1.0], color=:black, ls=:dot, lw=1.3, label="")
 annotate!(pb, 3.4e-3, 1.6e3, text(@sprintf("Spearman ρ = %+.3f", ρ2), 8, :left, :black))
-annotate!(pb, 3.4e-3, 5.5e2, text("no better than (a)", 8, :left, :firebrick))
+annotate!(pb, 3.4e-3, 5.5e2, text("slightly WORSE than (a)", 8, :left, :firebrick))
 
 pc = panel(eps, ratio, "relative error  ε = |Δ| / |⟨P⟩|", "G / G_max",
            "(c) the relative error, against the ceiling"; xl=(1e-6,20.0), yl=(2e-4,2.0))

@@ -46,29 +46,29 @@ annotate!(pa, 11.6, 1.55, text(@sprintf("F support: %.4f at every L\ngain: %.0f 
 Us = [2.0,4.0,8.0,12.0]
 pu(o,q) = [ (m = (W.==1) .& (LX.==12) .& (geo.=="cylinder") .& (U.==u) .& (pri.=="UHF") .& (obs.==o);
              q[findfirst(m)]) for u in Us ]
-pb = plot(xscale=:log2, yscale=:log10, xlabel="interaction U / t", ylabel="gain G",
+pb = plot(xscale=:log2, yscale=:log10, xlabel="interaction U / t",
+          ylabel="relative error  ε = |Δ| / |⟨P⟩|",
           title="(b) charge and spin observables move in opposite directions",
-          legend=:left, xticks=(Us, ["2","4","8","12"]), ylims=(0.4, 1.2e3))
-for (o,lab,cl,mk) in (("ZZ onsite","ZZ onsite (charge)",:darkorange,:circle),
-                      ("DoubleOcc","double occupancy (charge)",:goldenrod,:rect))
-    plot!(pb, Us, pu(o,G), marker=mk, ms=6, lw=2.4, color=cl, label=lab)
+          legend=:left, xticks=(Us, ["2","4","8","12"]), ylims=(8e-3, 3.0))
+for (o,lab,cl,mk) in (("ZZ onsite","ZZ onsite = double occ. (charge)",:darkorange,:circle),)
+    plot!(pb, Us, pu(o,eps), marker=mk, ms=6, lw=2.4, color=cl, label=lab)
 end
 for (o,lab,cl,mk) in (("ZZ up-up nb","ZZ up-up (spin)",:steelblue,:utriangle),
                       ("SzSz nb","SzSz (spin)",:mediumpurple,:diamond),
                       ("SxSx nb","SxSx (spin)",:seagreen,:star5))
-    plot!(pb, Us, pu(o,G), marker=mk, ms=6, lw=2.4, ls=:dash, color=cl, label=lab)
+    plot!(pb, Us, pu(o,eps), marker=mk, ms=6, lw=2.4, ls=:dash, color=cl, label=lab)
 end
-hline!(pb, [1.0], color=:black, ls=:dot, lw=1.5, label="G = 1 (break-even)")
-annotate!(pb, 9.0, 6e2, text("×200", 8, :left, :darkorange))
-annotate!(pb, 9.0, 0.52, text("crosses into loss", 7, :left, :steelblue))
+hline!(pb, [1.0], color=:black, ls=:dot, lw=1.5, label="ε = 1 (break-even)")
+annotate!(pb, 8.4, 1.4e-2, text("÷34", 8, :left, :darkorange))
+annotate!(pb, 3.0, 1.35, text("crosses into loss", 7, :left, :steelblue))
 
 # ---------- (c) 全点: 大域忠実度と利得 ----------
 pc = plot(xscale=:log10, yscale=:log10, xlabel="global fidelity  F(ρ, σ)", ylabel="gain G",
-          title="(c) all 3920 exact points: F does not determine G",
+          title=@sprintf("(c) all %d exact single-Pauli points: F does not determine G", sum(ok)),
           legend=:bottomleft, xlims=(3e-5, 2.0), ylims=(0.3, 3e3))
 mps = ok .& (pri .!= "UHF"); uhf = ok .& (pri .== "UHF")
-scatter!(pc, max.(gf[mps],3e-5), max.(G[mps],0.3), ms=2.4, mc=:steelblue, msw=0,
-         alpha=0.32, label="MPS priors (χ_p = 2–256)")
+scatter!(pc, max.(gf[mps],3e-5), max.(G[mps],0.3), ms=2.6, mc=:steelblue, msw=0,
+         alpha=0.38, label="MPS priors (χ_p = 2–256)")
 scatter!(pc, max.(gf[uhf],3e-5), max.(G[uhf],0.3), ms=4.2, mc=:firebrick, msw=0.3,
          alpha=0.8, marker=:star5, label="UHF (mean field)")
 hline!(pc, [1.0], color=:black, ls=:dot, lw=1.5, label="G = 1")
