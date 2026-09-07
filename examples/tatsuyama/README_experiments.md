@@ -903,7 +903,11 @@ CRMは統計学の**制御変量法**のβ=1特殊例と見なせる:
 
 ## 10. 厳密基底状態を参照にした prior の総当たり(1D/2D、OBC/PBC、U 走査)
 
-スクリプト: [crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) / [.pbs](crm_2d_edfid.pbs) / 統合データ: [crm_edfid_all.tsv](crm_edfid_all.tsv)
+スクリプト: [crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) / [.pbs](crm_2d_edfid.pbs)
+
+**全データ(4424行)は1つの表にまとめてある**: [crm_edfid_all.tsv](crm_edfid_all.tsv)(生データ)/ [crm_edfid_atlas.html](crm_edfid_atlas.html)(絞り込みと並べ替えができる版。次元・サイズ・境界条件・ $U$ ・prior・観測量で絞れる)
+
+列は `dim W LX nsites geometry bipartite U Eref Hvar exact prior global_fid observable nA F_supp D_supp true prior_val Delta eps G G_max` の22。 `exact` は $\langle H^2\rangle-\langle H\rangle^2<10^{-8}$ かどうか、 `Hvar` はその値そのもの。
 
 これまで「利得」「大域忠実度」「台の忠実度」は別々のデータセットに散っていて、しかも参照状態が DMRG のものが混ざっていた。ここで**1つのスクリプトで全部を同時に測り直す**。
 

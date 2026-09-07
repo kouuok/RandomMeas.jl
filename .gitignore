@@ -16,3 +16,7 @@
 *.out
 *.toc
 *.synctex.gz
+*.fls
+*.fdb_latexmk
+.katex_check.html
+.atlas_preview.html
