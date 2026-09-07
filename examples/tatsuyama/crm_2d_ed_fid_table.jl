@@ -82,37 +82,55 @@ function slater_mps(sites, Φu, Φd, Nup, Ndn; maxdim=2048, cutoff=1e-15)
     normalize!(ψ); ψ
 end
 
-"""サイト集合 ss(1〜2サイト)の縮約密度行列。ITensor の Electron 基底
-   |0>,|up>,|dn>,|updn> は そのまま (upキュービット ⊗ dnキュービット) である。"""
+"""サイト集合 ss(1〜2サイト)の縮約密度行列を、ITensor の Electron 局所基底
+   |0>,|up>,|dn>,|updn> の順序のまま返す。"""
 function site_rdm(ψ::MPS, ss::Vector{Int})
-    ϕ = orthogonalize(ψ, first(ss))
-    s = siteinds(ψ)
+    ϕ = orthogonalize(ψ, first(ss)); s = siteinds(ψ)
     if length(ss) == 1
-        A = ϕ[ss[1]]
-        ρ = prime(A, s[ss[1]]) * dag(A)
+        A = ϕ[ss[1]]; ρ = prime(A, s[ss[1]]) * dag(A)
         return Array(ρ, prime(s[ss[1]]), s[ss[1]])
     else
         a, b = ss
         A = ϕ[a]; for k in a+1:b; A *= ϕ[k] end
         ρ = prime(A, s[a], s[b]) * dag(A)
-        M = Array(ρ, prime(s[a]), prime(s[b]), s[a], s[b])
-        return reshape(permutedims(M, (1,2,3,4)), 16, 16)
+        M = Array(ρ, prime(s[a]), prime(s[b]), s[a], s[b])   # (ia', ib', ia, ib)
+        out = zeros(ComplexF64, 16, 16)
+        for ia in 1:4, ib in 1:4, ja in 1:4, jb in 1:4
+            out[(ia-1)*4+ib, (ja-1)*4+jb] = M[ia, ib, ja, jb]   # |a>⊗|b> の順に並べ直す
+        end
+        return out
     end
 end
 
-"""4^k の RDM から、残すキュービット集合 keep(サイトごとに (:up,:dn) を並べた
-   2k キュービットのうち)に縮約する。"""
-function qubit_rdm(ρ::Matrix, nq::Int, keep::Vector{Int})
-    d = 2^nq; @assert size(ρ,1) == d
-    out = zeros(ComplexF64, 2^length(keep), 2^length(keep))
-    tr_ = setdiff(1:nq, keep)
-    bit(i,q) = (i >> (nq-q)) & 1
-    idx(i) = sum(bit(i,q) << (length(keep)-k) for (k,q) in enumerate(keep); init=0)
-    for i in 0:d-1, j in 0:d-1
-        all(bit(i,q) == bit(j,q) for q in tr_) || continue
-        out[idx(i)+1, idx(j)+1] += ρ[i+1, j+1]
+# Electron 局所基底の番号 i(1..4)を (上向き占有, 下向き占有) に分解する。
+#   1=|0>→(0,0)  2=|up>→(1,0)  3=|dn>→(0,1)  4=|updn>→(1,1)
+locbits(i) = ((i-1) & 1, ((i-1) >> 1) & 1)
+
+"""k サイト(k≤2)の RDM から、指定したモードだけに縮約する。
+   modes は (サイトの何番目, :up または :dn) の並び。残りのモードはトレースする。"""
+function mode_rdm(ρ::Matrix, k::Int, modes::Vector{Tuple{Int,Symbol}})
+    nk = length(modes); d = 4^k
+    @assert size(ρ,1) == d
+    sel(i_vec, (p, m)) = m === :up ? locbits(i_vec[p])[1] : locbits(i_vec[p])[2]
+    allm = [(p,m) for p in 1:k for m in (:up,:dn)]
+    tr_  = setdiff(allm, modes)
+    unpack(I) = k == 1 ? (I,) : (div(I-1,4)+1, mod(I-1,4)+1)
+    idx(v) = 1 + sum((sel(v,mm) << (nk-t)) for (t,mm) in enumerate(modes); init=0)
+    out = zeros(ComplexF64, 2^nk, 2^nk)
+    for I in 1:d, J in 1:d
+        vi = unpack(I); vj = unpack(J)
+        all(sel(vi,mm) == sel(vj,mm) for mm in tr_) || continue
+        out[idx(vi), idx(vj)] += ρ[I, J]
     end
     out
+end
+
+"""自己検証: 縮約した RDM から求めた期待値が MPO の値と一致するか。"""
+function check_rdm(name, ρq, modes, P_mpo)
+    nk = length(modes)
+    diagv = [prod((( (i >> (nk-t)) & 1) == 1 ? -1.0 : 1.0) for t in 1:nk) for i in 0:2^nk-1]
+    val = real(sum(diagv[i+1]*ρq[i+1,i+1] for i in 0:2^nk-1))   # Z...Z の期待値
+    (name, val, P_mpo)
 end
 
 fid(ρ::Matrix, σ::Matrix) = begin
@@ -166,25 +184,43 @@ function main()
 
     c0 = sidx(max(1,cld(LX,2)), max(1,cld(W,2)))
     nb = first(b for (a,b) in edges if a == c0)
-    # (名前, 演算子, キュービット台の大きさ, 台のサイト, サイト内で残すキュービット)
+    # (名前, 演算子, キュービット台の大きさ, 台のサイト, 残すモード)
+    ss1 = [c0]; ss2 = sort([c0,nb]); pa = c0 < nb ? 1 : 2; pb = 3 - pa
     obs = Any[
-      ("ZZ onsite", let q=OpSum(); q += 4.0,"Nupdn",c0; q += -2.0,"Nup",c0; q += -2.0,"Ndn",c0; q += 1.0,"Id",c0; q end, 2, [c0], [1,2]),
-      ("ZZ up-up nb", let q=OpSum(); q += 4.0,"Nup",c0,"Nup",nb; q += -2.0,"Nup",c0; q += -2.0,"Nup",nb; q += 1.0,"Id",c0; q end, 2, sort([c0,nb]), [1,3]),
-      ("SzSz nb", let q=OpSum(); q += 1.0,"Sz",c0,"Sz",nb; q end, 4, sort([c0,nb]), [1,2,3,4]),
-      ("DoubleOcc", let q=OpSum(); q += 1.0,"Nupdn",c0; q end, 2, [c0], [1,2]),
-      ("Sz", let q=OpSum(); q += 1.0,"Sz",c0; q end, 2, [c0], [1,2]) ]
+      ("ZZ onsite", let q=OpSum(); q += 4.0,"Nupdn",c0; q += -2.0,"Nup",c0; q += -2.0,"Ndn",c0; q += 1.0,"Id",c0; q end,
+        2, ss1, [(1,:up),(1,:dn)]),
+      ("ZZ up-up nb", let q=OpSum(); q += 4.0,"Nup",c0,"Nup",nb; q += -2.0,"Nup",c0; q += -2.0,"Nup",nb; q += 1.0,"Id",c0; q end,
+        2, ss2, [(pa,:up),(pb,:up)]),
+      ("SzSz nb", let q=OpSum(); q += 1.0,"Sz",c0,"Sz",nb; q end,
+        4, ss2, [(pa,:up),(pa,:dn),(pb,:up),(pb,:dn)]),
+      ("SxSx nb", let q=OpSum()
+          q += 0.25,"S+",c0,"S+",nb; q += 0.25,"S+",c0,"S-",nb
+          q += 0.25,"S-",c0,"S+",nb; q += 0.25,"S-",c0,"S-",nb; q end,
+        4, ss2, [(pa,:up),(pa,:dn),(pb,:up),(pb,:dn)]),
+      ("DoubleOcc", let q=OpSum(); q += 1.0,"Nupdn",c0; q end, 2, ss1, [(1,:up),(1,:dn)]),
+      ("n", let q=OpSum(); q += 1.0,"Nup",c0; q += 1.0,"Ndn",c0; q end, 2, ss1, [(1,:up),(1,:dn)]),
+      ("Sz", let q=OpSum(); q += 1.0,"Sz",c0; q end, 2, ss1, [(1,:up),(1,:dn)]) ]
+
+    # 自己検証: ZZ onsite / ZZ up-up は Z...Z 型なので RDM から出した値が MPO と一致するはず
+    for (name, op, nA, ss, modes) in obs
+        name in ("ZZ onsite","ZZ up-up nb") || continue
+        Pm = real(inner(ψ', MPO(op, sites), ψ))
+        ρq = mode_rdm(site_rdm(ψ, ss), length(ss), modes)
+        (_, v, _) = check_rdm(name, ρq, modes, Pm)
+        @printf("  検証 %-14s RDMから %+.10f  MPOから %+.10f  差 %.2e\n", name, v, Pm, abs(v-Pm))
+        abs(v-Pm) < 1e-8 || error("台の縮約が MPO と一致しない: $name")
+    end
 
     fn = joinpath(@__DIR__, @sprintf("crm_2d_edfid_W%dL%d_%s_U%.1f.tsv", W, LX, geo, U))
     open(fn,"w") do io
         println(io, "W\tLX\tnsites\tgeometry\tbipartite\tU\tEref\tHvar\tprior\tglobal_fid\t"*
                     "observable\tnA\tF_supp\tD_supp\ttrue\tprior_val\tDelta\teps\tG\tG_max")
-        for (name, op, nA, ss, keep) in obs
+        for (name, op, nA, ss, modes) in obs
             Op = MPO(op, sites); P = real(inner(ψ', Op, ψ))
-            nq = 2*length(ss)
-            ρq = qubit_rdm(site_rdm(ψ, ss), nq, keep)
+            ρq = mode_rdm(site_rdm(ψ, ss), length(ss), modes)
             for (l,σ,F) in zip(labels, priors, fids)
                 Pσ = real(inner(σ', Op, σ)); Δ = P - Pσ
-                σq = qubit_rdm(site_rdm(σ, ss), nq, keep)
+                σq = mode_rdm(site_rdm(σ, ss), length(ss), modes)
                 Fs = fid(ρq, σq); Ds = 0.5*sum(abs, eigvals(Hermitian(ρq - σq)))
                 eps = abs(P) > 1e-12 ? abs(Δ)/abs(P) : NaN
                 @printf(io, "%d\t%d\t%d\t%s\t%s\t%.1f\t%.10f\t%.3e\t%s\t%.10e\t%s\t%d\t%.8f\t%.8e\t%.10f\t%.10f\t%.6e\t%.6e\t%.6f\t%.6f\n",
