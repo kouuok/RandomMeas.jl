@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N crm2dedfid
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=72:00:00
+#PBS -j oe
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export W="${W:-2}" LX="${LX:-4}" PBC="${PBC:-0}" CRM_U="${CRM_U:-8.0}" CHIMAX="${CHIMAX:-0}"
+export DMRG_BLAS=16 JULIA_NUM_THREADS=1
+export JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+GEO=$([ "$PBC" = "1" ] && echo torus || echo cylinder)
+echo "host=$(hostname) W=${W} LX=${LX} ${GEO} U=${CRM_U} chimax=${CHIMAX} start=$(date)"
+julia --project=Hubbard_MPS_Env_v2 crm_2d_ed_fid_table.jl 2>&1 \
+  | tee "crm_2d_edfid_W${W}L${LX}_${GEO}_progress.log"
+echo "end=$(date)"
