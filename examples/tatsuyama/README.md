@@ -1260,6 +1260,12 @@ $L=8$ 、 $U=4$ 、半充填、 $n_m=100$ 、n_repeat=300。 $G$ は $n_u=50$ �
 
 → **[README_2m.md](README_2m.md) を参照**
 
+## 10. 厳密基底状態を参照にした prior の総当たり → **[README_prior_survey.md](README_prior_survey.md)**
+
+1D/2D、OBC/PBC、 $U=2,4,8,12$ の **72系4424点**。参照 $\rho$ を厳密な基底状態にして、平均場と各 $\chi_p$ の MPS を prior として、**利得・大域忠実度・台の忠実度を同時に**測ったもの。これまでの主張をこのデータで当て直し、3つに限定を付けた。
+
+→ **[README_prior_survey.md](README_prior_survey.md) を参照**
+
 ## 2b–9. 個別の実験 → **[README_experiments.md](README_experiments.md)**
 
 サイト分解、ボンド量の振動、最適係数CRM、必要ボンド次元、ショット配分と相図、2Dシリンダー、matchgateシャドウ、derandomization との比較、W=6 スケールアップ、ドープ系の相図。
