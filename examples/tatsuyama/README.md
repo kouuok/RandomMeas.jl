@@ -1266,6 +1266,10 @@ $L=8$ 、 $U=4$ 、半充填、 $n_m=100$ 、n_repeat=300。 $G$ は $n_u=50$ �
 
 → **[README_prior_survey.md](README_prior_survey.md) を参照**
 
+## 利得法則の検証(128量子ビットまで) → **[README_gainlaw.md](README_gainlaw.md)**
+
+§10 の利得はすべて法則からの計算値なので、実測と突き合わせた。**288点すべてで一致**(中央値ちょうど 1.0000、統計誤差の範囲)。単一 Pauli 列なら $\langle P\rangle$ ひとつでシャドウ測定を厳密に模擬できることを使っている。
+
 ## 2b–9. 個別の実験 → **[README_experiments.md](README_experiments.md)**
 
 サイト分解、ボンド量の振動、最適係数CRM、必要ボンド次元、ショット配分と相図、2Dシリンダー、matchgateシャドウ、derandomization との比較、W=6 スケールアップ、ドープ系の相図。

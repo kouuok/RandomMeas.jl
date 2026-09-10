@@ -11,6 +11,7 @@
 | **個別の実験(§2b–§9)** | [README_experiments.md](README_experiments.md) |
 | **要約** | [SUMMARY.md](SUMMARY.md) |
 | **全データ** | [crm_edfid_all.tsv](crm_edfid_all.tsv)(生)/ [crm_edfid_atlas.html](crm_edfid_atlas.html)(絞り込み可) |
+| **利得法則の検証** | [README_gainlaw.md](README_gainlaw.md) — 本節の $G$ は全て法則値。128量子ビットまで288点で実測と照合済み |
 
 スクリプト: [crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) / [.pbs](crm_2d_edfid.pbs) — 1D は $W=1$ として**同じコード**を使うので、次元による方法論の差がない。
 
