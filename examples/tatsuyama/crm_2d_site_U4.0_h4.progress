@@ -1,0 +1,39 @@
+=== 2D site-resolved: W=4 Lx=8 (N=64 qubits), U=4.0, nhole=4 ===
+DMRG: E0=-87.431630  N_el=28  maxlinkdim=512  (510s)
+  UHF init=neel    E=-27.292766
+  UHF init=stripe  E=-27.786914
+  UHF init=random  E=-27.786914
+  -> selected init=random (E=-27.786914)
+prior fidelities: chi8=1.483e-03, chi32=2.303e-01, exact=1.000e+00
+  site 4/32 (530s)
+  site 8/32 (531s)
+  site 12/32 (532s)
+  site 16/32 (532s)
+  site 20/32 (533s)
+  site 24/32 (533s)
+  site 28/32 (534s)
+  site 32/32 (534s)
+results saved: /home/tatsuyama/RandomMeas.jl/examples/tatsuyama/crm_2d_site_U4p0_h4.tsv
+
+[ZZ onsite] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     4.51e-01 5.46e-01 2.06e-01 4.05e-01 2.10e-01 1.26e-01 2.86e-01 3.20e-01        4.3
+chi32    9.38e-02 1.18e-01 6.71e-02 6.96e-02 4.50e-02 5.22e-02 7.57e-02 8.79e-02        2.6
+UHF      2.25e-01 1.03e-02 4.59e-01 1.13e+00 1.13e+00 4.58e-01 1.27e-02 2.28e-01      109.3
+
+[DoubleOcc] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     1.69e-01 2.53e-01 4.02e-01 2.12e-01 2.50e-01 6.51e-01 1.22e-01 2.17e-01        5.3
+chi32    4.00e-02 5.07e-02 1.39e-01 3.73e-02 7.95e-02 2.15e-01 7.03e-02 5.79e-02        5.8
+UHF      1.74e-01 2.20e-01 4.22e-01 2.77e-01 2.80e-01 4.24e-01 2.21e-01 1.79e-01        2.4
+
+[SzSz nb] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     5.48e-01 2.42e-01 1.85e+00 6.96e-01 2.67e-01 3.04e+00 6.76e-01 4.16e-01       12.6
+chi32    1.23e-01 1.72e-01 2.44e-01 8.31e-02 4.73e-02 2.89e-01 1.63e-01 1.16e-01        6.1
+UHF      2.16e+00 1.69e+00 1.55e+00 5.15e-01 5.13e-01 1.55e+00 1.70e+00 2.16e+00        4.2
+
+列ごとの電子密度 <n> と スタッガード磁化
+x                 1        2        3        4        5        6        7        8
+<n>           0.896    0.892    0.839    0.875    0.874    0.838    0.891    0.895
+m_stag        0.000    0.000    0.000   -0.000    0.000    0.000    0.000    0.007

@@ -13,6 +13,8 @@ const PBC = get(ENV,"PBC","0") == "1"
 const U   = parse(Float64, get(ENV,"CRM_U","8.0"))
 const NM  = parse(Int, get(ENV,"CRM_NM","100"))
 const CHIMAX = parse(Int, get(ENV,"CHIMAX","0"))   # 0 なら 4^(n/2) を使う
+const CUTOFF = parse(Float64, get(ENV,"CUTOFF","0.0"))  # 0 なら切断なし(小さい系)
+const SWPER  = parse(Int, get(ENV,"SWEEPS_PER","6"))
 sidx(x,y) = (x-1)*W + y
 
 function lat_edges(Lx, Wd; pbc_x::Bool)
@@ -149,9 +151,9 @@ function main()
     edges = lat_edges(LX, W; pbc_x=PBC)
     geo = PBC ? "torus" : "cylinder"
     bip = bipartite(edges, n)
-    chimax = CHIMAX > 0 ? CHIMAX : min(4^(n÷2), 8192)
-    @printf("%s %dx%d  n=%d  ボンド %d  二部格子:%s  厳密化に要る χ=4^%d=%d (使用 %d)\n",
-            geo, LX, W, n, length(edges), bip ? "はい" : "いいえ(奇環)", n÷2, 4^(n÷2), chimax)
+    chimax = CHIMAX > 0 ? CHIMAX : min(n÷2 >= 32 ? typemax(Int) : 4^(n÷2), 8192)
+    @printf("%s %dx%d  n=%d  ボンド %d  二部格子:%s  最悪値 χ=4^%d (使用 %d)\n",
+            geo, LX, W, n, length(edges), bip ? "はい" : "いいえ(奇環)", n÷2, chimax)
 
     sites = siteinds("Electron", n; conserve_qns=true)
     os = OpSum()
@@ -162,8 +164,16 @@ function main()
     for s in 1:n; os += U,"Nupdn",s end
     H = MPO(os, sites)
     st = [isodd(sum(divrem(s-1,W))) ? "Up" : "Dn" for s in 1:n]
+    # 結合次元をランプさせる。必要な χ が小さい系で上限から始めると初期スイープが
+    # 無駄に重くなる(L=28 は χ≈380 で足りるのに上限 8192 だと5.5時間、ランプ後は数分)。
+    # ノイズ項は Néel 初期状態からの局所解を抜けるために要る(L≥40 で収束不足になった)。
+    sched = Int[]; cc = 64
+    while cc < chimax; push!(sched, cc); cc *= 2 end
+    push!(sched, chimax)
+    md = vcat([fill(d, SWPER) for d in sched]...)
     E, ψ = dmrg(H, random_mps(sites, st; linkdims=32);
-                nsweeps=60, maxdim=chimax, cutoff=0.0, outputlevel=0)
+                nsweeps=length(md)+30, maxdim=vcat(md, fill(chimax,30)),
+                cutoff=CUTOFF, noise=[1e-6,1e-7,1e-8,1e-9,0.0], outputlevel=0)
     normalize!(ψ)
     Hψ = apply(H, ψ; cutoff=1e-16)
     var = real(inner(Hψ,Hψ) - E^2)
@@ -173,7 +183,7 @@ function main()
     ψu = slater_mps(sites, uhf.Φu, uhf.Φd, Nup, Ndn)
     @printf("UHF: 磁化 m=%.4f  χ=%d\n", uhf.m, maxlinkdim(ψu))
 
-    chis = [2,4,8,16,32,64,128,256]
+    chis = [2,4,8,16,32,64,128,256,512]
     filter!(c -> c < maxlinkdim(ψ), chis)
     priors = Any[]; labels = String[]; fids = Float64[]
     for c in chis

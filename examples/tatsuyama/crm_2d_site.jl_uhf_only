@@ -1,0 +1,110 @@
+using LinearAlgebra, Statistics, Printf, Random
+const W  = 4
+const LX = 8
+sidx(x, y) = (x - 1) * W + y
+
+function cyl_edges(Lx, W)
+    edges = Tuple{Int,Int}[]
+    for x in 1:Lx, y in 1:W
+        s = sidx(x, y)
+        x < Lx && push!(edges, (s, sidx(x+1, y)))
+        push!(edges, (s, sidx(x, y == W ? 1 : y + 1)))
+    end
+    return edges
+end
+
+function hubbard_cyl_mpo(sites, Lx, W, t, U, mu)
+    os = OpSum()
+    for (s, s2) in cyl_edges(Lx, W)
+        for q in (qup, qdn)
+            os += -t, "Cdag", q(s), "C", q(s2)
+            os += -t, "Cdag", q(s2), "C", q(s)
+        end
+    end
+    for s in 1:Lx*W
+        os += U, "N", qup(s), "N", qdn(s)
+        os += -mu, "N", qup(s)
+        os += -mu, "N", qdn(s)
+    end
+    return MPO(os, sites)
+end
+
+function ground_state_cyl(Lx, W, t, U, mu; chi_max=512, nsweeps=14, nhole=0)
+    n = Lx * W; N = 2n
+    sites = siteinds("Fermion", N; conserve_qns=true)
+    H = hubbard_cyl_mpo(sites, Lx, W, t, U, mu)
+    occ = falses(N)
+    for x in 1:Lx, y in 1:W
+        s = sidx(x, y)
+        isodd(x + y) ? (occ[qup(s)] = true) : (occ[qdn(s)] = true)
+    end
+    # ホールは中央の列から等間隔に抜く（ストライプが立ちやすい初期条件）
+    if nhole > 0
+        cand = [sidx(x, y) for x in 1:Lx for y in 1:W]
+        pick = [cand[round(Int, (k - 0.5) * length(cand) / nhole)] for k in 1:nhole]
+        for s in unique(pick)
+            occ[qup(s)] = false; occ[qdn(s)] = false
+        end
+    end
+    ψ0 = productMPS(sites, [occ[q] ? "Occ" : "Emp" for q in 1:N])
+    ramp = vcat([50, 100, 200, 400], fill(chi_max, max(0, nsweeps - 4)))
+    maxdims = min.(chi_max, ramp)[1:nsweeps]
+    noise = vcat([1e-5, 1e-6, 1e-7, 1e-8, 1e-9], zeros(max(0, nsweeps - 5)))[1:nsweeps]
+    E, ψ = dmrg(H, ψ0; nsweeps, maxdim=maxdims, cutoff=1e-10, noise, outputlevel=0)
+    return E, ψ, count(occ)
+end
+
+# ------------------------------------------------------------
+# UHF平均場 prior (crm_2d_doped.jl と同じ実装)
+# ------------------------------------------------------------
+function hopping_matrix(Lx, W, t)
+    n = Lx * W; T = zeros(n, n)
+    for (s, s2) in cyl_edges(Lx, W); T[s, s2] = T[s2, s] = -t; end
+    return T
+end
+
+function solve_uhf(Lx, W, t, U; Nup, Ndn, iters=3000, tol=1e-11, init=:neel)
+    n = Lx * W; T = hopping_matrix(Lx, W, t)
+    nup = zeros(n); ndn = zeros(n); fill_avg = (Nup + Ndn) / (2n)
+    for x in 1:Lx, y in 1:W
+        s = sidx(x, y)
+        if init == :neel
+            nup[s] = fill_avg + 0.4 * (-1)^(x + y); ndn[s] = fill_avg - 0.4 * (-1)^(x + y)
+        elseif init == :stripe
+            wall = Lx / 2 + 0.5; dom = x <= Lx ÷ 2 ? 1.0 : -1.0
+            hole = 0.35 * exp(-abs(x - wall))
+            nup[s] = fill_avg - hole + dom * 0.4 * (-1)^(x + y)
+            ndn[s] = fill_avg - hole - dom * 0.4 * (-1)^(x + y)
+        else
+            nup[s] = fill_avg + 0.3 * (rand() - 0.5); ndn[s] = fill_avg + 0.3 * (rand() - 0.5)
+        end
+    end
+    clamp!(nup, 0.02, 0.98); clamp!(ndn, 0.02, 0.98)
+    nup .*= Nup / sum(nup); ndn .*= Ndn / sum(ndn)
+    local Fu, Fd
+    for _ in 1:iters
+        Fu = eigen(Symmetric(T + diagm(U .* ndn))); Fd = eigen(Symmetric(T + diagm(U .* nup)))
+        new_up = vec(sum(abs2, Fu.vectors[:, 1:Nup]; dims=2))
+        new_dn = vec(sum(abs2, Fd.vectors[:, 1:Ndn]; dims=2))
+        if max(maximum(abs.(new_up .- nup)), maximum(abs.(new_dn .- ndn))) < tol
+            nup, ndn = new_up, new_dn; break
+        end
+        nup = 0.5 .* new_up .+ 0.5 .* nup; ndn = 0.5 .* new_dn .+ 0.5 .* ndn
+    end
+    Φu = Fu.vectors[:, 1:Nup]; Φd = Fd.vectors[:, 1:Ndn]
+    Cu = Φu * Φu'; Cd = Φd * Φd'
+    E = tr(T * Cu) + tr(T * Cd) + U * sum(diag(Cu) .* diag(Cd))
+    return (nup=diag(Cu), ndn=diag(Cd), Cu=Cu, Cd=Cd, E=E)
+end
+
+function solve_uhf_best(Lx, W, t, U; Nup, Ndn)
+    Random.seed!(31); best = nothing
+    for ini in (:neel, :stripe, :random)
+        uhf = solve_uhf(Lx, W, t, U; Nup, Ndn, init=ini)
+        @printf("  UHF init=%-7s E=%.6f\n", ini, uhf.E)
+        (best === nothing || uhf.E < best[2].E) && (best = (ini, uhf))
+    end
+    @printf("  -> selected init=%s (E=%.6f)\n", best[1], best[2].E)
+    return best[2]
+end
+

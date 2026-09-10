@@ -1,0 +1,10 @@
+#!/bin/bash
+#PBS -N crmreach
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=72:00:00
+#PBS -j oe
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export W="${W:-1}" LX="${LX:-16}" PBC="${PBC:-0}" CRM_U="${CRM_U:-8.0}"
+export CUTOFF="${CUTOFF:-1e-13}" CHIMAX="${CHIMAX:-8192}"
+export DMRG_BLAS=16 JULIA_NUM_THREADS=1 JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+julia --project=Hubbard_MPS_Env_v2 crm_exact_reach.jl

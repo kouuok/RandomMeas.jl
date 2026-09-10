@@ -1,0 +1,39 @@
+=== 2D site-resolved: W=4 Lx=8 (N=64 qubits), U=8.0, nhole=0 ===
+DMRG: E0=-144.059374  N_el=32  maxlinkdim=512  (796s)
+  UHF init=neel    E=-13.970921
+  UHF init=stripe  E=-13.121175
+  UHF init=random  E=-12.507360
+  -> selected init=neel (E=-13.970921)
+prior fidelities: chi8=1.951e-01, chi32=6.235e-01, exact=1.000e+00
+  site 4/32 (824s)
+  site 8/32 (825s)
+  site 12/32 (826s)
+  site 16/32 (827s)
+  site 20/32 (828s)
+  site 24/32 (829s)
+  site 28/32 (830s)
+  site 32/32 (831s)
+results saved: /home/tatsuyama/RandomMeas.jl/examples/tatsuyama/crm_2d_site_U8p0_h0.tsv
+
+[ZZ onsite] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     1.18e-01 1.79e-01 1.76e-01 1.78e-01 1.78e-01 1.75e-01 1.83e-01 1.14e-01        1.6
+chi32    2.30e-02 5.25e-02 6.22e-02 6.05e-02 6.10e-02 5.96e-02 5.51e-02 2.59e-02        2.7
+UHF      2.41e-02 1.89e-02 1.72e-02 1.81e-02 1.81e-02 1.72e-02 1.89e-02 2.41e-02        1.4
+
+[DoubleOcc] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     5.45e-01 6.47e-01 6.44e-01 6.45e-01 6.47e-01 6.38e-01 6.60e-01 5.25e-01        1.3
+chi32    1.06e-01 1.91e-01 2.26e-01 2.20e-01 2.22e-01 2.18e-01 1.99e-01 1.19e-01        2.1
+UHF      1.11e-01 6.84e-02 6.26e-02 6.57e-02 6.57e-02 6.26e-02 6.84e-02 1.11e-01        1.8
+
+[SzSz nb] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     1.47e-01 3.21e-01 3.15e-01 3.20e-01 3.20e-01 3.23e-01 3.23e-01 1.61e-01        2.2
+chi32    6.26e-02 1.18e-01 1.37e-01 1.36e-01 1.35e-01 1.31e-01 1.02e-01 5.99e-02        2.3
+UHF      8.73e-01 1.17e+00 1.13e+00 1.14e+00 1.14e+00 1.13e+00 1.17e+00 8.73e-01        1.3
+
+列ごとの電子密度 <n> と スタッガード磁化
+x                 1        2        3        4        5        6        7        8
+<n>           1.000    1.000    1.000    1.000    1.000    1.000    1.000    1.000
+m_stag       -0.001   -0.001   -0.001   -0.001   -0.001   -0.001   -0.001   -0.001

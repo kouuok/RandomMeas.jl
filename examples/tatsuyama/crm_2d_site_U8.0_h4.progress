@@ -1,0 +1,39 @@
+=== 2D site-resolved: W=4 Lx=8 (N=64 qubits), U=8.0, nhole=4 ===
+DMRG: E0=-135.174107  N_el=28  maxlinkdim=512  (523s)
+  UHF init=neel    E=-17.972289
+  UHF init=stripe  E=-17.824734
+  UHF init=random  E=-17.966412
+  -> selected init=neel (E=-17.972289)
+prior fidelities: chi8=1.340e-02, chi32=3.571e-01, exact=1.000e+00
+  site 4/32 (542s)
+  site 8/32 (543s)
+  site 12/32 (544s)
+  site 16/32 (545s)
+  site 20/32 (545s)
+  site 24/32 (546s)
+  site 28/32 (546s)
+  site 32/32 (547s)
+results saved: /home/tatsuyama/RandomMeas.jl/examples/tatsuyama/crm_2d_site_U8p0_h4.tsv
+
+[ZZ onsite] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     1.38e-01 1.04e-01 1.25e-01 1.86e-01 3.50e-02 9.91e-02 1.58e-01 1.81e-01        5.3
+chi32    5.23e-02 5.98e-02 2.30e-02 3.20e-02 2.91e-02 4.92e-02 7.81e-02 5.03e-02        3.4
+UHF      1.78e-01 3.68e-01 5.13e-01 4.07e-01 3.83e-01 9.50e-01 4.25e-01 9.71e-02        9.8
+
+[DoubleOcc] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     2.64e-01 4.69e-01 3.48e-01 4.43e-01 1.01e-01 1.13e-01 2.33e-01 3.19e-01        4.7
+chi32    9.24e-02 1.89e-01 2.56e-01 1.59e-01 1.39e-01 2.63e-01 1.82e-01 1.16e-01        2.8
+UHF      2.59e-02 1.55e-01 2.82e-01 1.91e-01 1.13e-01 3.95e-01 3.69e-02 4.86e-02       15.2
+
+[SzSz nb] 列 x ごとの median 相対誤差
+prior         x=1      x=2      x=3      x=4      x=5      x=6      x=7      x=8    max/min
+chi8     2.22e-01 1.79e-01 4.10e-01 2.81e-01 9.87e-02 3.97e-01 3.75e-01 3.18e-01        4.2
+chi32    7.22e-02 9.59e-02 2.20e-02 6.74e-02 7.76e-02 4.20e-02 1.15e-01 7.58e-02        5.2
+UHF      1.47e+00 2.92e+00 3.89e+00 2.66e+00 9.50e-01 4.32e-01 1.03e+00 1.33e+00        9.0
+
+列ごとの電子密度 <n> と スタッガード磁化
+x                 1        2        3        4        5        6        7        8
+<n>           0.934    0.879    0.841    0.843    0.846    0.844    0.880    0.934
+m_stag       -0.004   -0.002    0.002    0.006    0.005   -0.001   -0.007   -0.010
