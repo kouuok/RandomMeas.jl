@@ -48,35 +48,181 @@
 
 #### 利得はどう求めたか — サンプリングではなく厳密な閉形式
 
-**この総当たりはシャドウを一度もサンプリングしていない。** モンテカルロではなく、分散の厳密な閉形式に2つの数値を代入して $G$ を出している。
+**この総当たりはシャドウを一度もサンプリングしていない。** モンテカルロではなく、分散の厳密な閉形式に2つの数値を代入して $G$ を出している。以下、なぜそれが可能で、なぜ $n_u$ を決めなくてよいのかを順に追う。
 
-利得法則は、観測量が**単一パウリ文字列**のとき**不等式ではなく等式**になる。このとき両方の推定量の分散が完全に手で書けるからである。台 $A$ 上のパウリ文字列 $P$ を局所ランダムパウリ測定で測るとき、
+#### ステップ0: 測定の構造と記号
 
-- ランダム基底が $P$ と一致する確率は $3^{-\lvert A\rvert}$ で、一致したときだけ $3^{\lvert A\rvert}$ 倍して拾う
-- 一致した基底での $n_m$ ショットは、平均 $\langle P\rangle$ の $\pm1$ ベルヌーイ試行
+局所ランダムパウリ測定(シャドウ測定)は、次の「ユニット」を $n_u$ 回繰り返す:
 
-の2点だけで、1ユニットあたりの分散が決まる:
+1. **ランダム基底を1つ引く** — 各量子ビットについて $X,Y,Z$ のどれで測るかを独立に等確率で選ぶ
+2. **その基底のまま $n_m$ 回測る** — 1ショットごとに各量子ビットで $\pm1$ が出る
+
+総ショット数は $n_u\times n_m$ である。記号を固定する:
+
+| 記号 | 意味 |
+|---|---|
+| $P$ | 推定したいパウリ文字列。台 $A$ の上に載っており、 $\lvert A\rvert$ は台の量子ビット数(オンサイト ZZ なら $\lvert A\rvert=2$ ) |
+| $\langle P\rangle$ | 真の状態 $\rho$ での期待値 $\mathrm{Tr}[P\rho]$ 。これが推定したい数 |
+| $s\equiv\langle P\rangle_\sigma$ | prior $\sigma$ が予測する値。 $\sigma$ は古典的に分かっているので**既知の定数** |
+| $\Delta=\langle P\rangle-s$ | prior の外し幅 |
+| $h_u$ | ユニット $u$ で基底が当たったら $1$ 、外れたら $0$ |
+| $m_u$ | 当たったユニットでの $n_m$ ショット平均 |
+
+#### ステップ1: 1ユニットからの推定量
+
+$P$ を測るには、台の $\lvert A\rvert$ 個すべてで基底が一致しなければならない。各量子ビットが一致する確率は $1/3$ で独立なので
 
 ```math
-\mathrm{Var}_{\text{std}}
-= 3^{\lvert A\rvert}\Bigl[\langle P\rangle^2+\tfrac{1-\langle P\rangle^2}{n_m}\Bigr]-\langle P\rangle^2
-= (3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s
+\Pr[h_u=1]=3^{-\lvert A\rvert}
 ```
 
-CRM は同じ乱数で $\sigma$ の予測値を引いてから拾うので、 $\langle P\rangle$ が差 $\Delta=\langle P\rangle_\rho-\langle P\rangle_\sigma$ に置き換わるだけである:
+当たったユニットでは、台の $\pm1$ の積が平均 $\langle P\rangle$ の $\pm1$ 確率変数になり、その $n_m$ 個の平均が $m_u$ である。外れたユニットは $P$ について何も教えない。
+
+そこで**当たる確率の逆数 $3^{\lvert A\rvert}$ を掛けて埋め合わせる**:
 
 ```math
-\mathrm{Var}_{\text{CRM}}=(3^{\lvert A\rvert}-1)\Delta^2+v_s,
-\qquad v_s=\frac{3^{\lvert A\rvert}(1-\langle P\rangle^2)}{n_m}
+\hat o_u=3^{\lvert A\rvert}\,h_u\,m_u
 ```
 
-**どちらも全体が $1/n_u$ 倍されるだけ**なので、比を取ると $n_u$ が消えて
+不偏であることを確認する。 $h_u=0$ の項は消えるので
+
+```math
+\mathbb{E}[\hat o_u]
+=3^{\lvert A\rvert}\Pr[h_u=1]\,\mathbb{E}[m_u\mid h_u=1]
+=3^{\lvert A\rvert}\cdot 3^{-\lvert A\rvert}\cdot\langle P\rangle
+=\langle P\rangle
+```
+
+**掛けた $3^{\lvert A\rvert}$ と当たる確率 $3^{-\lvert A\rvert}$ がちょうど相殺する。** これがシャドウ測定の核である。
+
+#### ステップ2: 最終推定量はユニットの平均 — $n_u$ はここにしか現れない
+
+$n_u$ 個のユニットは**互いに独立で同分布**である(それぞれが自分の乱数で基底を引き、自分のショットを取る)。最終的な推定値はその平均である:
+
+```math
+\hat o=\frac{1}{n_u}\sum_{u=1}^{n_u}\hat o_u
+```
+
+独立同分布な量の平均の分散は、よく知られた
+
+```math
+\mathrm{Var}\Bigl[\frac{1}{n_u}\sum_{u=1}^{n_u}\hat o_u\Bigr]
+=\frac{1}{n_u^{2}}\sum_{u=1}^{n_u}\mathrm{Var}[\hat o_u]
+=\frac{1}{n_u^{2}}\cdot n_u\cdot\mathrm{Var}[\hat o_1]
+=\frac{\mathrm{Var}[\hat o_1]}{n_u}
+```
+
+である(2番目の等号で独立性を使い、3番目で同分布性を使った)。 $n$ 回測って平均すれば誤差が $1/n$ になる、というあの計算そのものである。
+
+> **ここが要点である。** $n_u$ は**1ユニットの中身にはいっさい入っていない**。 $\hat o_1$ の分布は基底の当たり外れと $n_m$ ショットだけで決まり、ユニットを何回繰り返すかとは無関係である。 $n_u$ は最後に「何個平均したか」として外側に $1/n_u$ の形で付くだけである。
+
+#### ステップ3: CRM も構造はまったく同じ
+
+CRM は $s$ が既知であることを使い、**引いてから増幅し、あとで足し戻す**:
+
+```math
+\hat o^{\rm CRM}_u=3^{\lvert A\rvert}\,h_u\,(m_u-s)+s
+```
+
+不偏性も同じように確認できる:
+
+```math
+\mathbb{E}[\hat o^{\rm CRM}_u]
+=3^{\lvert A\rvert}\cdot3^{-\lvert A\rvert}(\langle P\rangle-s)+s
+=\Delta+s=\langle P\rangle
+```
+
+そして最終推定量は、**同じ $n_u$ 個の同じユニット**の平均である:
+
+```math
+\hat o^{\rm CRM}=\frac{1}{n_u}\sum_{u=1}^{n_u}\hat o^{\rm CRM}_u,
+\qquad
+\mathrm{Var}[\hat o^{\rm CRM}]=\frac{\mathrm{Var}[\hat o^{\rm CRM}_1]}{n_u}
+```
+
+**CRM が変えたのは「1ユニットから何を計算するか」だけで、ユニットを何個取るか、どう束ねるかは何も変えていない。**
+
+#### ステップ4: 比を取ると $n_u$ が約分される
+
+利得は2つの分散の比である。両方に**同じ $1/n_u$** が掛かっているので、
+
+```math
+G=\frac{\mathrm{Var}[\hat o]}{\mathrm{Var}[\hat o^{\rm CRM}]}
+=\frac{\mathrm{Var}[\hat o_1]\,/\,n_u}{\mathrm{Var}[\hat o^{\rm CRM}_1]\,/\,n_u}
+=\frac{\mathrm{Var}[\hat o_1]}{\mathrm{Var}[\hat o^{\rm CRM}_1]}
+```
+
+となり、 $n_u$ が消える。**$G$ は「1ユニットあたりの分散の比」であって、ユニットを何個集めたかを含まない量である。** 標準シャドウも CRM も同じ測定データを同じ個数だけ使うのだから、 $n_u$ を増やせば両方が同じ割合で良くなるだけで、優劣の比は動かない。
+
+#### なぜ $n_m$ は消えないのか — 対比
+
+同じ理屈で $n_m$ も消えそうに見えるが、消えない。**入る場所が違う**からである:
+
+| | どこに入るか | 比でどうなるか |
+|---|---|---|
+| $n_u$ | ユニットの**外側**(何個平均したか) | 両方に同じ $1/n_u$ が付くので**約分されて消える** |
+| $n_m$ | ユニットの**内側**( $m_u$ のばらつきを決める) | $\mathrm{Var}[\hat o_1]$ 自体を変えるので**残る** |
+
+$n_m$ を増やすと $m_u$ が真の値に近づくが、これは**当たったユニットの質**を上げるだけで、外れたユニットが当たるようにはならない。当たり外れのばらつき(分散の主要項)は $n_m$ をいくら増やしても残るので、両者は非対称に効く。この非対称性が、次の「 $n_u$ と $n_m$ の影響」で見る $n_m$ 依存の正体である。
+
+#### 1ユニットの分散を書き下す
+
+あとは $\mathrm{Var}[\hat o_1]$ と $\mathrm{Var}[\hat o^{\rm CRM}_1]$ を具体的に計算するだけである。以下 $\lvert A\rvert$ を $a$ と略記せず、そのまま書く。
+
+**準備**: $m$ は平均 $\langle P\rangle$ の $\pm1$ 変数を $n_m$ 個平均したものである。 $\pm1$ 変数は2乗すると必ず $1$ なので、1個あたりの分散は $1-\langle P\rangle^2$ 、したがって
+
+```math
+\mathrm{Var}[m]=\frac{1-\langle P\rangle^2}{n_m},
+\qquad
+\mathbb{E}[m^2]=\mathrm{Var}[m]+\bigl(\mathbb{E}[m]\bigr)^2=\langle P\rangle^2+\frac{1-\langle P\rangle^2}{n_m}
+```
+
+**標準シャドウ**: $h\in\{0,1\}$ なので $h^2=h$ であり、
+
+```math
+\mathbb{E}[\hat o_1^2]=3^{2\lvert A\rvert}\,\mathbb{E}[h\,m^2]
+=3^{2\lvert A\rvert}\cdot3^{-\lvert A\rvert}\,\mathbb{E}[m^2]
+=3^{\lvert A\rvert}\Bigl[\langle P\rangle^2+\frac{1-\langle P\rangle^2}{n_m}\Bigr]
+```
+
+不偏なので $\mathbb{E}[\hat o_1]=\langle P\rangle$ を引けばよく、
+
+```math
+\mathrm{Var}[\hat o_1]=3^{\lvert A\rvert}\langle P\rangle^2-\langle P\rangle^2+v_s
+=(3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s,
+\qquad
+v_s\equiv\frac{3^{\lvert A\rvert}(1-\langle P\rangle^2)}{n_m}
+```
+
+**CRM**: 定数 $s$ を足しても分散は変わらないので $\hat o^{\rm CRM}_1-s=3^{\lvert A\rvert}h(m-s)$ を見ればよい。 $\mathbb{E}[(m-s)^2]=\mathrm{Var}[m]+(\langle P\rangle-s)^2=\mathrm{Var}[m]+\Delta^2$ なので、まったく同じ計算で
+
+```math
+\mathrm{Var}[\hat o^{\rm CRM}_1]=(3^{\lvert A\rvert}-1)\Delta^2+v_s
+```
+
+**$\langle P\rangle$ が $\Delta$ に置き換わっただけ**である。ショットノイズ床 $v_s$ が両者で共通なのは、それが「 $\rho$ を測るときのショットのばらつき」から来ており、prior が何であっても変わらないためである。
+
+以上より
 
 ```math
 G=\frac{(3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s}{(3^{\lvert A\rvert}-1)\Delta^2+v_s}
 ```
 
-が残る([crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) の `gain(P, Δ, nA)` がこれである)。**これは漸近形でも上界でもなく、任意の $n_u\ge1$ 、 $n_m\ge1$ で成り立つ厳密な恒等式**である(元論文の Eq. 4 は一般の観測量に対する不等式だが、単一パウリ文字列では等号になる)。したがって $n_u$ には決めるべき値が存在しない。
+が得られる([crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) の `gain(P, Δ, nA)` がこれである)。**これは漸近形でも上界でもなく、任意の $n_u\ge1$ 、 $n_m\ge1$ で成り立つ厳密な恒等式**である(元論文の Eq. 4 は一般の観測量に対する不等式だが、単一パウリ文字列では等号になる)。したがって $n_u$ には決めるべき値が存在しない。
+
+> **$n_u=1$ でも厳密である。** 「基底が1つも当たらなかったらどうなるのか」と思うかもしれないが、その場合も含めて正しい。 $h_u=0$ という事象は $\hat o_1$ の分布の中に最初から入っており、 $\mathrm{Var}[\hat o_1]$ はそれを込みで計算した値だからである。当たり外れの揺らぎこそが $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ という主要項の正体である。
+
+#### 数値で確かめる
+
+オンサイト ZZ( $\lvert A\rvert=2$ 、 $3^{\lvert A\rvert}=9$ )、 $\langle P\rangle=0.9$ 、 $\Delta=0.1$ 、 $n_m=100$ とすると $v_s=9(1-0.81)/100=0.0171$ で、1ユニットあたりの分散は標準 $6.4971$ 、CRM $0.0971$ である。ここから $n_u$ だけを振ると:
+
+| $n_u$ | $\mathrm{Var}_{\text{std}}$ | $\mathrm{Var}_{\text{CRM}}$ | $G$ |
+|---|---|---|---|
+| 1 | $6.4971$ | $0.0971$ | **66.91** |
+| 100 | $6.4971\times10^{-2}$ | $9.71\times10^{-4}$ | **66.91** |
+| $10^4$ | $6.4971\times10^{-4}$ | $9.71\times10^{-6}$ | **66.91** |
+
+**両方の分散が $10^4$ 倍改善しているのに、比は小数点以下まで動かない。** これが「 $n_u$ は絶対精度だけを決め、利得は決めない」という主張の中身である。実測でも $n_u$ を 25 から 1600 まで振って確認してある(下記「 $n_u$ と $n_m$ の影響」結果1)。
 
 #### 実際に計算したもの
 
