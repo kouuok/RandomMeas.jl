@@ -1266,6 +1266,10 @@ $L=8$ 、 $U=4$ 、半充填、 $n_m=100$ 、n_repeat=300。 $G$ は $n_u=50$ �
 
 → **[README_prior_survey.md](README_prior_survey.md) を参照**
 
+## なぜ忠実度ではなくトレース距離なのか → **[README_distance_vs_fidelity.md](README_distance_vs_fidelity.md)**
+
+§2m の理論部。 $\Delta$ は線形汎関数で、その双対ノルムがトレース距離である。元論文が何を指標にしているかの一次資料確認、台に縮約すると prior が混合になって忠実度が使えなくなる理由、そしてトレース距離自体を CRM で測れるかまで。
+
 ## 利得法則の検証(128量子ビットまで) → **[README_gainlaw.md](README_gainlaw.md)**
 
 §10 の利得はすべて法則からの計算値なので、実測と突き合わせた。**288点すべてで一致**(中央値ちょうど 1.0000、統計誤差の範囲)。単一 Pauli 列なら $\langle P\rangle$ ひとつでシャドウ測定を厳密に模擬できることを使っている。
