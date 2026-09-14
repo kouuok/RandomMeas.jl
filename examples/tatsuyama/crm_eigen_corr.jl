@@ -13,6 +13,21 @@
 #   W=1 LX=8 PBC=0 CRM_U=8.0 julia --project=. examples/tatsuyama/crm_eigen_corr.jl
 include("crm_2d_ed_fid_table.jl")   # 定数・lat_edges・solve_uhf・slater_mps(main は走らない)
 using Serialization
+# REFINE=1: 保存済みの状態の分散が VARTOL を超えていたら、そこからノイズ付きでスイープを足す。
+#   ランダム初期状態からの DMRG は L=64 で局所解に留まることがある(U=12 で分散 4.3e-6、χ=485)。
+const REFINE = get(ENV, "REFINE", "0") == "1"
+const VARTOL = parse(Float64, get(ENV, "VARTOL", "1e-8"))
+
+function hubbard_mpo(sites, edges, n)
+    os = OpSum()
+    for (a,b) in edges
+        os += -1.0,"Cdagup",a,"Cup",b; os += -1.0,"Cdagup",b,"Cup",a
+        os += -1.0,"Cdagdn",a,"Cdn",b; os += -1.0,"Cdagdn",b,"Cdn",a
+    end
+    for s in 1:n; os += U,"Nupdn",s end
+    MPO(os, sites)
+end
+energy_var(H, ψ, E) = (Hψ = apply(H, ψ; cutoff=1e-16); real(inner(Hψ,Hψ) - E^2))
 
 function zobs(ψ::MPS)
     nu = expect(ψ, "Nup"); nd = expect(ψ, "Ndn")
@@ -41,16 +56,21 @@ function run()
 
     if isfile(fstate)
         d = deserialize(fstate); ψ, ψu, E, var = d.ψ, d.ψu, d.E, d.var
-        println("保存済みの状態を読み込み: ", fstate)
+        @printf("保存済みの状態を読み込み: %s  (E0=%.12f 分散=%.3e χ=%d)\n", fstate, E, var, maxlinkdim(ψ))
+        if REFINE && var > VARTOL
+            H = hubbard_mpo(siteinds(ψ), edges, n)
+            for round in 1:8
+                E, ψ = dmrg(H, ψ; nsweeps=20, maxdim=chimax, cutoff=CUTOFF,
+                            noise=[1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,0.0], outputlevel=0)
+                normalize!(ψ); var = energy_var(H, ψ, E)
+                @printf("  追加スイープ %d: E0=%.12f  χ=%d  分散=%.3e  (%.0f 秒)\n", round, E, maxlinkdim(ψ), var, time()-t0)
+                var < VARTOL && break
+            end
+            serialize(fstate, (ψ=ψ, ψu=ψu, E=E, var=var, m=d.m))
+        end
     else
         sites = siteinds("Electron", n; conserve_qns=true)
-        os = OpSum()
-        for (a,b) in edges
-            os += -1.0,"Cdagup",a,"Cup",b; os += -1.0,"Cdagup",b,"Cup",a
-            os += -1.0,"Cdagdn",a,"Cdn",b; os += -1.0,"Cdagdn",b,"Cdn",a
-        end
-        for s in 1:n; os += U,"Nupdn",s end
-        H = MPO(os, sites)
+        H = hubbard_mpo(sites, edges, n)
         # DMRG の設定は crm_2d_ed_fid_table.jl の main() と同一(ランプ + ノイズ項)
         st = [isodd(sum(divrem(s-1,W))) ? "Up" : "Dn" for s in 1:n]
         sched = Int[]; cc = 64
@@ -60,8 +80,7 @@ function run()
         E, ψ = dmrg(H, random_mps(sites, st; linkdims=32);
                     nsweeps=length(md)+30, maxdim=vcat(md, fill(chimax,30)),
                     cutoff=CUTOFF, noise=[1e-6,1e-7,1e-8,1e-9,0.0], outputlevel=0)
-        normalize!(ψ)
-        Hψ = apply(H, ψ; cutoff=1e-16); var = real(inner(Hψ,Hψ) - E^2)
+        normalize!(ψ); var = energy_var(H, ψ, E)
         uhf = solve_uhf(edges, n, 1.0, U; Nup, Ndn)
         ψu = slater_mps(sites, uhf.Φu, uhf.Φd, Nup, Ndn)
         serialize(fstate, (ψ=ψ, ψu=ψu, E=E, var=var, m=uhf.m))
