@@ -48,8 +48,10 @@ end
 has_w2 = any((Wc .== 2) .& (LXc .== 8))
 (Wb, Lb) = has_w2 ? (2, 8) : (4, 3)
 pb = plot(yscale=:log10, yticks=LOGT, ylims=(5e-3, 200), legend=:topright,
-          xlabel="distance r   (Manhattan, periodic in y)", ylabel="gain G",
-          title=@sprintf("(b) %s, U=8: correlations decay slowly", has_w2 ? "2-leg ladder L=8" : "width-4 cylinder L=3"))
+          xlabel=has_w2 ? "distance r = |Δx| + |Δy|   (central half of the legs)" : "distance r   (Manhattan, periodic in y)",
+          ylabel="gain G",
+          title=has_w2 ? "(b) 2-leg ladder L=8, U=8: the same order, UHF-sym turns at r = 4" :
+                         "(b) width-4 cylinder L=3, U=8")
 hline!(pb, [1.0], color=:black, ls=:dot, lw=1.2, label="")
 vsr!(pb, Wb, "cylinder", Lb, 8.0)
 
@@ -71,15 +73,15 @@ pd = plot(xscale=:log10, yscale=:log10, yticks=LOGT, xlims=(0.03, 40), ylims=(5e
 hline!(pd, [1.0], color=:black, ls=:dot, lw=1.2, label="")
 vline!(pd, [1.0], color=:gray, lw=1, label="")
 vline!(pd, [2.0], color=:black, ls=:dash, lw=1.2, label="")
-nskip = 0
+nskip = 0; nplot = 0
 for (q, c, lab) in SER
     m = (pri .== q) .& (yv ./ xv .> 0)
-    global nskip += sum((pri .== q) .& .!(yv ./ xv .> 0))
+    global nskip += sum((pri .== q) .& .!(yv ./ xv .> 0)); global nplot += sum(m)
     scatter!(pd, yv[m] ./ xv[m], Gv[m]; color=c, ms=3.2, msw=0, alpha=0.45, label=lab)
 end
 annotate!(pd, 0.9, 0.3, text("prior less extreme\nthan the truth: G ≥ 1", 7, :right, INK))
 annotate!(pd, 2.3, 3.0, text("more than twice\nthe truth: G < 1", 7, :left, INK))
-annotate!(pd, 38, 120, text(@sprintf("%d pairs (%d with ⟨P⟩σ/⟨P⟩ρ ≤ 0 not shown)", length(Gv), nskip), 7, :right, INK))
+annotate!(pd, 38, 120, text(@sprintf("%d points shown (%d with ⟨P⟩σ/⟨P⟩ρ ≤ 0 omitted)", nplot, nskip), 7, :right, INK))
 
 fig = plot(pa, pb, pc, pd; layout=(2, 2), size=(1500, 1180), margin=6Plots.mm)
 out = joinpath(DIR, "crm_new_fig_eigen_dist.png"); savefig(fig, out); println("書き出し: ", out)

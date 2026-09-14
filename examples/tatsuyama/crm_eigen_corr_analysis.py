@@ -121,3 +121,25 @@ if __name__ == "__main__":
         for (k, r, p, x, y, g, i, j) in allpts:
             f.write(f"{k[0]}\t{k[1]}\t{k[2]}\t{k[3]:.1f}\t{r}\t{i}\t{j}\t{p}\t{x:.10f}\t{y:.10f}\t{g:.8e}\n")
     print("書き出し: crm_eigcorr_pairs.tsv", len(allpts), "行")
+
+    # ---- 5. README 用の要約: 各 prior の中央値 G が初めて 1 を下回る距離 ------------------------
+    by = collections.defaultdict(list)
+    for (k, r, p, x, y, g, i, j) in allpts:
+        by[(k, p, r)].append((g, abs(x), abs(y)))
+    print(f"\n[5] 中央値 G が初めて 1 を下回る距離 r(その距離での中央値 |x| と、予想の境目 |y|/2)")
+    print(f"  {'系':28s} | " + " | ".join(f"{p:>7s} r  |x|  |y|/2" for p in ("UHF", "UHF-sym")) + " | 損の割合 RHF χ4 χ8")
+    for k in sorted({kk for (kk, _, _) in by}):
+        cells = []
+        for p in ("UHF", "UHF-sym"):
+            rs = sorted(r for (kk, pp, r) in by if kk == k and pp == p)
+            hit = next((r for r in rs if st.median(a[0] for a in by[(k, p, r)]) < 1), None)
+            if hit is None:
+                cells.append(f"{'なし':>9s}            ")
+            else:
+                v = by[(k, p, hit)]
+                cells.append(f"{hit:>9d} {st.median(a[1] for a in v):.3f} {st.median(a[2] for a in v)/2:.3f}")
+        frac = []
+        for p in ("RHF", "chi4", "chi8"):
+            v = [a for (kk, pp, r), aa in by.items() if kk == k and pp == p for a in aa]
+            frac.append(f"{sum(a[0] < 1-1e-9 for a in v)/len(v):4.0%}" if v else "   -")
+        print(f"  {str(k):28s} | " + " | ".join(cells) + " | " + " ".join(frac))
