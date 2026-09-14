@@ -59,6 +59,16 @@ def wick(Gu, Gd, i, j):
     return dict(zz_on=zz_on, zz_uu=zz_uu, szsz=szsz, sxsx=sxsx, n=nu[i]+nd[i], sz=0.5*(nu[i]-nd[i]),
                 cc=cc, ss=szsz + 2*sxsx, zz_uu_sym=cc + (4/3)*(szsz + 2*sxsx))
 
+def rhf_G(edges, n, Nocc, tol=1e-9):
+    """RHF の1体密度行列。半充填で密度が一様なら Hartree 項は定数なので、軌道は U=0 のものと同じ。
+    フェルミ準位が縮退していれば、その殻に電子を均等に配る(スピン・並進対称な混合状態)。"""
+    T = np.zeros((n, n))
+    for a, b in edges: T[a-1, b-1] = T[b-1, a-1] = -1.0
+    e, V = np.linalg.eigh(T)
+    ef = e[Nocc-1]; below = e < ef - tol; shell = np.abs(e - ef) <= tol
+    f = np.zeros(n); f[below] = 1.0; f[shell] = (Nocc - below.sum())/shell.sum()
+    return (V*f) @ V.T
+
 def gain(x, y, nA=2, nm=100):
     K = 3.0**nA - 1; vs = 3.0**nA*(1 - x*x)/nm
     return (K*x*x + vs)/(K*(x-y)**2 + vs)
@@ -102,3 +112,25 @@ if __name__ == "__main__":
     print(f"損をする系: UHF {lose['UHF']}/80  →  UHF-sym {lose['sym']}/80")
     ratio.sort()
     print(f"G_sym/G_UHF: 中央値 {ratio[len(ratio)//2]:.2f}  最小 {ratio[0]:.2f}  最大 {ratio[-1]:.2f}")
+
+    # ---- HF の中で比べる: RHF(固有状態から最も遠い)・UHF(最も近い)・UHF-sym ----------------
+    import statistics as st
+    res = collections.defaultdict(list)
+    for (k, d, w) in rows:
+        W, geo, LX, U = k; n = W*LX; e = lat_edges(LX, W, geo == "torus")
+        c0 = (max(1, -(-LX//2))-1)*W + max(1, -(-W//2)); nb = next(b for (a, b) in e if a == c0)
+        Gr = rhf_G(e, n, n//2); wr = wick(Gr, Gr, c0-1, nb-1)
+        Gu, Gd = solve_uhf(e, n, LX, W, U, n//2, n//2)
+        x_z = 1 - d["n"][0] - 2*d["Sz"][0]
+        for obs, x, nA, ys in (("オンサイト ZZ", d["ZZ onsite"][0], 2, {"RHF": wr["zz_on"], "UHF": w["zz_on"], "UHF-sym": w["zz_on"]}),
+                               ("隣接 Z↑Z↑", d["ZZ up-up nb"][0], 2, {"RHF": wr["zz_uu"], "UHF": w["zz_uu"], "UHF-sym": w["zz_uu_sym"]}),
+                               ("単一サイト Z↑", x_z, 1, {"RHF": 1-2*Gr[c0-1, c0-1], "UHF": 1-2*Gu[c0-1, c0-1], "UHF-sym": 1-(Gu[c0-1, c0-1]+Gd[c0-1, c0-1])})):
+            for p_, y in ys.items():
+                res[(obs, U, p_)].append((gain(x, y, nA), abs(y)))
+    print(f"\nHF の3種の prior(全20格子の中央値 [最小])")
+    print(f"{'観測量':12s} {'U':>3s} | " + " | ".join(f"{p_:>7s} |y|    G [最小]" for p_ in ("RHF", "UHF", "UHF-sym")))
+    for obs in ("オンサイト ZZ", "隣接 Z↑Z↑", "単一サイト Z↑"):
+        for U in (2.0, 4.0, 8.0, 12.0):
+            print(f"{obs:12s} {U:3.0f} | " + " | ".join(
+                f"{st.median(a[1] for a in res[(obs, U, p_)]):7.3f} {st.median(a[0] for a in res[(obs, U, p_)]):7.2f} [{min(a[0] for a in res[(obs, U, p_)]):6.2f}]"
+                for p_ in ("RHF", "UHF", "UHF-sym")))
