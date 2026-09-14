@@ -110,3 +110,32 @@ if lose: print(f"  負けの |x| 最大値 {max(abs(r['x']) for r in lose):.4f}"
 for obs in OBS:
     s = [r for r in sub if r["observable"] == obs]
     if s: print(f"  {obs:12s} {len(s):3d} 行  負け {sum(r['Gf']<1 for r in s):3d}  prior 内訳 {dict(collections.Counter(r['fam'] for r in s))}")
+
+# ---- 7. 1 節の恒等式と、天井の「くじ + ショット」分解を乱数で確かめる ----------------
+import numpy as np
+rng = np.random.default_rng(20260915)
+def Gv(x, y, nA=2, nm=100):
+    K = 3.0**nA - 1; vs = 3.0**nA*(1 - x*x)/nm
+    return (K*x*x + vs)/(K*(x - y)**2 + vs)
+N = 10**6
+print("\n[7] 1 節の恒等式(乱数 10^6 点)")
+x = rng.uniform(-1, 1, N); y = np.sign(x)*rng.uniform(0, 1, N)
+etaf = lambda v: (1 - np.abs(v))/2
+print("  同符号で |Δ| = 2|η_σ-η_ρ| の最大誤差:", np.abs(np.abs(x-y) - 2*np.abs(etaf(y) - etaf(x))).max())
+x = rng.uniform(-1, 1, N); y = rng.uniform(-1, 1, N); nA = rng.integers(1, 6, N); nm = rng.integers(1, 10**4, N)
+print("  G>1 ⟺ 0<y/x<2 の破れ:", int(np.sum((Gv(x, y, nA, nm) > 1) != ((y/x > 0) & (y/x < 2)))))
+x = rng.uniform(-1, 1, N)
+print("  |y|=1 で G>1 ⟺ |x|>1/2 の破れ:", int(np.sum((Gv(x, np.sign(x), nA, nm) > 1) != (np.abs(x) > 0.5))))
+ys = np.linspace(-1, 1, 200001)
+print("  ρ 固定で G を最大にする y と x のずれ:", max(abs(ys[np.argmax(Gv(xx, ys))] - xx) for xx in np.linspace(-0.95, 0.95, 39)))
+
+print("[7] 天井の分解: 標準シャドウの1ユニットの分散 = くじ(当たり外れ) + ショット(|A|=2, n_m=100)")
+nA1, nm1, M = 2, 100, 2_000_000
+for x0 in (0.5, 0.9):
+    h = rng.random(M) < 3.0**-nA1
+    m = np.where(rng.random((M, nm1)) < (1 + x0)/2, 1.0, -1.0).mean(1)
+    o = 3**nA1*h*m
+    lottery = np.var(3**nA1*h*x0)                         # Var(E[ô|h])
+    shot = (3**nA1)**2*np.var(m[h])*h.mean()              # E[Var(ô|h)]
+    K = 3**nA1 - 1; vs = 3**nA1*(1 - x0*x0)/nm1
+    print(f"  x={x0}: 全分散 {o.var():.4f} = くじ {lottery:.4f} + ショット {shot:.5f}   理論 {K*x0*x0:.4f} + {vs:.5f}   天井 G_max = {1 + K*x0*x0/vs:.1f}")

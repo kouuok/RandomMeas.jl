@@ -103,14 +103,97 @@ G>1\iff\lvert x\rvert>\frac12\iff\eta_\rho<\frac14
 
 ### 1.6 仮説の正しい部分: 固有状態への近さは $\rho$ の天井を決める
 
-$\rho$ 側の固有状態への近さには、はっきりした役割がある。prior が完全( $\Delta=0$ )なときの利得、つまり**天井**は $x$ だけで決まり、 $\eta_\rho$ で書くと
+$\rho$ 側の固有状態への近さには、はっきりした役割がある。**真の状態が固有状態に近いほど、利得の天井(prior が完全なときの利得)が高くなる。** 以下、その理由を式から順に示す。要点は、分散が「prior で消せる部分」と「どんな prior でも消せない部分」に分かれ、**消せない部分が $\rho$ の固有状態でちょうど 0 になる**ことである。
+
+**ステップ1: 天井とは何か。** 1.2 の利得の式
 
 ```math
-G_{\max}=1+\frac{(3^{\lvert A\rvert}-1)\,n_m}{3^{\lvert A\rvert}}\cdot\frac{(1-2\eta_\rho)^2}{4\eta_\rho(1-\eta_\rho)}
-\;\approx\;\frac{(3^{\lvert A\rvert}-1)\,n_m}{4\cdot3^{\lvert A\rvert}\,\eta_\rho}\qquad(\eta_\rho\ll1)
+G=\frac{Kx^2+v_s}{K\Delta^2+v_s},\qquad K=3^{\lvert A\rvert}-1,\qquad v_s=\frac{3^{\lvert A\rvert}(1-x^2)}{n_m}
 ```
 
-である(統合表の 1580 行で相対差 $1.5\times10^{-7}$ 以内)。**天井は $\rho$ の固有状態からの離れ具合に反比例する。** 例えば $U=12$ のオンサイト ZZ では $\eta_\rho=0.0356$ で、厳密値 559、近似式 624 である。
+で、**分子は prior に依らない**。分母は $K\Delta^2\ge0$ なので必ず $v_s$ 以上で、等号は $\Delta=0$ (prior の値が真の値に一致する)のときだけである。したがって
+
+```math
+G\le G_{\max}=\frac{Kx^2+v_s}{v_s}=1+\frac{Kx^2}{v_s}
+```
+
+が成り立つ。これが天井で、 **$x$ だけで決まり、prior には依らない**。
+
+**ステップ2: 分散を「くじ」と「ショット」に分ける。** 1ユニットの推定量は $\hat o=3^{\lvert A\rvert}h\,m$ だった( $h$ は基底が当たれば 1、外れれば 0。 $m$ は $n_m$ ショットの平均。定義は [README_prior_survey.md](README_prior_survey.md) の「利得はどう求めたか」のステップ1)。ここで**全分散の法則**を使う。「全体のばらつき = グループごとの平均値のばらつき + グループ内のばらつきの平均」で、グループは「当たり」と「外れ」である:
+
+```math
+\mathrm{Var}(\hat o)=\underbrace{\mathrm{Var}\bigl(\mathbb E[\hat o\mid h]\bigr)}_{(\mathrm a)}+\underbrace{\mathbb E\bigl[\mathrm{Var}(\hat o\mid h)\bigr]}_{(\mathrm b)}
+```
+
+(a) **くじのばらつき**: 当たりなら平均 $3^{\lvert A\rvert}x$ 、外れなら 0 である。 $h$ は確率 $p=3^{-\lvert A\rvert}$ で 1 になるので $\mathrm{Var}(h)=p(1-p)$ で、
+
+```math
+\mathrm{Var}\bigl(3^{\lvert A\rvert}h\,x\bigr)=3^{2\lvert A\rvert}x^2\cdot3^{-\lvert A\rvert}\bigl(1-3^{-\lvert A\rvert}\bigr)=Kx^2
+```
+
+(b) **ショットのばらつき**: 当たりのときだけ $m$ が揺れ、その分散は $3^{2\lvert A\rvert}\mathrm{Var}(m)$ 、外れでは 0 である。平均すると
+
+```math
+p\cdot3^{2\lvert A\rvert}\cdot\frac{1-x^2}{n_m}=\frac{3^{\lvert A\rvert}(1-x^2)}{n_m}=v_s
+```
+
+CRM の推定量 $3^{\lvert A\rvert}h(m-s)+s$ で同じ計算をすると、(a) では $x$ が $\Delta$ に置き換わる。一方で定数 $s$ を引いても $m$ の揺れは変わらないので、(b) はそのまま残る:
+
+| | (a) くじのばらつき | (b) ショットのばらつき |
+|---|---|---|
+| 標準シャドウ | $Kx^2$ | $v_s$ |
+| CRM | $K\Delta^2$ | $v_s$ (**同じ**) |
+
+**prior が消せるのは (a) だけで、(b) は床として必ず残る。** だから天井は「標準シャドウの分散全体 ÷ 床」になる。乱数で分解を確かめると( $\lvert A\rvert=2$ 、 $n_m=100$ 、各 $2\times10^6$ ユニット)、 $x=0.5$ で (a) 1.9983 + (b) 0.06770(理論 2.0000 + 0.06750)、 $x=0.9$ で (a) 6.4901 + (b) 0.01712(理論 6.4800 + 0.01710)だった。
+
+**ステップ3: 床の正体は、 $\rho$ で $P$ を測ったときの量子的なばらつき。** 1ショットの結果 $s=\pm1$ は、 $+1$ が確率 $p_+=(1+x)/2$ 、 $-1$ が確率 $p_-$ で出る。 $s^2=1$ なので
+
+```math
+\mathrm{Var}(s)=\mathbb E[s^2]-\mathbb E[s]^2=1-x^2=4p_+p_-=4\eta_\rho(1-\eta_\rho)
+```
+
+である。これは **$p_+$ か $p_-$ が 0 のとき、つまり $\rho$ が $P$ の固有状態のときにだけ 0 になる**。結果が毎回同じなら、ショットのばらつきは原理的に存在しないからである。
+
+**ステップ4: 天井を固有状態への近さで書く。** ステップ3をステップ1に入れると
+
+```math
+G_{\max}=1+\frac{K\,n_m}{3^{\lvert A\rvert}}\cdot\frac{x^2}{1-x^2}=1+\frac{K\,n_m}{3^{\lvert A\rvert}}\cdot\frac{(1-2\eta_\rho)^2}{4\eta_\rho(1-\eta_\rho)}
+```
+
+となる(統合表の 1580 行で相対差 $1.5\times10^{-7}$ 以内)。 $x^2/(1-x^2)$ を $x^2$ で微分すると $1/(1-x^2)^2>0$ なので、 **$\lvert x\rvert$ が 1 に近づく(固有状態に近づく)ほど $G_{\max}$ は単調に増える**。しかも2つの効果が同じ向きに働く:
+
+- 分子(消せる部分 $Kx^2$ )は $x^2\to1$ で**増える**
+- 分母(床 $\propto1-x^2$ )は **0 に向かう**
+
+固有状態の近く( $\eta_\rho\ll1$ )では
+
+```math
+G_{\max}\approx\frac{K\,n_m}{4\cdot3^{\lvert A\rvert}\,\eta_\rho}
+```
+
+となり、**天井は $\rho$ の固有状態からの離れ具合に反比例する**。
+
+**ステップ5: 数値で見る**( $\lvert A\rvert=2$ 、 $n_m=100$ ):
+
+| $\lvert x\rvert$ | $\eta_\rho$ | (a) くじ $Kx^2$ | (b) 床 $v_s$ | $G_{\max}$ | 近似 $Kn_m/(4\cdot3^{\lvert A\rvert}\eta_\rho)$ |
+|---|---|---|---|---|---|
+| 0 | 0.5 | 0 | 0.0900 | **1.0** | — |
+| 0.5 | 0.25 | 2.00 | 0.0675 | 30.6 | 88.9 |
+| 0.9 | 0.05 | 6.48 | 0.0171 | 380 | 444 |
+| 0.99 | 0.005 | 7.84 | 0.00179 | 4379 | 4444 |
+| 0.999 | 0.0005 | 7.98 | 0.00018 | 44379 | 44444 |
+
+(a) は最大でも $K=8$ までしか増えないが、(b) は 0 に向かって桁で縮む。**天井を押し上げているのは主に床の消滅である。** $x=0$ では消せる部分がそもそも 0 なので、どんな prior でも $G=1$ を超えられない(2.6 の単一サイト $Z_\uparrow$ がこれに当たる)。近似式のずれは $\eta_\rho=0.05$ で 17%、 $0.01$ で 3.0%、 $0.005$ で 1.5% である。実データでは、1次元 $L=64$ のオンサイト ZZ で $U=2\to12$ のとき $\eta_\rho$ が 0.351 から 0.036 に下がり、 $G_{\max}$ は 9.7 から 559 に上がる(近似式では 624)。
+
+**ステップ6: ちょうど固有状態のとき天井が無限大になる意味。** $x=\pm1$ ならショットは毎回同じ結果で、 $m=x$ が厳密に成り立つ。完全な prior( $s=x$ )を使うと
+
+```math
+\hat o_{\rm CRM}=3^{\lvert A\rvert}h\,(x-x)+x=x
+```
+
+が当たり外れに関係なく**全てのユニットで**成り立ち、推定量の分散はちょうど 0 になる。標準シャドウには (a) の $K$ が残るので、比は無限大である。式の見かけ上の発散ではなく、**実際に誤差なしで推定できる状況**に対応している。
+
+**注意。** これは単一パウリ文字列についての厳密な結果である。 $G_{\max}-1$ は $n_m$ に比例する(ショットを増やすと床だけが下がるため)。天井は $\rho$ ・ $P$ ・ $n_m$ ・ $\lvert A\rvert$ だけで決まり、**実際にそこへ届くかどうかは prior の $\Delta$ で決まる**。
 
 したがって仮説を正しく言い直すと次のようになる:
 
@@ -120,7 +203,7 @@ G_{\max}=1+\frac{(3^{\lvert A\rvert}-1)\,n_m}{3^{\lvert A\rvert}}\cdot\frac{(1-2
 
 ### 1.7 数値で確かめる
 
-上の恒等式を $10^6$ 個の乱数 $(x,y,\lvert A\rvert,n_m)$ で確かめた(図のスクリプトとは別に実行)。
+上の恒等式を $10^6$ 個の乱数 $(x,y,\lvert A\rvert,n_m)$ で確かめた([crm_eigen_hypothesis.py](crm_eigen_hypothesis.py) の [7]。1.6 の分解の確認も同じ場所にある)。
 
 | 恒等式 | 破れた点 |
 |---|---|
@@ -541,7 +624,7 @@ $\chi_p=8$ は1次元で一度も損をしないが、 $\chi_p=4$ は弱結合�
 
 | ファイル | 内容 |
 |---|---|
-| [crm_eigen_hypothesis.py](crm_eigen_hypothesis.py) | 2.1〜2.5 の集計(分類・Spearman・自然実験・閾値) |
+| [crm_eigen_hypothesis.py](crm_eigen_hypothesis.py) | 1 節の恒等式と天井の分解の乱数検証、2.1〜2.5 の集計(分類・Spearman・自然実験・閾値) |
 | [crm_eigen_figure.jl](crm_eigen_figure.jl) | 図 [crm_new_fig_eigen.png](crm_new_fig_eigen.png) |
 | [crm_eigen_uhfsym.py](crm_eigen_uhfsym.py) | 3.5 の UHF 移植・統合表との照合・群平均 $y_{\rm sym}$ |
 | [crm_eigen_corr.jl](crm_eigen_corr.jl) / [crm_eigen_corr.pbs](crm_eigen_corr.pbs) | 4 の全サイト対の Z 相関(clara)。 `REFINE=1` で止まった DMRG の状態を仕上げ直す |
