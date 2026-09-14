@@ -33,7 +33,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 5 | **CRM は制御変量法に一般化でき、「損をしない」形にできる** | 係数をデータから推定すると $G\ge1$ が保証され、損をしていた全ケースが修復(§6) |
 | 6 | **prior が破った対称性は、群平均でタダで回復できる** | 測定コストゼロ。SU(2) では $\langle S^z\rangle$ が $-6\times10^{-17}$ に、並進では $\chi_p=4$ +平均が完全な prior と一致(§2i, §2j) |
 | 7 | **利得は測定なしで予測できる — 台に縮約したトレース距離ひとつから** | 半充填では $\lvert\Delta\rvert=2D_A$ が恒等式。破れる条件まで閉形式 $\min(1,2/(1+4r))$, $r=\lvert\Delta(S^z)\rvert/\lvert\Delta_P\rvert$ で、 $r$ が10桁にわたる24点で最大誤差 0.0022(§2m) |
-| 8 | **prior が観測量の固有状態に近いことは、それだけでは良い兆候ではない** | 損得の境目は $0<\langle P\rangle_\sigma/\langle P\rangle_\rho<2$ (厳密)。 $\rho$ を固定すると最も固有状態に近い prior が最良なのは 160 系中 1 系。UHF はスピン相関で 92.5% が過信し、単一サイト $Z_\uparrow$ で $G=0.0156$ 。SU(2) 群平均で損が 17/80 → 0/80。距離 $r$ の相関 16460 点で判定則の例外 0([README_eigenstate.md](README_eigenstate.md)) |
+| 8 | **prior が観測量の固有状態に近いことは、それだけでは良い兆候ではない** | 損得の境目は $0<\langle P\rangle_\sigma/\langle P\rangle_\rho<2$ (厳密)。 $\rho$ を固定すると最も固有状態に近い prior が最良なのは 160 系中 1 系。UHF はスピン相関で 92.5% が過信し、単一サイト $Z_\uparrow$ で $G=0.0156$ 。SU(2) 群平均で損が 17/80 → 0/80。距離 $r$ の相関 16600 点で判定則の例外 0([README_eigenstate.md](README_eigenstate.md)) |
 
 ## 実験の一覧
 

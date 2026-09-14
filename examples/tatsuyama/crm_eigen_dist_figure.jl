@@ -81,7 +81,7 @@ for (q, c, lab) in SER
 end
 annotate!(pd, 0.9, 0.3, text("prior less extreme\nthan the truth: G ≥ 1", 7, :right, INK))
 annotate!(pd, 2.3, 3.0, text("more than twice\nthe truth: G < 1", 7, :left, INK))
-annotate!(pd, 38, 120, text(@sprintf("%d points shown (%d with ⟨P⟩σ/⟨P⟩ρ ≤ 0 omitted)", nplot, nskip), 7, :right, INK))
+annotate!(pd, 38, 120, text(@sprintf("%d points shown\n(%d with ⟨P⟩σ/⟨P⟩ρ ≤ 0 omitted)", nplot, nskip), 7, :right, INK))
 
 fig = plot(pa, pb, pc, pd; layout=(2, 2), size=(1500, 1180), margin=6Plots.mm)
 out = joinpath(DIR, "crm_new_fig_eigen_dist.png"); savefig(fig, out); println("書き出し: ", out)
