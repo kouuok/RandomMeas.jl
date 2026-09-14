@@ -240,4 +240,7 @@ function main()
     end
     println("書き出し: ", fn)
 end
-main()
+# include されたときは走らせない(crm_eigen_corr.jl が関数だけを再利用する)
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end
