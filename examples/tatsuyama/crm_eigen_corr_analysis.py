@@ -66,19 +66,21 @@ if __name__ == "__main__":
 
     # ---- 2. 距離 r ごとの利得 -------------------------------------------------------
     def pairs_by_r(k, d):
+        """距離 r ごとのサイト対。周期方向は最小像の距離、開放端の方向は長ければ中央の半分だけを使う。"""
         W, geo, LX, U = k
         out = collections.defaultdict(list)
         for (p, kind, i, j) in d:
             if p != "UHF" or kind != "ZupZup": continue
             xi, yi = divmod(i-1, W); xj, yj = divmod(j-1, W)
-            if W == 1:
-                lo, hi = LX//4, 3*LX//4                         # 開放端の影響を避けて中央の半分だけ使う
+            dx = abs(xi - xj)
+            if geo == "torus":
+                dx = min(dx, LX - dx)
+            elif LX >= 8:                                   # 開放端: 端の影響を避ける
+                lo, hi = LX//4, 3*LX//4
                 if not (lo <= xi < hi and lo <= xj < hi): continue
-                r = abs(xi-xj)
-            else:
-                dy = abs(yi-yj); dy = min(dy, W-dy) if W > 2 else dy
-                r = abs(xi-xj) + dy
-            out[r].append((i, j))
+            dy = abs(yi - yj)
+            if W > 2: dy = min(dy, W - dy)                  # W>2 は y 方向が周期
+            out[dx + dy].append((i, j))
         return out
 
     PRI = ["UHF", "UHF-sym", "RHF", "chi4", "chi8"]
