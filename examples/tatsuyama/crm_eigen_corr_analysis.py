@@ -8,7 +8,7 @@
 """
 import csv, glob, collections, math, statistics as st, re
 import numpy as np
-from crm_eigen_uhfsym import lat_edges, solve_uhf, wick, gain
+from crm_eigen_uhfsym import lat_edges, solve_uhf, wick, gain, rhf_G
 
 def load():
     D = collections.defaultdict(dict)       # (W,geo,LX,U) -> {(prior,kind,i,j): (x,y)}
@@ -47,17 +47,18 @@ if __name__ == "__main__":
     print(f"\n[1a] 統合表との照合: {nchk} 値、最大差 {worst:.1e}")
 
     # ---- 1b. UHF の全サイト対を Wick と照合、ついでに y_sym を作る ----------------------
-    SYM = {}; worst_all = collections.defaultdict(float)
+    SYM = {}; RHF = {}; worst_all = collections.defaultdict(float)
     for k, d in D.items():
         W, geo, LX, U = k; n = W*LX
         Gu, Gd = solve_uhf(lat_edges(LX, W, geo == "torus"), n, LX, W, U, n//2, n//2)
+        Gr = rhf_G(lat_edges(LX, W, geo == "torus"), n, n//2)
         for (p, kind, i, j), (x, y) in d.items():
             if p != "UHF": continue
             if kind == "Zup":
                 wz = 1 - 2*Gu[i-1, i-1]; worst_all[kind] = max(worst_all[kind], abs(wz - y))
             elif kind == "ZupZup":
                 w = wick(Gu, Gd, i-1, j-1); worst_all[kind] = max(worst_all[kind], abs(w["zz_uu"] - y))
-                SYM[(k, i, j)] = w["zz_uu_sym"]
+                SYM[(k, i, j)] = w["zz_uu_sym"]; RHF[(k, i, j)] = wick(Gr, Gr, i-1, j-1)["zz_uu"]
             elif kind == "ZupZdn":
                 wz = (1-2*Gu[i-1, i-1])*(1-2*Gd[j-1, j-1]) - (0 if i == j else 0)   # ↑↓ は無相関(同一サイトも異サイトも)
                 worst_all[kind] = max(worst_all[kind], abs(wz - y))
@@ -80,7 +81,7 @@ if __name__ == "__main__":
             out[r].append((i, j))
         return out
 
-    PRI = ["UHF", "UHF-sym", "chi4", "chi8", "chi16"]
+    PRI = ["UHF", "UHF-sym", "RHF", "chi4", "chi8"]
     allpts = []                                                 # (系, r, prior, x, y, G)
     for k, d in sorted(D.items()):
         byr = pairs_by_r(k, d)
@@ -93,6 +94,7 @@ if __name__ == "__main__":
                 for (i, j) in byr[r]:
                     x = d[("UHF", "ZupZup", i, j)][0]
                     if p == "UHF-sym": y = SYM[(k, i, j)]
+                    elif p == "RHF": y = RHF[(k, i, j)]
                     elif (p, "ZupZup", i, j) in d: y = d[(p, "ZupZup", i, j)][1]
                     else: continue
                     g = gain(x, y); ratios.append(y/x); gs.append(g); allpts.append((k, r, p, x, y, g, i, j))
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     # ---- 3. 予想の検定 ------------------------------------------------------------------
     bad = sum((g < 1-1e-9) != (not (0 < y/x < 2)) for (_, _, _, x, y, g, _, _) in allpts if abs(g-1) > 1e-9)
     print(f"\n[3a] 全 {len(allpts)} 点で G<1 ⟺ not(0<y/x<2) の破れ: {bad}")
-    for p in ("UHF", "UHF-sym"):
+    for p in ("UHF", "UHF-sym", "RHF", "chi4", "chi8"):
         pts = [(abs(x), abs(y), g) for (_, _, q, x, y, g, _, _) in allpts if q == p and x*y > 0]
         lose = [a for a in pts if a[2] < 1]
         pred = sum((g < 1) == (ax < ay/2) for ax, ay, g in pts)
