@@ -110,6 +110,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 手法の入門(物理の予備知識が薄い場合) | [paper/crm_tutorial.pdf](paper/crm_tutorial.pdf) |
 | 論文本体 | [paper/crm_hubbard.pdf](paper/crm_hubbard.pdf) |
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
+| UHF-sym(対称性回復した UHF)の説明 | [README_uhfsym.md](README_uhfsym.md) |
 | 二重占有の物理 | [paper/crm_double_occupancy.pdf](paper/crm_double_occupancy.pdf) |
 | 全実験の詳細な記録 | [README.md](README.md) |
 | 確立した主張と未解決問題 | [ROADMAP.md](ROADMAP.md) |

@@ -1,6 +1,6 @@
 # HF を prior にした CRM: 観測量による利得の違いと、利得が大きくなる観測量
 
-[README.md](README.md) に戻る / 前提: [README_eigenstate.md](README_eigenstate.md)(固有状態への近さと損得の境目) / 利得の式: [README_prior_survey.md](README_prior_survey.md)
+[README.md](README.md) に戻る / 前提: [README_eigenstate.md](README_eigenstate.md)(固有状態への近さと損得の境目) / 利得の式: [README_prior_survey.md](README_prior_survey.md) / **UHF-sym の説明: [README_uhfsym.md](README_uhfsym.md)**
 
 ---
 
@@ -82,7 +82,7 @@ d_i=\frac{n_i^2}{4}-\bigl\lvert\langle\mathbf S_i\rangle\bigr\rvert^2
 
 ### 3.2 誤差を「破れの誤差」と「相関の誤差」に分ける
 
-観測量を、スピン回転で変わらない部分(階数 0)と変わる部分(階数 1、2、…)に分ける。真の状態(一重項)では、変わる部分の期待値はすべて 0 である。群平均した UHF(UHF-sym)は、変わらない部分だけを残した prior になる。したがって UHF の外れは厳密に
+観測量を、スピン回転で変わらない部分(階数 0)と変わる部分(階数 1、2、…)に分ける。真の状態(一重項)では、変わる部分の期待値はすべて 0 である。群平均した UHF(UHF-sym、UHF をあらゆるスピンの向きに回して平均した混合状態。詳しくは [README_uhfsym.md](README_uhfsym.md))は、変わらない部分だけを残した prior になる。したがって UHF の外れは厳密に
 
 ```math
 \Delta=\underbrace{(x-y_{\rm sym})}_{\text{相関の誤差}}+\underbrace{(y_{\rm sym}-y)}_{\text{破れの誤差}}
@@ -265,7 +265,9 @@ $O=\sum_kc_kP_k$ をランダムな局所パウリ測定で推定するとき、
 
 ### 5.2 二重占有を和として測る: 共線 UHF は成分で損をする
 
-$n_\uparrow n_\downarrow=(1-Z_\uparrow-Z_\downarrow+Z_\uparrow Z_\downarrow)/4$ は3つのパウリ成分を持つ。UHF は和全体ではほぼ正確だが、 $Z_\uparrow$ と $Z_\downarrow$ の成分では磁化 $\pm2m$ がそのまま外れになる。統合表の厳密な 80 系の中央値 [最小値]:
+$n_\uparrow n_\downarrow=(1-Z_\uparrow-Z_\downarrow+Z_\uparrow Z_\downarrow)/4$ は3つのパウリ成分を持つ。UHF は和全体ではほぼ正確だが、 $Z_\uparrow$ と $Z_\downarrow$ の成分では磁化 $\pm2m$ がそのまま外れになる。
+
+**この効果自体は [README.md](README.md) §2f (5) で既に見つかっている**(1次元 $U=4$ 、サンプリングで二重占有 1.16 → 27.40)。ここで新しく示すのは、5.1 の厳密な式による**項ごとの内訳**、 **$U$ 依存**、そして**対称化しても消えない床**である。統合表の厳密な 80 系の中央値 [最小値]( $U=4$ の 1.20 → 28.0 は §2f と一致する):
 
 | $U$ | 共線 UHF | UHF-sym | RHF | $\chi_p=4$ | $\chi_p=8$ | ( $Z_\uparrow Z_\downarrow$ だけで測る場合) |
 |---|---|---|---|---|---|---|
