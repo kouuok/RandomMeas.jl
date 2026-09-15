@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -N crmmpslow
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=48:00:00
+#PBS -j oe
+# U ごとに Julia を1つずつ並列に走らせる(小さい χ の DMRG は BLAS の並列化が効かないので1スレッド)。
+# qsub -v はカンマで変数を区切るので、リストは / で区切って渡す:
+#   qsub -v SYSTEMS="1:cylinder:64:tpq",US=2/4/8/12,TRUNC_US=4/8/12,JOBTAG=L64 crm_mps_lowchi.pbs
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+US="${US:-2/4/8/12}"
+export SYSTEMS="${SYSTEMS:-1:cylinder:8:t}" NSTART="${NSTART:-4}" NSWEEP="${NSWEEP:-60}"
+export CHIS="$(echo "${CHIS:-2/4/8/16}" | tr '/' ',')" TRUNC_US="$(echo "${TRUNC_US:-$US}" | tr '/' ',')"
+export JULIA_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 JULIA_LOAD_PATH="@:@v#.#:@stdlib"
+JOBTAG="${JOBTAG:-test}"
+echo "host=$(hostname) SYSTEMS=${SYSTEMS} US=${US} TRUNC_US=${TRUNC_US} CHIS=${CHIS} NSTART=${NSTART} NSWEEP=${NSWEEP} start=$(date)"
+for u in $(echo "$US" | tr '/' ' '); do
+  US="$u" julia --project=Hubbard_MPS_Env_v2 crm_mps_lowchi.jl > "crm_mpslow_${JOBTAG}_U${u}.log" 2>&1 &
+done
+wait
+echo "end=$(date)"

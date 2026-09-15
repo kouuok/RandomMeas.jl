@@ -1,0 +1,57 @@
+W	LX	nsites	geometry	U	method	chi	quantity	i	j	value
+1	12	12	torus	4.0	var	2	E	0	0	0.000000000000
+1	12	12	torus	4.0	var	2	chi_reached	0	0	2.000000000000
+1	12	12	torus	4.0	var	2	ZZ onsite	6	7	-1.000000000000
+1	12	12	torus	4.0	var	2	ZZ up-up nb	6	7	-1.000000000000
+1	12	12	torus	4.0	var	2	SzSz nb	6	7	-0.250000000000
+1	12	12	torus	4.0	var	2	SxSx nb	6	7	-0.000000000000
+1	12	12	torus	4.0	var	2	DoubleOcc	6	7	0.000000000000
+1	12	12	torus	4.0	var	2	n	6	7	1.000000000000
+1	12	12	torus	4.0	var	2	Sz	6	7	0.500000000000
+1	12	12	torus	4.0	var	2	mz_max	0	0	0.500000000000
+1	12	12	torus	4.0	var	2	E_start	1	0	0.000000000000
+1	12	12	torus	4.0	var	2	E_start	2	0	0.000000000000
+1	12	12	torus	4.0	var	2	E_start	3	0	0.000000000000
+1	12	12	torus	4.0	var	2	E_start	4	0	0.000000000000
+1	12	12	torus	4.0	var	4	E	0	0	-6.243190200251
+1	12	12	torus	4.0	var	4	chi_reached	0	0	4.000000000000
+1	12	12	torus	4.0	var	4	ZZ onsite	6	7	-0.617843256068
+1	12	12	torus	4.0	var	4	ZZ up-up nb	6	7	-0.550149836940
+1	12	12	torus	4.0	var	4	SzSz nb	6	7	-0.117357555623
+1	12	12	torus	4.0	var	4	SxSx nb	6	7	-0.093789005326
+1	12	12	torus	4.0	var	4	DoubleOcc	6	7	0.095539185983
+1	12	12	torus	4.0	var	4	n	6	7	1.000000000000
+1	12	12	torus	4.0	var	4	Sz	6	7	0.244410431117
+1	12	12	torus	4.0	var	4	mz_max	0	0	0.262169552291
+1	12	12	torus	4.0	var	4	E_start	1	0	-6.243190200251
+1	12	12	torus	4.0	var	4	E_start	2	0	-6.243190200251
+1	12	12	torus	4.0	var	4	E_start	3	0	-6.243190200251
+1	12	12	torus	4.0	var	4	E_start	4	0	-6.243190200251
+1	12	12	torus	4.0	var	8	E	0	0	-6.485087810616
+1	12	12	torus	4.0	var	8	chi_reached	0	0	8.000000000000
+1	12	12	torus	4.0	var	8	ZZ onsite	6	7	-0.608103218238
+1	12	12	torus	4.0	var	8	ZZ up-up nb	6	7	-0.328516398759
+1	12	12	torus	4.0	var	8	SzSz nb	6	7	-0.067111331124
+1	12	12	torus	4.0	var	8	SxSx nb	6	7	-0.067786211949
+1	12	12	torus	4.0	var	8	DoubleOcc	6	7	0.098013003516
+1	12	12	torus	4.0	var	8	n	6	7	1.000077616151
+1	12	12	torus	4.0	var	8	Sz	6	7	0.021880397359
+1	12	12	torus	4.0	var	8	mz_max	0	0	0.025121497655
+1	12	12	torus	4.0	var	8	E_start	1	0	-6.485087570561
+1	12	12	torus	4.0	var	8	E_start	2	0	-6.485087810616
+1	12	12	torus	4.0	var	8	E_start	3	0	-6.484911015197
+1	12	12	torus	4.0	var	8	E_start	4	0	-6.485087570561
+1	12	12	torus	4.0	var	16	E	0	0	-6.680340202443
+1	12	12	torus	4.0	var	16	chi_reached	0	0	16.000000000000
+1	12	12	torus	4.0	var	16	ZZ onsite	6	7	-0.610151698297
+1	12	12	torus	4.0	var	16	ZZ up-up nb	6	7	-0.460026847794
+1	12	12	torus	4.0	var	16	SzSz nb	6	7	-0.096278771323
+1	12	12	torus	4.0	var	16	SxSx nb	6	7	-0.090400274965
+1	12	12	torus	4.0	var	16	DoubleOcc	6	7	0.097467496479
+1	12	12	torus	4.0	var	16	n	6	7	1.000010842105
+1	12	12	torus	4.0	var	16	Sz	6	7	0.175143641176
+1	12	12	torus	4.0	var	16	mz_max	0	0	0.245256562800
+1	12	12	torus	4.0	var	16	E_start	1	0	-6.680252656708
+1	12	12	torus	4.0	var	16	E_start	2	0	-6.680340202443
+1	12	12	torus	4.0	var	16	E_start	3	0	-6.590705130934
+1	12	12	torus	4.0	var	16	E_start	4	0	-6.590575395936

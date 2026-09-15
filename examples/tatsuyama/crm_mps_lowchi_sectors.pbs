@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -N crmsectors
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=01:00:00
+#PBS -j oe
+cd "$HOME/RandomMeas.jl/examples/tatsuyama" || exit 1
+export JULIA_NUM_THREADS=1 JULIA_LOAD_PATH="@:@v#.#:@stdlib" TAGS="W1L64_cylinder_U12.0,W1L64_cylinder_U4.0"
+julia --project=Hubbard_MPS_Env_v2 crm_mps_lowchi_sectors.jl > crm_mps_lowchi_sectors.log 2>&1

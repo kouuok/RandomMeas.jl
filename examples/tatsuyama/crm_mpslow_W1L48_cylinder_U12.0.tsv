@@ -1,0 +1,65 @@
+W	LX	nsites	geometry	U	method	chi	quantity	i	j	value
+1	48	48	cylinder	12.0	var	2	E	0	0	-0.519991801393
+1	48	48	cylinder	12.0	var	2	chi_reached	0	0	2.000000000000
+1	48	48	cylinder	12.0	var	2	ZZ onsite	24	25	-1.000000000000
+1	48	48	cylinder	12.0	var	2	ZZ up-up nb	24	25	-1.000000000000
+1	48	48	cylinder	12.0	var	2	SzSz nb	24	25	-0.250000000000
+1	48	48	cylinder	12.0	var	2	SxSx nb	24	25	-0.000000000000
+1	48	48	cylinder	12.0	var	2	DoubleOcc	24	25	0.000000000000
+1	48	48	cylinder	12.0	var	2	n	24	25	1.000000000000
+1	48	48	cylinder	12.0	var	2	Sz	24	25	-0.500000000000
+1	48	48	cylinder	12.0	var	2	mz_max	0	0	0.500000000000
+1	48	48	cylinder	12.0	var	2	E_start	1	0	0.000000000000
+1	48	48	cylinder	12.0	var	2	E_start	2	0	-0.435730780124
+1	48	48	cylinder	12.0	var	2	E_start	3	0	-0.519991801393
+1	48	48	cylinder	12.0	var	2	E_start	4	0	-0.193705270160
+1	48	48	cylinder	12.0	var	2	E_start	5	0	-0.232470967367
+1	48	48	cylinder	12.0	var	2	E_start	6	0	-0.155485015992
+1	48	48	cylinder	12.0	var	4	E	0	0	-10.318325140682
+1	48	48	cylinder	12.0	var	4	chi_reached	0	0	4.000000000000
+1	48	48	cylinder	12.0	var	4	ZZ onsite	24	25	-0.930885953071
+1	48	48	cylinder	12.0	var	4	ZZ up-up nb	24	25	-0.640079814851
+1	48	48	cylinder	12.0	var	4	SzSz nb	24	25	-0.155803051035
+1	48	48	cylinder	12.0	var	4	SxSx nb	24	25	-0.125822002391
+1	48	48	cylinder	12.0	var	4	DoubleOcc	24	25	0.017278511732
+1	48	48	cylinder	12.0	var	4	n	24	25	1.000000000000
+1	48	48	cylinder	12.0	var	4	Sz	24	25	0.296954719799
+1	48	48	cylinder	12.0	var	4	mz_max	0	0	0.308997545645
+1	48	48	cylinder	12.0	var	4	E_start	1	0	-10.318325140682
+1	48	48	cylinder	12.0	var	4	E_start	2	0	-10.123723298296
+1	48	48	cylinder	12.0	var	4	E_start	3	0	-10.028571698821
+1	48	48	cylinder	12.0	var	4	E_start	4	0	-0.682606883827
+1	48	48	cylinder	12.0	var	4	E_start	5	0	-10.131453441768
+1	48	48	cylinder	12.0	var	4	E_start	6	0	-10.131452360710
+1	48	48	cylinder	12.0	var	8	E	0	0	-10.619592926837
+1	48	48	cylinder	12.0	var	8	chi_reached	0	0	8.000000000000
+1	48	48	cylinder	12.0	var	8	ZZ onsite	24	25	-0.929047949324
+1	48	48	cylinder	12.0	var	8	ZZ up-up nb	24	25	-0.568711742761
+1	48	48	cylinder	12.0	var	8	SzSz nb	24	25	-0.137939315939
+1	48	48	cylinder	12.0	var	8	SxSx nb	24	25	-0.134878170128
+1	48	48	cylinder	12.0	var	8	DoubleOcc	24	25	0.017738012669
+1	48	48	cylinder	12.0	var	8	n	24	25	1.000000000000
+1	48	48	cylinder	12.0	var	8	Sz	24	25	0.177319299273
+1	48	48	cylinder	12.0	var	8	mz_max	0	0	0.178280323427
+1	48	48	cylinder	12.0	var	8	E_start	1	0	-10.619592926837
+1	48	48	cylinder	12.0	var	8	E_start	2	0	-10.609415720017
+1	48	48	cylinder	12.0	var	8	E_start	3	0	-10.605415461468
+1	48	48	cylinder	12.0	var	8	E_start	4	0	-10.611991593224
+1	48	48	cylinder	12.0	var	8	E_start	5	0	-10.614036960469
+1	48	48	cylinder	12.0	var	8	E_start	6	0	-10.618162855596
+1	48	48	cylinder	12.0	var	16	E	0	0	-10.659405306770
+1	48	48	cylinder	12.0	var	16	chi_reached	0	0	16.000000000000
+1	48	48	cylinder	12.0	var	16	ZZ onsite	24	25	-0.928819214751
+1	48	48	cylinder	12.0	var	16	ZZ up-up nb	24	25	-0.501196497003
+1	48	48	cylinder	12.0	var	16	SzSz nb	24	25	-0.121353509142
+1	48	48	cylinder	12.0	var	16	SxSx nb	24	25	-0.121353424621
+1	48	48	cylinder	12.0	var	16	DoubleOcc	24	25	0.017795196312
+1	48	48	cylinder	12.0	var	16	n	24	25	1.000000000000
+1	48	48	cylinder	12.0	var	16	Sz	24	25	0.000191062731
+1	48	48	cylinder	12.0	var	16	mz_max	0	0	0.000192905752
+1	48	48	cylinder	12.0	var	16	E_start	1	0	-10.659405223422
+1	48	48	cylinder	12.0	var	16	E_start	2	0	-10.659405306770
+1	48	48	cylinder	12.0	var	16	E_start	3	0	-10.659405305444
+1	48	48	cylinder	12.0	var	16	E_start	4	0	-10.659405291609
+1	48	48	cylinder	12.0	var	16	E_start	5	0	-10.659405297094
+1	48	48	cylinder	12.0	var	16	E_start	6	0	-10.659405208363

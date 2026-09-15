@@ -35,6 +35,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 7 | **利得は測定なしで予測できる — 台に縮約したトレース距離ひとつから** | 半充填では $\lvert\Delta\rvert=2D_A$ が恒等式。破れる条件まで閉形式 $\min(1,2/(1+4r))$, $r=\lvert\Delta(S^z)\rvert/\lvert\Delta_P\rvert$ で、 $r$ が10桁にわたる24点で最大誤差 0.0022(§2m) |
 | 8 | **prior が観測量の固有状態に近いことは、それだけでは良い兆候ではない** | 損得の境目は $0<\langle P\rangle_\sigma/\langle P\rangle_\rho<2$ (厳密)。 $\rho$ を固定すると最も固有状態に近い prior が最良なのは 160 系中 1 系。UHF はスピン相関で 92.5% が過信し、単一サイト $Z_\uparrow$ で $G=0.0156$ 。SU(2) 群平均で損が 17/80 → 0/80。距離 $r$ の相関 16600 点で判定則の例外 0([README_eigenstate.md](README_eigenstate.md)) |
 | 9 | **物理的に自然な和の観測量では、prior の誤差が項ごとに効く** | 二重占有を4項の和として測ると共線 UHF の利得は 1.8、対称化すると 124(厳密な参照状態、 $U=12$ )。局所エネルギーでは対称化した UHF が 51 で $\chi_p=32$ の MPS(60)と並ぶ。ブロックの電荷の偶奇は台 64 量子ビットでも UHF で約 600([README_observables.md](README_observables.md)) |
+| 10 | **スピン射影 HF の効果は $1/L$ で消え、低い結合次元の MPS は作り方で性質が逆になる** | 射影による隣の $\langle\mathbf S\cdot\mathbf S\rangle$ の変化は回転子の描像の予測 $-2m/L$ と一致( $U=12$ 、 $L=64$ で $L\,\Delta=-0.963$ 対 $-0.972$ )し、 $L=64$ では真の値との差の 11% しか埋まらない。 $\chi=4$ の切断 MPS は隣接 $Z_\uparrow Z_\uparrow$ で利得 29 だが二重占有が 0、 $\chi=4$ の変分 MPS はオンサイト ZZ で 553(天井)だが磁化 0.30 で単一サイト $Z_\uparrow$ が 20 系すべて損([README_phf_mps.md](README_phf_mps.md)) |
 
 ## 実験の一覧
 
@@ -111,6 +112,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 論文本体 | [paper/crm_hubbard.pdf](paper/crm_hubbard.pdf) |
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
 | UHF-sym(対称性回復した UHF)の説明 | [README_uhfsym.md](README_uhfsym.md) |
+| スピン射影 HF と低い結合次元の MPS の比較 | [README_phf_mps.md](README_phf_mps.md) |
 | 二重占有の物理 | [paper/crm_double_occupancy.pdf](paper/crm_double_occupancy.pdf) |
 | 全実験の詳細な記録 | [README.md](README.md) |
 | 確立した主張と未解決問題 | [ROADMAP.md](ROADMAP.md) |

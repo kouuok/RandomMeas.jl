@@ -1,0 +1,100 @@
+W	LX	nsites	geometry	U	method	chi	quantity	i	j	value
+1	8	8	cylinder	4.0	exact	0	E	0	0	-4.235806999130
+1	8	8	cylinder	4.0	exact	0	Hvar	0	0	0.000000000002
+1	8	8	cylinder	4.0	exact	0	chi_reached	0	0	163.000000000000
+1	8	8	cylinder	4.0	trunc	2	E	0	0	0.000000000000
+1	8	8	cylinder	4.0	trunc	2	chi_reached	0	0	2.000000000000
+1	8	8	cylinder	4.0	trunc	2	ZZ onsite	4	5	-1.000000000000
+1	8	8	cylinder	4.0	trunc	2	ZZ up-up nb	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	2	SzSz nb	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	2	SxSx nb	4	5	0.000000000000
+1	8	8	cylinder	4.0	trunc	2	DoubleOcc	4	5	0.000000000000
+1	8	8	cylinder	4.0	trunc	2	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	trunc	2	Sz	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	2	mz_max	0	0	0.000000000000
+1	8	8	cylinder	4.0	trunc	4	E	0	0	-3.313188726915
+1	8	8	cylinder	4.0	trunc	4	chi_reached	0	0	4.000000000000
+1	8	8	cylinder	4.0	trunc	4	ZZ onsite	4	5	-0.698223119263
+1	8	8	cylinder	4.0	trunc	4	ZZ up-up nb	4	5	0.000000000000
+1	8	8	cylinder	4.0	trunc	4	SzSz nb	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	4	SxSx nb	4	5	0.000000000000
+1	8	8	cylinder	4.0	trunc	4	DoubleOcc	4	5	0.075444220184
+1	8	8	cylinder	4.0	trunc	4	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	trunc	4	Sz	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	4	mz_max	0	0	0.000000000000
+1	8	8	cylinder	4.0	trunc	8	E	0	0	-4.208572096331
+1	8	8	cylinder	4.0	trunc	8	chi_reached	0	0	8.000000000000
+1	8	8	cylinder	4.0	trunc	8	ZZ onsite	4	5	-0.602896748761
+1	8	8	cylinder	4.0	trunc	8	ZZ up-up nb	4	5	-0.339346120732
+1	8	8	cylinder	4.0	trunc	8	SzSz nb	4	5	-0.069703620426
+1	8	8	cylinder	4.0	trunc	8	SxSx nb	4	5	-0.069703620426
+1	8	8	cylinder	4.0	trunc	8	DoubleOcc	4	5	0.099275812810
+1	8	8	cylinder	4.0	trunc	8	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	trunc	8	Sz	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	8	mz_max	0	0	0.000000000000
+1	8	8	cylinder	4.0	trunc	16	E	0	0	-4.232690482640
+1	8	8	cylinder	4.0	trunc	16	chi_reached	0	0	16.000000000000
+1	8	8	cylinder	4.0	trunc	16	ZZ onsite	4	5	-0.599826025468
+1	8	8	cylinder	4.0	trunc	16	ZZ up-up nb	4	5	-0.343500891685
+1	8	8	cylinder	4.0	trunc	16	SzSz nb	4	5	-0.069796779698
+1	8	8	cylinder	4.0	trunc	16	SxSx nb	4	5	-0.069796779698
+1	8	8	cylinder	4.0	trunc	16	DoubleOcc	4	5	0.100043493633
+1	8	8	cylinder	4.0	trunc	16	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	trunc	16	Sz	4	5	-0.000000000000
+1	8	8	cylinder	4.0	trunc	16	mz_max	0	0	0.000000000000
+1	8	8	cylinder	4.0	var	2	E	0	0	-0.150948152960
+1	8	8	cylinder	4.0	var	2	chi_reached	0	0	2.000000000000
+1	8	8	cylinder	4.0	var	2	ZZ onsite	4	5	-0.968391008218
+1	8	8	cylinder	4.0	var	2	ZZ up-up nb	4	5	-0.483696184422
+1	8	8	cylinder	4.0	var	2	SzSz nb	4	5	-0.116972922133
+1	8	8	cylinder	4.0	var	2	SxSx nb	4	5	0.000000000000
+1	8	8	cylinder	4.0	var	2	DoubleOcc	4	5	0.015804495891
+1	8	8	cylinder	4.0	var	2	n	4	5	1.015804495891
+1	8	8	cylinder	4.0	var	2	Sz	4	5	-0.490168407453
+1	8	8	cylinder	4.0	var	2	mz_max	0	0	0.500000000000
+1	8	8	cylinder	4.0	var	2	E_start	1	0	0.000000000000
+1	8	8	cylinder	4.0	var	2	E_start	2	0	0.000000000000
+1	8	8	cylinder	4.0	var	2	E_start	3	0	-0.150948152960
+1	8	8	cylinder	4.0	var	2	E_start	4	0	0.000000000000
+1	8	8	cylinder	4.0	var	4	E	0	0	-4.033692360184
+1	8	8	cylinder	4.0	var	4	chi_reached	0	0	4.000000000000
+1	8	8	cylinder	4.0	var	4	ZZ onsite	4	5	-0.615961786259
+1	8	8	cylinder	4.0	var	4	ZZ up-up nb	4	5	-0.475934585441
+1	8	8	cylinder	4.0	var	4	SzSz nb	4	5	-0.100727898265
+1	8	8	cylinder	4.0	var	4	SxSx nb	4	5	-0.083303655844
+1	8	8	cylinder	4.0	var	4	DoubleOcc	4	5	0.096009553435
+1	8	8	cylinder	4.0	var	4	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	var	4	Sz	4	5	-0.230824869686
+1	8	8	cylinder	4.0	var	4	mz_max	0	0	0.257549039206
+1	8	8	cylinder	4.0	var	4	E_start	1	0	-4.033692360184
+1	8	8	cylinder	4.0	var	4	E_start	2	0	-4.033692360184
+1	8	8	cylinder	4.0	var	4	E_start	3	0	-4.033692360184
+1	8	8	cylinder	4.0	var	4	E_start	4	0	-4.033692360184
+1	8	8	cylinder	4.0	var	8	E	0	0	-4.217722773359
+1	8	8	cylinder	4.0	var	8	chi_reached	0	0	8.000000000000
+1	8	8	cylinder	4.0	var	8	ZZ onsite	4	5	-0.606503336984
+1	8	8	cylinder	4.0	var	8	ZZ up-up nb	4	5	-0.313543737922
+1	8	8	cylinder	4.0	var	8	SzSz nb	4	5	-0.063950174657
+1	8	8	cylinder	4.0	var	8	SxSx nb	4	5	-0.064286473460
+1	8	8	cylinder	4.0	var	8	DoubleOcc	4	5	0.098349863187
+1	8	8	cylinder	4.0	var	8	n	4	5	0.999951394865
+1	8	8	cylinder	4.0	var	8	Sz	4	5	0.005264865870
+1	8	8	cylinder	4.0	var	8	mz_max	0	0	0.010976426326
+1	8	8	cylinder	4.0	var	8	E_start	1	0	-4.216258889238
+1	8	8	cylinder	4.0	var	8	E_start	2	0	-4.216944154031
+1	8	8	cylinder	4.0	var	8	E_start	3	0	-4.217718144298
+1	8	8	cylinder	4.0	var	8	E_start	4	0	-4.217722773359
+1	8	8	cylinder	4.0	var	16	E	0	0	-4.233510924170
+1	8	8	cylinder	4.0	var	16	chi_reached	0	0	16.000000000000
+1	8	8	cylinder	4.0	var	16	ZZ onsite	4	5	-0.601222215735
+1	8	8	cylinder	4.0	var	16	ZZ up-up nb	4	5	-0.340745655768
+1	8	8	cylinder	4.0	var	16	SzSz nb	4	5	-0.069229601038
+1	8	8	cylinder	4.0	var	16	SxSx nb	4	5	-0.069223915049
+1	8	8	cylinder	4.0	var	16	DoubleOcc	4	5	0.099694446066
+1	8	8	cylinder	4.0	var	16	n	4	5	1.000000000000
+1	8	8	cylinder	4.0	var	16	Sz	4	5	-0.000338946908
+1	8	8	cylinder	4.0	var	16	mz_max	0	0	0.001060470571
+1	8	8	cylinder	4.0	var	16	E_start	1	0	-4.233510924170
+1	8	8	cylinder	4.0	var	16	E_start	2	0	-4.233510924170
+1	8	8	cylinder	4.0	var	16	E_start	3	0	-4.233510924170
+1	8	8	cylinder	4.0	var	16	E_start	4	0	-4.233510924170
