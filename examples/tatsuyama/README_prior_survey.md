@@ -509,11 +509,109 @@ UHF の大域忠実度:
 | **SzSz nb** | 4 | **0.248** | 0.626 | 0.900 | 0.918 | **弱結合で良い** |
 | **SxSx nb** | 4 | **0.393** | 0.776 | 0.944 | 0.974 | **弱結合で良い** |
 
+(**「二重占有」の行だけは $c_0$ を引く前の $\varepsilon=\lvert\Delta\rvert/\lvert\langle O\rangle\rvert$ である。** $c_0$ を引いた現在の定義では ZZ onsite の行と厳密に一致する — 表1の注。この行は下の (4) の $\delta$ 、すなわち**二重占有そのものの相対誤差**を表していて、強結合で 0.28 に飽和する。)
+
 **7観測量のうち、強結合を好むのはオンサイトの電荷量(ZZ onsite・二重占有)だけである。** サイト間のスピン量は3つとも $U$ とともに単調に悪化する。
 
 機構は明快である。**電荷セクター**は $U$ が大きいほど Mott ギャップで凍り、二重占有がほぼ古典的になるので UHF がよく捉える。**スピンセクター**は逆で、大きい $U$ では真の状態が量子的に揺らぐ一重項なのに UHF は古典的な Néel 状態なので、スピン相関を定性的に間違える。**大域忠実度が $U$ とともに悪化するのは、Mott 絶縁体では状態がスピン自由度に支配されるから**である。
 
 > つまり「UHF は $U$ が大きい方が良いのか小さい方が良いのか」に**単一の答えはない**。大域忠実度では小さい $U$、電荷量では大きい $U$、スピン量では小さい $U$ が良い。**観測量ごとに見るしかない** — これは §2 の主張そのものである。
+
+#### なぜそうなるのか — 強結合展開で最後まで追う
+
+上の表の $U$ 依存は、強結合展開で式まで追える。数値は1次元 $L=12$ の周期境界、UHF prior で確かめる。
+
+**(1) ZZ onsite は二重占有だけで決まる。** JW 変換で $Z_{i\sigma}=1-2n_{i\sigma}$ なので
+
+```math
+Z_{i\uparrow}Z_{i\downarrow}=1-2n_i+4\,n_{i\uparrow}n_{i\downarrow}
+```
+
+であり、半充填の二部格子では粒子正孔対称性で $\langle n_i\rangle=1$ が厳密に成り立つ( $L=64$ の中央で $\lvert\langle Z_\uparrow\rangle\rvert<3\times10^{-5}$ )。したがって
+
+```math
+x=4d_{\rm 真}-1,\qquad y=4d_{\rm UHF}-1,\qquad \Delta=4\,(d_{\rm 真}-d_{\rm UHF})
+```
+
+となり、**誤差はまるごと二重占有 $d=\langle n_\uparrow n_\downarrow\rangle$ の誤差になる**。
+
+**(2) 真の状態の $d$ は「その結合が一重項である確率」に比例する。** 強結合では二重占有のない配置(スピン配置)が低エネルギーの多様体で、電子が隣へ跳べるのは2つのスピンが一重項の成分を持つときだけである(同じ向きなら Pauli 原理で禁止)。その成分を測るのが一重項の射影演算子
+
+```math
+\hat P_{\rm s}=\frac14-\mathbf S_i\cdot\mathbf S_j\qquad(\text{一重項で }1\text{、三重項で }0)
+```
+
+で、2次摂動のエネルギーは1結合あたり $-\frac{4t^2}{U}\langle\hat P_{\rm s}\rangle$ 、すなわち Heisenberg 模型 $-J\hat P_{\rm s}$ ( $J=4t^2/U$ )そのものである。ここで Hellmann–Feynman の関係 $\sum_i\langle n_{i\uparrow}n_{i\downarrow}\rangle=\partial E/\partial U$ を使うと(Heisenberg の基底状態は $J$ の大きさに依らないので、 $U$ 依存は前因子だけ)、1次元(結合の数はサイトの数と同じ)で
+
+```math
+d_{\rm 真}\approx\frac{4t^2}{U^2}\Bigl(\frac14-\langle\mathbf S_i\cdot\mathbf S_j\rangle\Bigr)
+```
+
+が出る。**二重占有は隣の結合の一重項相関の「こだま」である**([README_observables.md](README_observables.md))。 $U=12$ で予測 0.0188 対 実測 0.0180、 $U=8$ で 0.0409 対 0.0369。
+
+**(3) UHF の $d$ も同じ形で、括弧の中だけが古典ネールの値になる。** 共線 UHF は上向きと下向きが独立な行列式の積なので
+
+```math
+d_{\rm UHF}=\langle n_{i\uparrow}\rangle\langle n_{i\downarrow}\rangle=\Bigl(\frac12+m\Bigr)\Bigl(\frac12-m\Bigr)=\frac14-m^2
+```
+
+である(Slater 恒等式 $d_i=n_i^2/4-\lvert\langle\mathbf S_i\rangle\rvert^2$ の半充填版)。自己無撞着条件 $1=\frac U2\frac1N\sum_k(\varepsilon_k^2+\Delta^2)^{-1/2}$ ( $\Delta=Um$ 、 $\varepsilon_k=-2t\cos k$ 、 $\langle\varepsilon_k^2\rangle=2t^2$ )を $\Delta\gg t$ で展開すると
+
+```math
+2m\approx1-\frac{4t^2}{U^2}\quad\Longrightarrow\quad m\approx\frac12-\frac{2t^2}{U^2},\qquad d_{\rm UHF}\approx\frac{2t^2}{U^2}=\frac{4t^2}{U^2}\Bigl(\frac14+\frac14\Bigr)
+```
+
+となる。括弧の中は**古典的な反平行配置 $\lvert\uparrow\downarrow\rangle$ の一重項成分 $\frac14-(-\frac14)=\frac12$** 、つまり「半分だけ一重項」である。数値でも $\frac12-m$ は $U=8$ で 0.0307(予測 0.0312)、 $U=12$ で 0.0138(予測 0.0139)と合う。
+
+**(4) だから $d$ の相対誤差は $U$ に依らない定数に飽和する。**
+
+```math
+\delta\equiv\frac{d_{\rm UHF}}{d_{\rm 真}}-1\ \longrightarrow\ \frac{1/2}{\frac14+\lvert\langle\mathbf S\cdot\mathbf S\rangle\rvert}-1=\frac{0.5}{0.693}-1=-0.28
+```
+
+(無限 Heisenberg 鎖の $\langle\mathbf S\cdot\mathbf S\rangle=\frac14-\ln2=-0.443$ を使った。)**上の表の「二重占有」の行はまさにこの $\delta$ である** — $c_0$ を引く前の $\varepsilon=\lvert\Delta d\rvert/d$ で、厳密な 80 系の中央値は 0.265、0.021、0.187、0.237 と強結合で 0.28 に近づく。 $c_0$ を引いた現在の定義では ZZ onsite の行と厳密に一致する(表1の注)。
+
+**(5) 消えるのは「ZZ に対する」相対誤差である。**
+
+```math
+\varepsilon=\frac{4\lvert d_{\rm 真}-d_{\rm UHF}\rvert}{\lvert4d_{\rm 真}-1\rvert}\approx4\,d_{\rm 真}\,\lvert\delta\rvert\approx4\cdot\frac{4t^2}{U^2}(0.693)\cdot0.28=3.1\Bigl(\frac tU\Bigr)^2
+```
+
+分子は $d\propto(t/U)^2$ とともに 0 へ落ち、分母は $d\to0$ で 1 に張り付く。**$d$ に対する誤差は 28% のまま残るのに、ZZ に対する誤差は $(t/U)^2$ で消える** — これが「電荷量は強結合で良くなる」の正体である。
+
+| $U$ | $d_{\rm 真}$ | $d_{\rm UHF}$ | $\delta$ | $\varepsilon$ 実測 | $4d\lvert\delta\rvert/\lvert x\rvert$ | 漸近形 $3.1(t/U)^2$ |
+|---|---|---|---|---|---|---|
+| 4 | 0.0990 | 0.1021 | $+0.032$ | 0.021 | 0.021 | 0.194 |
+| 8 | 0.0369 | 0.0298 | $-0.193$ | 0.033 | 0.033 | 0.048 |
+| 12 | 0.0180 | 0.0136 | $-0.243$ | 0.019 | 0.019 | 0.022 |
+
+( $U=8$ で漸近形からずれるのは、 $\delta$ がまだ $-0.28$ に達していないためである。)
+
+**(6) $U\simeq4$ のくぼみは、誤差の符号が入れ替わる点である。** 表の ZZ onsite の行が単調でない(0.61、0.014、0.032、0.018)のはこのためである。弱結合側では、真の状態は相関で二重占有を抑えるのに UHF は上向きと下向きが無相関なので**過大評価**し( $U=2$ で 0.211 対 0.165)、強結合側では (4) のとおり**28% 過小評価**する。 $U\simeq4$ で2つの誤差が打ち消し、 $\varepsilon$ がいったん 0.02 まで落ちる。
+
+**(7) スピン量が逆を向く理由。** こちらは真の値も prior の値も有限値に落ち着き、**食い違ったまま止まる**。真の状態は無限 Heisenberg 鎖の $\langle S^zS^z\rangle=\frac13(\frac14-\ln2)=-0.148$ へ、UHF は $m\to\frac12$ の古典ネール $-\frac14$ へ向かうので
+
+```math
+\frac yx\longrightarrow\frac{3\cdot\frac14}{\lvert\langle\mathbf S\cdot\mathbf S\rangle\rvert},\qquad
+\varepsilon\longrightarrow\Bigl\lvert1-\frac{0.75}{\lvert\langle\mathbf S\cdot\mathbf S\rangle\rvert}\Bigr\rvert
+```
+
+となる。1次元では $0.75/0.443=1.69$ 、すなわち $\varepsilon\to0.69$ で、実測( $L=12$ 周期境界)も $U=8$ で 0.690、 $U=12$ で 0.684 と一致する。**損得の境目 $y/x=2$ は $\lvert\langle\mathbf S\cdot\mathbf S\rangle\rvert=3/8$ に対応する**ので、1次元(0.443)は得、2次元正方格子(0.335)は損になる — [README_eigenstate.md](README_eigenstate.md) 3.3 の判定条件と同じものである。
+
+**(8) 利得としてどう効くか。** $1-x^2=8d(1-2d)\approx8d\propto(t/U)^2$ なので、ショットノイズの床 $v_s=3^{\lvert A\rvert}(1-x^2)/n_m$ が縮んで天井が上がり、prior の寄与は落ちる:
+
+```math
+G_{\max}=1+\frac{Kx^2}{v_s}\propto\Bigl(\frac Ut\Bigr)^2,\qquad
+R=\varepsilon^2(G_{\max}-1)\propto\Bigl(\frac tU\Bigr)^4\Bigl(\frac Ut\Bigr)^2=\Bigl(\frac tU\Bigr)^2
+```
+
+| $U$ | $G_{\max}$ | $R=\varepsilon^2(G_{\max}-1)$ | $G_{\max}/(1+R)$ | $G$ 実測 |
+|---|---|---|---|---|
+| 4 | 52.1 | 0.022 | 50.9 | 50.9 |
+| 8 | 237.1 | 0.264 | 187.5 | 187.5 |
+| 12 | 554.0 | 0.195 | 463.7 | 463.7 |
+
+**強結合では、電荷量の利得は prior の質ではなくショットノイズの床で決まるところまで来ている**( $U=12$ で天井の 84%)。スピン量では $\varepsilon$ が 0.69 で止まるので、天井が上がるほど $R$ も一緒に増え、利得は 1 付近に張り付いたままになる。
 
 ### 結果3: 大域忠実度と利得は、極端では逆を向く
 
@@ -572,6 +670,29 @@ UHF、ZZ onsite、厳密系の中央値:
 **平均場 prior は境界条件にほとんど反応しない**(利得の差は2〜3%)。§2k で見た「PBC にすると MPS prior が半減する」のと対照的で、これは平均場が結合次元を持たない — つまり周期境界で余分に切る辺の代金を払わない — ことの直接的な現れである。
 
 > **ただしこれは ZZ onsite(電荷量)に限った話である。** 同じ系・同じ prior でもスピン量では境界条件が決定的で、 $L=12$ 、 $U=8$ の $\varepsilon$ は SzSz で OBC 1.297 / PBC 0.690、ZZ up-up で OBC 1.211 / PBC 0.638 と**約2倍違い、得か損かが入れ替わる**。原因は開放端が誘起する中央ボンドの交替で、上記「PBC 版」のパネル(d)に示した。**「境界条件の影響は小さい」を観測量全体に一般化してはいけない。**
+
+#### なぜ電荷量だけ境界条件に鈍いのか — サイトの量と結合の量
+
+ZZ onsite が**1サイトの量**、スピン相関が**1本の結合の量**であることが効いている。理由は2つある。
+
+**(a) 開放端が作る乱れは、ほぼすべてが結合の強弱の交替である。** 半充填の二部格子では粒子正孔対称性でサイトの電子数が 1 に固定されるので、電荷の Friedel 振動はそもそも起きない( $L=64$ の中央で $\lvert\langle Z_\uparrow\rangle\rvert<3\times10^{-5}$ )。しかもサイトの量は、結果2の (2) の式をサイトあたりに書いた
+
+```math
+d_i\approx\frac{2t^2}{U^2}\sum_{j\,(\text{隣})}\Bigl(\frac14-\langle\mathbf S_i\cdot\mathbf S_j\rangle\Bigr)
+```
+
+のとおり**隣り合う2本の結合の和**で決まる。交替は結合ごとに符号が反転するので、2本足すと打ち消える。 $L=64$ 、 $U=8$ の厳密な状態(中央付近)で確かめると:
+
+| | 平均 | 交替の振幅 | 相対 |
+|---|---|---|---|
+| 結合の $Z_\uparrow Z_\uparrow$ | $-0.5665$ | 0.111 | 20% |
+| サイトの ZZ onsite | $-0.8534$ | 0.00009 | 0.01% |
+
+隣り合う2本の結合は $-0.620$ と $-0.513$ と大きく違うのに、その平均は $-0.56663$ 、 $-0.56648$ 、 $-0.56656$ とほぼ一定で、 $d_i$ (0.036646、0.036640、0.036643)はその平均に追随している。**結合の量では 20% 揺れるものが、サイトの量では 0.01% になる。**
+
+**(b) 損得の境目からの距離が違う。** ZZ onsite は $\varepsilon=0.033$ と境目( $\varepsilon=1$ )から2桁離れているので、真値が 0.1% 動いても順位は変わらない。スピン量は結果2の (7) のとおり $\varepsilon\to0.69$ と境目のすぐ下にいるので、中央ボンドが交替の谷に当たって真値が 35% 小さくなるだけで $\varepsilon$ が 1 を越える( $L=12$ 、 $U=8$ で OBC 1.297 / PBC 0.690)。
+
+> **境界条件が結論を変えるのは、「観測量が結合にまたがる」ことと「 $\varepsilon$ が 1 の近くにある」ことが重なったときだけである。** ZZ onsite はどちらも満たさない。
 
 ---
 
