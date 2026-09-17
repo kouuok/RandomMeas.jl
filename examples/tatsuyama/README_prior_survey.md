@@ -535,6 +535,26 @@ x=4d_{\rm 真}-1,\qquad y=4d_{\rm UHF}-1,\qquad \Delta=4\,(d_{\rm 真}-d_{\rm UH
 
 となり、**誤差はまるごと二重占有 $d=\langle n_\uparrow n_\downarrow\rangle$ の誤差になる**。
 
+> **なぜ $\langle n_i\rangle=1$ が厳密なのか — サイトごとに違ってよさそうなのに。** 半充填の二部格子では**粒子正孔対称性**がこれを禁じている。副格子 A で $\varepsilon_i=+1$ 、B で $\varepsilon_i=-1$ として $\Pi:\,c_{i\sigma}\to\varepsilon_i c^\dagger_{i\sigma}$ と置くと、
+>
+> - **電子数**: $n_{i\sigma}=c^\dagger_{i\sigma}c_{i\sigma}\to c_{i\sigma}c^\dagger_{i\sigma}=1-n_{i\sigma}$ (電子を穴に読み替える)
+> - **ホッピング**: 結合の両端は副格子が違うので $\varepsilon_i\varepsilon_j=-1$ 、さらに $c_{i\sigma}c^\dagger_{j\sigma}=-c^\dagger_{j\sigma}c_{i\sigma}$ でもう1つ符号が出るので、**2つの $-1$ が打ち消えて不変**
+> - **相互作用**: $U n_\uparrow n_\downarrow\to U(1-n_\uparrow)(1-n_\downarrow)=U n_\uparrow n_\downarrow-U n_i+U$
+>
+> すなわち $H\to H-U(\hat N-N_{\rm site})$ で、**半充填 $\hat N=N_{\rm site}$ のセクターでは $H$ がそのまま**である( $\Pi$ は $\hat N\to2N_{\rm site}-\hat N$ と写すので、半充填はこの変換の不動点)。Lieb の定理より、二部格子・2つの副格子のサイト数が等しい・ $U>0$ の半充填の基底状態は一意なスピン一重項なので、 $\Pi\lvert\psi_0\rangle=e^{i\varphi}\lvert\psi_0\rangle$ であり
+>
+> ```math
+> \langle n_{i\sigma}\rangle=\langle\psi_0\rvert\Pi^\dagger n_{i\sigma}\Pi\lvert\psi_0\rangle=1-\langle n_{i\sigma}\rangle\quad\Longrightarrow\quad\langle n_{i\sigma}\rangle=\frac12
+> ```
+>
+> が**サイトごとに**言える。境界条件にも $U$ にも系の形にも依らない。UHF でも、上向きと下向きで staggered 場の符号が逆なので和は 1 に戻る(統合表の `n` は真値も prior 値も全系で 1.0000)。
+>
+> **開放端の Friedel 振動はどこへ行ったのか。** 端が作る密度振動の波数は $2k_F$ で、半充填ではちょうど $2k_F=\pi$ 、つまり $\pm(-1)^i$ の交替である。ところが $n_i-1$ は $\Pi$ で符号を変える(粒子正孔で奇)ので、**その交替だけが対称性で塞がれている**。端の影響が消えたのではなく、行き先が塞がれて**結合の強弱の交替**に回る(結合の量 $c^\dagger_{i\sigma}c_{j\sigma}+{\rm h.c.}$ は粒子正孔で偶なので制限を受けない)。これが結果6の「なぜ電荷量だけ境界条件に鈍いのか」の対称性の側の理由である。
+>
+> **禁止されないもの**: スピン密度(粒子正孔対称性は電荷の自由度しか縛らない。UHF は $\langle S^z_i\rangle=\pm m$ と堂々と交替する。真の状態で 0 になるのは一重項だからで、別の対称性の話である)と、電荷の**ゆらぎ** $\langle n_\uparrow n_\downarrow\rangle$ (こちらは動けるが、(2) のとおり隣り合う2本の結合の平均で決まるので交替が打ち消え、実測の振幅は 0.01%)。
+>
+> **崩れる条件**: ドープ( $2k_F\ne\pi$ になり禁止が外れる。1/8 ホールドープの $6\times8$ シリンダー、 $U=8$ では $\langle n_{21}\rangle=0.846$ 、 $\langle n_{27}\rangle=0.933$ と 10% 違う)、非二部格子(次近接ホッピングや奇環でホッピング項が不変でなくなる)、外場や不規則ポテンシャル、基底状態が縮退している場合。**ドープ系では ZZ onsite が二重占有だけでは決まらないので、この節の $(t/U)^2$ の議論もそのままでは使えない。**
+
 **(2) 真の状態の $d$ は「その結合が一重項である確率」に比例する。** 強結合では二重占有のない配置(スピン配置)が低エネルギーの多様体で、電子が隣へ跳べるのは2つのスピンが一重項の成分を持つときだけである(同じ向きなら Pauli 原理で禁止)。その成分を測るのが一重項の射影演算子
 
 ```math
