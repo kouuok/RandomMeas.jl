@@ -113,6 +113,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
 | UHF-sym(対称性回復した UHF)の説明 | [README_uhfsym.md](README_uhfsym.md) |
 | スピン射影 HF と低い結合次元の MPS の比較 | [README_phf_mps.md](README_phf_mps.md) |
+| 半充填で ⟨n_i⟩ = 1 がサイトごとに厳密な理由(粒子正孔対称性) | [README_particle_hole.md](README_particle_hole.md) |
 | 二重占有の物理 | [paper/crm_double_occupancy.pdf](paper/crm_double_occupancy.pdf) |
 | 全実験の詳細な記録 | [README.md](README.md) |
 | 確立した主張と未解決問題 | [ROADMAP.md](ROADMAP.md) |
