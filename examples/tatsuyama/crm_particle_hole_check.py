@@ -11,6 +11,8 @@
 さらに粒子正孔変換が対称性であることを、その帰結で確かめる: Π† H Π = H - U(N̂ - L) なので、
 (N↑, N↓) のセクターと (L-N↑, L-N↓) のセクターのスペクトルは U(L - N↑ - N↓) だけずれて一致するはず。
 二部格子でない(t' がある)とこの関係は崩れる。
+最後に基底状態の一意性(Lieb の定理)を確かめる: 半充填の基底状態と次の準位のギャップ、次の準位が S^z=1 の
+セクターの最低準位と一致するか(最初の励起が三重項か)、U=0 では縮退することを見る。
 """
 import itertools
 import numpy as np
@@ -125,3 +127,16 @@ if __name__ == "__main__":
         e55 = np.sort(sla.eigsh(hamiltonian(L, 5, 5, chain(L, tp=tp), U)[0], k=4, which="SA")[0]) - 2*U
         print(f"  {label}: (3,3) " + " ".join(f"{x:+.8f}" for x in e33))
         print(f"  {'':{len(label)}s}  (5,5)-2U " + " ".join(f"{x:+.8f}" for x in e55) + f"   最大差 {np.max(np.abs(e33-e55)):.1e}")
+
+    # 基底状態の一意性(Lieb の定理)
+    print("\n基底状態の一意性: 1次元開放端 U=4、半充填の低い2準位と S^z=1 のセクター (L/2+1, L/2-1) の最低準位")
+    for Lc in (4, 6, 8, 10):
+        h = Lc // 2
+        e = np.sort(sla.eigsh(hamiltonian(Lc, h, h, chain(Lc), U)[0], k=3, which="SA")[0])
+        et = sla.eigsh(hamiltonian(Lc, h + 1, h - 1, chain(Lc), U)[0], k=1, which="SA")[0][0]
+        print(f"  L={Lc:2d}: E0={e[0]:+.6f}  E1={e[1]:+.6f}  ギャップ {e[1]-e[0]:.4f}  L×ギャップ {Lc*(e[1]-e[0]):.3f}"
+              f"   S^z=1 の最低 {et:+.6f}(E1 との差 {abs(et-e[1]):.1e})")
+    print("U=0 と U=4 の周期境界 L=4、半充填の低い4準位")
+    for Uv in (0.0, 4.0):
+        w = np.sort(sla.eigsh(hamiltonian(4, 2, 2, chain(4, pbc=True), Uv)[0], k=4, which="SA")[0])
+        print(f"  U={Uv}: " + " ".join(f"{x:+.6f}" for x in w))
