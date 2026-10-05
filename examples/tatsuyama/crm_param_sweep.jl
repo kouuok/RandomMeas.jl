@@ -211,6 +211,8 @@ end
 theory_var(absA, P, Δ, nu, nm) = (((3.0^absA - 1)*P^2 + 3.0^absA*(1-P^2)/nm)/nu,
                                   ((3.0^absA - 1)*Δ^2 + 3.0^absA*(1-P^2)/nm)/nu)
 
+include(joinpath(@__DIR__, "crm_exact_gain.jl"))
+
 function run_locals(wtens, cum_pl, obs_w, Pσ_all, trOσ_all; nu, nm, n_repeat, seed)
     Random.seed!(seed)
     Nw = length(wtens); nobs = length(obs_w); np = length(Pσ_all)
@@ -270,7 +272,7 @@ function prepare_point(L, t, U, mu; chi_exp, chi_priors, n_elec=L)
         push!(Pσ_all, Pσ)
         push!(trOσ_all, [sum(tm.coeff * Pσ[k][ti] for (ti, tm) in enumerate(obs[k].terms)) for k in 1:length(obs)])
     end
-    return (; E, obs, obs_w, wtens, cum_pl, Otrue, Pσ_all, trOσ_all, fids)
+    return (; E, obs, obs_w, wtens, cum_pl, Otrue, Pσ_all, trOσ_all, fids, exp_tens)
 end
 
 # ------------------------------------------------------------
@@ -309,7 +311,8 @@ function main()
                     vs, vc = theory_var(length(o.terms[1].sup), pt.Otrue[k], Δ, nu, nm)
                     G_theo = vs / vc
                 end
-                push!(rows_A, (nm, chi_p, o.name, o.pure, pt.Otrue[k], Δ, G, G_theo))
+                push!(rows_A, (nm, chi_p, o.name, o.pure, pt.Otrue[k], Δ, G, G_theo,
+                               exact_gain(o, pt.exp_tens, pt.Pσ_all[p][k], nm)))
             end
         end
     end
@@ -345,7 +348,7 @@ function main()
                 @printf(" %8.2f", G)
                 Δ = pt.Otrue[k] - pt.trOσ_all[p][k]
                 push!(rows_B, (pset.label, pset.U, pset.n_elec, chi_p, o.name,
-                               pt.Otrue[k], Δ, pt.fids[p], G))
+                               pt.Otrue[k], Δ, pt.fids[p], G, exact_gain(o, pt.exp_tens, pt.Pσ_all[p][k], nm)))
             end
             println()
         end
@@ -355,12 +358,12 @@ function main()
     # 保存
     outA = joinpath(@__DIR__, "crm_sweep_nm.tsv")
     open(outA, "w") do io
-        println(io, "nm\tchi_prior\tobservable\tpure\ttrue\tDelta\tG_emp\tG_theo")
+        println(io, "nm\tchi_prior\tobservable\tpure\ttrue\tDelta\tG_emp\tG_theo\tG_exact")
         for r in rows_A; println(io, join(r, "\t")); end
     end
     outB = joinpath(@__DIR__, "crm_sweep_U.tsv")
     open(outB, "w") do io
-        println(io, "label\tU\tn_elec\tchi_prior\tobservable\ttrue\tDelta\tprior_fid\tG_emp")
+        println(io, "label\tU\tn_elec\tchi_prior\tobservable\ttrue\tDelta\tprior_fid\tG_emp\tG_exact")
         for r in rows_B; println(io, join(r, "\t")); end
     end
     println("\nresults saved: $outA, $outB"); flush(stdout)
