@@ -509,7 +509,10 @@ function main()
     prior_labels = ["UHF", "UHF-sym", "chi=8", "chi=32"]
     prior_sets = [[1, 2], [1, 2, 3, 4]]           # multi(free) / multi(all)
     set_labels = ["multi(free)", "multi(all)"]
-    nu, nm, n_repeat = 50, 100, 50
+    # 反復回数は環境変数 NREP で変えられる(既定 50)。分散比の標本誤差は対数で約 sqrt(4/n_repeat) なので、
+    # 50 回では ±28% ほどぶれる(2026年10月に 400 回で再実行した)。
+    nu, nm = 50, 100
+    n_repeat = parse(Int, get(ENV, "NREP", "50"))
     n = LX * W; Nup = n ÷ 2; Ndn = n ÷ 2
 
     println("=== validation (U=0, $(W)x2 cylinder, exact MPS) ==="); flush(stdout)
@@ -584,7 +587,7 @@ function main()
         flush(stdout)
     end
 
-    out = joinpath(@__DIR__, "crm_optbeta_results.tsv")
+    out = joinpath(@__DIR__, n_repeat == 50 ? "crm_optbeta_results.tsv" : "crm_optbeta_results_nrep$(n_repeat).tsv")
     open(out, "w") do io
         hdr = ["U","observable","true","err_std",
                ["G_b1_$(l)" for l in ["UHF","UHFsym","chi8","chi32"]]...,

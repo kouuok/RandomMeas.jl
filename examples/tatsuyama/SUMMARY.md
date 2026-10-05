@@ -120,6 +120,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 元論文(Vermersch ら 2024)のうち、この研究に関係する部分の解説 | [README_crm_paper.md](README_crm_paper.md) |
 | 半充填で ⟨n_i⟩ = 1 がサイトごとに厳密な理由(粒子正孔対称性) | [README_particle_hole.md](README_particle_hole.md) |
 | 読み出し誤差に対する利得の崩れ方と、prior 側での補正 | [README_readout_noise.md](README_readout_noise.md) |
+| 変分 MPS をスピンの向きについて平均した prior | [README_varsym.md](README_varsym.md) |
 | 二重占有の物理 | [paper/crm_double_occupancy.pdf](paper/crm_double_occupancy.pdf) |
 | 全実験の詳細な記録 | [README.md](README.md) |
 | 確立した主張と未解決問題 | [ROADMAP.md](ROADMAP.md) |

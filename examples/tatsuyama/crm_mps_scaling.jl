@@ -230,6 +230,8 @@ theory_var(absA, P, Δ, nu, nm) = (((3.0^absA - 1)*P^2 + 3.0^absA*(1-P^2)/nm)/nu
 # ------------------------------------------------------------
 # 5. 局所観測量の実験 (窓サンプリング; 実験サンプルを全priorで共有)
 # ------------------------------------------------------------
+include(joinpath(@__DIR__, "crm_exact_gain.jl"))
+
 function run_locals(wtens, cum_pl, obs_w, Pσ_all, trOσ_all; nu, nm, n_repeat, seed)
     Random.seed!(seed)
     Nw = length(wtens); nobs = length(obs_w); np = length(Pσ_all)
@@ -470,7 +472,8 @@ function main()
                     vs, vc = theory_var(length(o.terms[1].sup), Otrue[k], Δ, nu, nm)
                     G_theo = vs / vc
                 end
-                push!(rows, (L, chi_priors[p], o.name, o.pure, Otrue[k], Δ, fids[p], G, G_theo))
+                push!(rows, (L, chi_priors[p], o.name, o.pure, Otrue[k], Δ, fids[p], G, G_theo,
+                             exact_gain(o, exp_tens, Pσ_all[p][k], nm)))
             end
             println()
         end
@@ -497,7 +500,7 @@ function main()
 
     out = joinpath(@__DIR__, "crm_mps_scaling_results.tsv")
     open(out, "w") do io
-        println(io, "L\tchi_prior\tobservable\tpure\ttrue\tDelta\tprior_fid\tG_emp\tG_theo")
+        println(io, "L\tchi_prior\tobservable\tpure\ttrue\tDelta\tprior_fid\tG_emp\tG_theo\tG_exact")
         for r in rows
             println(io, join(r, "\t"))
         end

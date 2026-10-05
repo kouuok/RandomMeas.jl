@@ -115,6 +115,7 @@ $U=12$ 、厳密な 80 系のうち 20 系の中央値( $n_m=100$ ):
 | PHF と低い $\chi$ の MPS | [README_phf_mps.md](README_phf_mps.md) |
 | 粒子正孔対称性と $\langle n_i\rangle=1$ | [README_particle_hole.md](README_particle_hole.md) |
 | 読み出し誤差に対する利得 | [README_readout_noise.md](README_readout_noise.md) |
+| 変分 MPS の回転平均 | [README_varsym.md](README_varsym.md) |
 | 全実験の記録 | [README.md](README.md)、[README_experiments.md](README_experiments.md) |
 
 重い計算(DMRG、大規模なサンプリング)はすべて clara(PBS クラスター)で行っている。
@@ -125,7 +126,7 @@ $U=12$ 、厳密な 80 系のうち 20 系の中央値( $n_m=100$ ):
 
 1. **文書の修正**: 利得の式の帰属、主要結論への $n_m$ の併記、 $\chi_p$ の指針の書き直し
 2. **誤差に強い prior**: 対称なビット反転の読み出し誤差は [README_readout_noise.md](README_readout_noise.md) で調べた。残りは非対称な読み出し誤差(混同行列)と、状態の用意の誤差(論文にするなら必須)
-3. **変分 MPS をスピンの向きについて平均する**: 電荷とスピンの両方で良い prior になるはず(保存済みの状態から安く計算できる)
+3. **変分 MPS をスピンの向きについて平均する**: 実行した([README_varsym.md](README_varsym.md))。 $\chi\ge8$ で損が1つもなく、隣接スピン相関で UHF-sym の 2〜3 倍得をする
 4. **基底の選び方を prior で偏らせる方法との組み合わせ**: 1基底1ショットでの天井を破れるかどうか
 5. **データから prior を作る**: データを2つに分けて、偏りなく prior を合わせ込む
 6. **ドープ系(ストライプ)**: 平均場が壊れる領域
