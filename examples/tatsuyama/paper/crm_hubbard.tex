@@ -34,7 +34,7 @@
 \maketitle
 
 \begin{abstract}
-古典シャドウ(ランダム測定)に古典計算で得た近似状態(prior)を組み合わせて測定分散を削減する共通ランダム測定 (common randomized measurements, CRM)[Vermersch \textit{et al.}, PRX Quantum \textbf{5}, 010352 (2024)] を、フェルミオン・ハバード模型へ系統的に適用した。局所 Pauli 観測量に対する CRM の分散削減率(利得 $G$)が、prior のグローバル忠実度ではなく\emph{観測量ごとの局所誤差} $\Delta$ のみで決まる閉形式で与えられることを示し、これを約 6 桁($G\approx 1.8\times10^{-3}$--$1.3\times10^{3}$)にわたり数値検証した。帰結として、prior のグローバル忠実度が系サイズとともに指数的に崩壊する領域($L=32$ 鎖で $F=0.007$)でも局所観測量の利得は保たれることを 64 量子ビット規模で実証した。さらに、Wick の定理により \emph{MPS 表現を要さない} $O(N^3)$ の非制限 Hartree--Fock (UHF) 平均場 prior を導入し、2 次元シリンダー(最大 96 量子ビット、研究室クラスターでの DMRG 計算)においてこれが $\chi=32$--$64$ の切断 MPS prior に匹敵すること、その弱点(サイト間スピン相関)がスピン回転平均した\emph{混合状態} prior で修復されることを示した。CRM を制御変量法の一般形へ拡張し、係数をデータから推定することで「priorがどれほど悪くても損をしない」($G\ge 1$)推定器を構成した。また matchgate(フェルミオン Gauss)シャドウにより Jordan--Wigner 弦の問題を解消し 2 次元の全エネルギー測定を可能にする一方、CRM の利得は測定アンサンブルに依存し自己平均的な Gauss 測定にはほとんど効かないことを定量化した。最後に、これらを統合して「安価な prior の相図」— 平均場 prior が有効な物理領域と、広幅ドープ系の電荷テクスチャで破綻する境界 — を確定した。
+古典シャドウ(ランダム測定)に古典計算で得た近似状態(prior)を組み合わせて測定分散を削減する共通ランダム測定 (common randomized measurements, CRM)[Vermersch \textit{et al.}, PRX Quantum \textbf{5}, 010352 (2024)] を、フェルミオン・ハバード模型へ系統的に適用した。原論文が与えた単一 Pauli 列の分散の厳密な式により、局所 Pauli 観測量に対する CRM の分散削減率(利得 $G$)は prior のグローバル忠実度ではなく\emph{観測量ごとの局所誤差} $\Delta$ だけで決まる。本研究はまずこの式を我々の実装で約 6 桁($G\approx 1.8\times10^{-3}$--$1.3\times10^{3}$)にわたり数値的に確認し、そのうえでハバード模型の具体的な prior について $\Delta$ がどう振る舞うかを系統的に調べた。帰結として、prior のグローバル忠実度が系サイズとともに指数的に崩壊する領域($L=32$ 鎖で $F=0.007$)でも局所観測量の利得は保たれることを 64 量子ビット規模で実証した。さらに、Wick の定理により \emph{MPS 表現を要さない} $O(N^3)$ の非制限 Hartree--Fock (UHF) 平均場 prior を導入し、2 次元シリンダー(最大 96 量子ビット、研究室クラスターでの DMRG 計算)においてこれが $\chi=32$--$64$ の切断 MPS prior に匹敵すること、その弱点(サイト間スピン相関)がスピン回転平均した\emph{混合状態} prior で修復されることを示した。CRM を制御変量法の一般形へ拡張し、係数をデータから推定することで「priorがどれほど悪くても損をしない」($G\ge 1$)推定器を構成した。また matchgate(フェルミオン Gauss)シャドウにより Jordan--Wigner 弦の問題を解消し 2 次元の全エネルギー測定を可能にする一方、CRM の利得は測定アンサンブルに依存し自己平均的な Gauss 測定にはほとんど効かないことを定量化した。最後に、これらを統合して「安価な prior の相図」— 平均場 prior が有効な物理領域と、広幅ドープ系の電荷テクスチャで破綻する境界 — を確定した。
 \end{abstract}
 
 \tableofcontents
@@ -65,16 +65,16 @@ Vermersch らの共通ランダム測定 (common randomized measurements, CRM)[V
 \end{equation}
 $\Tr[O\sigma]$ を足し戻すので\emph{期待値は不変(不偏推定量)}である一方、実験側 $X_\rho(u)$ と近似側 $X_\sigma(u)$ が\emph{同じ $u$}を共有するため、「ランダム基底の選び方」に由来する揺らぎ(前節で述べた $3^{|A|}$ 増幅を含む主要な分散源)が両者で相関し、差 $X_\rho(u)-X_\sigma(u)$ で相殺される。近似 $\sigma$ が真の状態 $\rho$ に近いほど相殺はよく効き、必要な測定回数が減る。
 
-原論文の主な貢献は、(i) この共通ランダム測定という枠組みの提案と不偏性・分散削減の理論的定式化、(ii) 分散削減量を近似 $\sigma$ の質と結びつける変分的なバウンドの提示、(iii) 実験状態の忠実度 $\mathcal F=\ev{\psi_\sigma|\rho|\psi_\sigma}$ の推定や、量子多体系のベンチマークへの応用である。prior としては主に汎用的な行列積状態 (MPS) が想定され、状態のグローバルな近さ(忠実度)が良い prior の指標として議論された。CRM は、量子ハードウェアの検証・エラー特性評価・多体観測量推定など、測定効率が律速となる幅広い場面での応用が期待されている。
+原論文の主な貢献は、(i) この共通ランダム測定という枠組みの提案と不偏性の証明、(ii) 分散の評価 --- 単一 Pauli 列 $O$ については分散が $\Tr[O(\rho-\sigma)]$ で決まる厳密な式(雑誌版の付録 C の式 (C7)、arXiv 版の式 (25))と、$N_M$ によらず $|\Tr[O(\rho-\sigma)]|\le|\Tr(O\rho)|$ なら標準シャドウより分散が小さいという条件、多コピー観測量については Hilbert--Schmidt 距離 $\|\rho_A-\sigma_A\|_2$ による上界、(iii) イオントラップの実験データによるエンタングルメント検出、フォン・ノイマン・エントロピーの多項式近似、忠実度推定への応用である。prior としては主に切り詰めた行列積状態 (MPS) が使われ、純粋な prior については忠実度 $1/2$ 以上で多コピー観測量の分散が標準シャドウより小さくなることから、忠実度が prior を選ぶ反復手順の指標として用いられた。CRM は、量子ハードウェアの検証・エラー特性評価・多体観測量推定など、測定効率が律速となる幅広い場面での応用が期待されている。
 
 \subsection{本研究の問いと位置づけ}
 \label{sec:questions}
 原論文は枠組みと一般論を確立したが、\emph{フェルミオン多体系}(電子系)への実践的適用にはいくつかの未解明点が残っていた。電子系の代表模型であるハバード模型は、高温超伝導や量子磁性の最小模型として物性物理の中心にあり、量子シミュレータの主要なターゲットでもある。そこで本研究は次の 2 つの問いに答えることを目的とする。
 \begin{itemize}
-  \item \textbf{Q1(prior の質と系サイズ):} Hartree--Fock や配置間相互作用 (CISD) のような量子化学の標準的近似は prior としてどこまで有効か。系を大きくすると、これら近似のグローバルな精度(忠実度)は\emph{指数的}に劣化する。「近似が悪くなるのだから、大きい系では手法に意味がないのではないか」という素朴な懸念に、定量的に答える必要がある。
+  \item \textbf{Q1(prior の質と系サイズ):} Hartree--Fock のような平均場近似や、低いボンド次元の MPS のような安価な近似は prior としてどこまで有効か。系を大きくすると、これら近似のグローバルな精度(忠実度)は\emph{指数的}に劣化する。「近似が悪くなるのだから、大きい系では手法に意味がないのではないか」という素朴な懸念に、定量的に答える必要がある。
   \item \textbf{Q2(2 次元での安価な prior):} MPS prior は 1 次元では強力だが、2 次元系では必要なボンド次元 $\chi$(=計算コスト)が幅に対して指数的に増える。DMRG が本当に苦しくなるこの領域で、コスト $O(N^3)$ の安価な平均場 prior は高価な MPS prior に代われるか。
 \end{itemize}
-本稿の結論を先取りすると、鍵は「良い prior とは何か」の\emph{測り方}にある。原論文でよい指標とされたグローバル忠実度は、実は\textbf{分散削減量を決めない}。本研究は、利得が\emph{測りたい観測量ごとの局所的な近さ} $\Delta$ のみで決まることを閉形式で示し(第\ref{sec:variance}, \ref{sec:gainlaw}節)、これにより Q1 は「局所観測量に対しては(グローバル忠実度が崩壊しても)有効」、Q2 は「オンサイト量では代われ、対称性回復すればほぼ全観測量で代われる」と答えられることを示す(第\ref{sec:2d}節)。あわせて、CRM を統計学の\emph{制御変量法}の一員として捉え直すことで「損をしない」推定器を構成し(第\ref{sec:optbeta}節)、フェルミオン系に自然な\emph{matchgate シャドウ}との組み合わせ(第\ref{sec:matchgate}節)や、既存手法(derandomization)との守備範囲(第\ref{sec:derand}節)まで含めて、手法の適用範囲の全体像を与える。
+本稿の結論を先取りすると、鍵は「良い prior とは何か」の\emph{測り方}にある。原論文の単一 Pauli 列の分散の式が示すとおり、局所観測量の利得は prior のグローバル忠実度ではなく\emph{測りたい観測量ごとの局所的な近さ} $\Delta$ で決まる(第\ref{sec:variance}節で自己完結のために導出をなぞり、第\ref{sec:gainlaw}節で我々の実装を検証する)。本研究はこれを出発点に、実際の prior で $\Delta$ がどう振る舞うかを系統的に調べる。これにより Q1 は「局所観測量に対しては(グローバル忠実度が崩壊しても)有効」、Q2 は「オンサイト量では代われ、対称性回復すればほぼ全観測量で代われる」と答えられることを示す(第\ref{sec:2d}節)。あわせて、CRM を統計学の\emph{制御変量法}の一員として捉え直すことで「損をしない」推定器を構成し(第\ref{sec:optbeta}節)、フェルミオン系に自然な\emph{matchgate シャドウ}との組み合わせ(第\ref{sec:matchgate}節)や、既存手法(derandomization)との守備範囲(第\ref{sec:derand}節)まで含めて、手法の適用範囲の全体像を与える。
 
 \section{手法}
 \label{sec:methods}
@@ -101,7 +101,7 @@ $\Tr[O\sigma]$ を足し戻すので\emph{期待値は不変(不偏推定量)}�
 
 \subsection{分散の閉形式と利得法則}
 \label{sec:variance}
-原論文の枠組みから\eqref{eq:gainlaw}を導く。出発点は古典シャドウの逆チャネルである。設定 $u=\bigotimes_q u_q$($u_q$ は $X/Y/Z$ 基底への回転)で測定してビット列 $b$ を得たとき、スナップショット
+以下の\eqref{eq:gainlaw}は、原論文の付録にある単一 Pauli 列の厳密な分散の式(雑誌版の式 (C7)、arXiv 版の式 (25))を、CRM と標準シャドウで比に取ったものである。ここでは本稿を自己完結させるために導出をなぞる。出発点は古典シャドウの逆チャネルである。設定 $u=\bigotimes_q u_q$($u_q$ は $X/Y/Z$ 基底への回転)で測定してビット列 $b$ を得たとき、スナップショット
 \begin{equation}
   \hat\rho(b,u) = \bigotimes_q \bigl(3\,u_q^\dagger\ket{b_q}\bra{b_q}u_q - I\bigr),
   \qquad \mathbb E[\hat\rho]=\rho
@@ -275,7 +275,7 @@ matchgate & ゲート列 $\Leftrightarrow$ $SO(2n)$ / Pfaffian 古典側=全数�
 
 \subsection{推定器の修正と利得法則の検証}
 \label{sec:gainlaw}
-一様な 4 サイトプラケット(8 量子ビット、ED)で 3 推定器を同一データ比較した。prior 側を有限ショットでサンプルする旧実装は独立ノイズの上乗せで標準シャドウに負け、36 点中 18 点で標準を下回る。厳密化した修正版は同じデータのまま分散を最大 2.0 倍改善する。純 Pauli 列に対し閉形式 \eqref{eq:gainlaw} は $G\approx1.8\times10^{-3}$ から $1.3\times10^{3}$ まで約 5.9 桁で経験値と一致した(図\ref{fig:gainlaw})。$U=8$ では忠実度 $0.370$ の粗い prior でも局所 $ZZ$ の利得が $1293$(理論 $1379$)に達する一方、粒子・正孔対称性で $\ev{Z}=0$ が厳密な観測量では UHF が対称性を破って $\Delta$ を生み、CRM が損をする($G=0.02$、$n_m=100$)。いずれも \eqref{eq:gainlaw} の予言どおりであり、損をするケースの存在が第\ref{sec:optbeta}節の動機となる。
+一様な 4 サイトプラケット(8 量子ビット、ED)で 3 推定器を同一データ比較した。prior 側を有限ショットでサンプルする旧実装は独立ノイズの上乗せで標準シャドウに負け、36 点中 18 点で標準を下回る。厳密化した修正版は同じデータのまま分散を最大 2.0 倍改善する。純 Pauli 列に対し閉形式 \eqref{eq:gainlaw} は $G\approx1.8\times10^{-3}$ から $1.3\times10^{3}$ まで約 5.9 桁で経験値と一致した(図\ref{fig:gainlaw})。\eqref{eq:gainlaw} は厳密な式なので、これは物理法則の検証ではなく、我々の実装(量子ビットの割り当て、JW 変換、推定量)が原論文の式どおりに動いていることの確認である。$U=8$ では忠実度 $0.370$ の粗い prior でも局所 $ZZ$ の利得が $1293$(理論 $1379$)に達する一方、粒子・正孔対称性で $\ev{Z}=0$ が厳密な観測量では UHF が対称性を破って $\Delta$ を生み、CRM が損をする($G=0.02$、$n_m=100$)。いずれも \eqref{eq:gainlaw} の予言どおりであり、損をするケースの存在が第\ref{sec:optbeta}節の動機となる。
 
 \begin{figure}[t]
 \centering
@@ -416,15 +416,15 @@ $L=16$ の $U$・ドーピング掃引($\chi{=}8$ prior)では、利得の観測
 
 \begin{table}[t]
 \centering\small
-\caption{相関強度・ドーピング依存($L=16$、$\chi{=}8$ prior での $G$)。}
+\caption{相関強度・ドーピング依存($L=16$、$\chi{=}8$ prior、$n_m=100$ での $G$)。半充填の onsite $ZZ$ と二重占有は、各観測量の期待値から分散の厳密な式で計算した値である。モンテカルロ推定($n_{\rm repeat}=60$)では $U=8$ でこの2つが $466.7$、$160.5$ と天井を大きく超えて外れていたので置き換えた。ホッピングとドープ系はモンテカルロ推定の値。}
 \label{tab:phasedep}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 領域 & prior 忠実度 & onsite $ZZ$ & 二重占有 & ホッピング \\
 \midrule
-$U=1$(弱結合) & 0.81 & 2.8 & 2.1 & \textbf{45.8} \\
-$U=4$ & 0.95 & 44.2 & 22.5 & 23.8 \\
-$U=8$(Mott) & 0.98 & \textbf{466.7} & 160.5 & 9.5 \\
+$U=1$(弱結合) & 0.81 & 2.7 & 2.0 & \textbf{45.8} \\
+$U=4$ & 0.95 & 50.6 & 28.1 & 23.8 \\
+$U=8$(Mott) & 0.98 & \textbf{238} & 87.3 & 9.5 \\
 $U=4$ doped ($n{=}7/8$) & 0.80 & 15.6 & 18.7 & 43.4 \\
 \bottomrule
 \end{tabular}
@@ -612,7 +612,7 @@ $1/8$ ホールドープのシリンダー($W=4\times8$ / $W=6\times8$、$\rho=$
 
 \section{考察と展望}
 
-本研究の一貫した主張は、\textbf{CRM の利得は prior のグローバルな良さではなく、測りたい観測量に対する局所的な良さ $\Delta$ で決まる}という点である(閉形式 \eqref{eq:gainlaw};より精密には相対誤差 $\Delta/\ev{P}$ とショットノイズ床の比で決まる\eqref{eq:tworegime})。ここから、(i) 系を大きくしても局所観測量なら利得が保たれること、(ii) MPS を要さない平均場 prior が 2 次元で MPS prior に匹敵すること、(iii) 混合状態 prior という自由度が実際に有用であること、が導かれた。さらに CRM を制御変量法へ一般化することで「損をしない」保証を得、matchgate シャドウ・derandomization との\emph{相補性}を明確にした。「安価な prior の相図」は、次に作るべき prior(電荷テクスチャを捉える中間コスト prior)の設計指針を与える。
+本研究の出発点は、原論文の厳密な分散の式が示すとおり、\textbf{CRM の利得は prior のグローバルな良さではなく、測りたい観測量に対する局所的な良さ $\Delta$ で決まる}ことである(\eqref{eq:gainlaw};より精密には相対誤差 $\Delta/\ev{P}$ とショットノイズ床の比で決まる\eqref{eq:tworegime})。本研究はこれをハバード模型の具体的な prior に当てはめ、(i) 系を大きくしても局所観測量なら利得が保たれること、(ii) MPS を要さない平均場 prior が 2 次元で MPS prior に匹敵すること、(iii) 混合状態 prior という自由度が実際に有用であること、が導かれた。さらに CRM を制御変量法へ一般化することで「損をしない」保証を得、matchgate シャドウ・derandomization との\emph{相補性}を明確にした。「安価な prior の相図」は、次に作るべき prior(電荷テクスチャを捉える中間コスト prior)の設計指針を与える。
 
 また\eqref{eq:tworegime}の $G$ vs $G_{\max}$ 比較は「prior をさらに作り込むべきか、測定ショットを増やすべきか」を観測量ごとに判定する実務的な診断を与える — 手法を実験に適用する際の設計指針としてそのまま使える。
 
@@ -626,7 +626,7 @@ $1/8$ ホールドープのシリンダー($W=4\times8$ / $W=6\times8$、$\rho=$
 クラスター実行は \texttt{qsub -v UVAL=8.0 <script>.pbs}。詳細な実験記録は \texttt{README.md}、論文構成の整理は \texttt{CRM\_RESEARCH\_NOTES.md} を参照。
 
 \begin{thebibliography}{9}
-\bibitem{crm} B.~Vermersch, A.~Rath, B.~Sundar, C.~Branciard, J.~Preskill, A.~Elben, ``Enhanced estimation of quantum observables with common randomized measurements,'' PRX Quantum \textbf{5}, 010352 (2024).
+\bibitem{crm} B.~Vermersch, A.~Rath, B.~Sundar, C.~Branciard, J.~Preskill, A.~Elben, ``Enhanced estimation of quantum properties with common randomized measurements,'' PRX Quantum \textbf{5}, 010352 (2024).
 \bibitem{shadow} H.-Y.~Huang, R.~Kueng, J.~Preskill, ``Predicting many properties of a quantum system from very few measurements,'' Nat.\ Phys.\ \textbf{16}, 1050 (2020).
 \bibitem{derand} H.-Y.~Huang, R.~Kueng, J.~Preskill, ``Efficient estimation of Pauli observables by derandomization,'' Phys.\ Rev.\ Lett.\ \textbf{127}, 030503 (2021).
 \bibitem{matchgate1} Z.~Zhao, N.~C.~Rubin, A.~Miyake, ``Fermionic partial tomography via classical shadows,'' Phys.\ Rev.\ Lett.\ \textbf{127}, 110504 (2021).
