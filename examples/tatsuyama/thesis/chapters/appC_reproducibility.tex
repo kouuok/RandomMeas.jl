@@ -1,0 +1,27 @@
+% =====================================================================
+\chapter{計算の再現}
+\label{app:repro}
+% =====================================================================
+
+本論文の数値を出したスクリプトとデータは、リポジトリの \texttt{examples/tatsuyama/} にある。重い計算(DMRG、大規模なサンプリング)は研究室の計算機クラスター(PBS)で実行した。
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.34\linewidth}p{0.58\linewidth}@{}}
+\toprule
+内容 & スクリプト / データ \\
+\midrule
+和の観測量の厳密な分散 & \texttt{crm\_pauli\_sum\_variance.py}、\texttt{crm\_exact\_gain.jl} \\
+厳密な参照の 80 系の総当たり & \texttt{crm\_2d\_ed\_fid\_table.jl} / \texttt{crm\_edfid\_all.tsv} \\
+系の大きさと利得(表\ref{tab:size}) & \texttt{crm\_mps\_scaling.jl} / \texttt{crm\_mps\_scaling\_results.tsv} \\
+PHF・MPS の比較 & \texttt{crm\_phf.py}、\texttt{crm\_phf\_compare.py}、\texttt{crm\_mps\_lowchi.jl} \\
+変分 MPS の回転平均 & \texttt{crm\_mps\_lowchi\_sym.jl}、\texttt{crm\_varsym\_compare.py} \\
+2 次元 $W=4$ & \texttt{crm\_2d\_symuhf.jl} / \texttt{crm\_2d\_symuhf\_results.tsv} \\
+2 次元 $W=6$、ドープ系 & \texttt{crm\_2d\_w6.jl}、\texttt{crm\_2d\_doped.jl}、\texttt{crm\_2d\_w6\_doped.jl} \\
+相図とショット配分 & \texttt{crm\_param\_sweep.jl} / \texttt{crm\_sweep\_U.tsv}、\texttt{crm\_sweep\_nm.tsv} \\
+読み出し誤差 & \texttt{crm\_readout\_noise.py} / \texttt{crm\_readout\_noise.out} \\
+粒子正孔対称性の確認 & \texttt{crm\_particle\_hole\_check.py} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\todo{使ったソフトウェアの版(Julia、ITensors、ITensorMPS、Python、NumPy)を書く}

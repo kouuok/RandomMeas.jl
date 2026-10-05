@@ -1,0 +1,87 @@
+% =====================================================================
+\chapter{局所性:大域的な忠実度は利得を決めない}
+\label{ch:locality}
+% =====================================================================
+
+利得の式\eqref{eq:gain}には prior の大域的な忠実度が現れない。この章では、それが実際の prior でどういう帰結を持つかを確かめ、prior の良さを観測量の台の上で測るにはどの量が適切かを論じる。
+
+\section{系の大きさを変える}
+\label{sec:size}
+
+1 次元の鎖($U=4$、半充填)で、系の長さを $L=8,16,32$(16〜64 量子ビット)と変え、鎖の中央の観測量の利得を調べた。prior は参照状態を結合次元 $\chi_p$ に切り詰めた MPS である。表\ref{tab:size}に結果を示す。
+
+\begin{table}[t]
+\centering\small
+\caption{系の長さと利得(1 次元、$U=4$、$n_m=100$、分散の厳密な式による値)。$F$ は prior の大域的な忠実度。}
+\label{tab:size}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+$L$ & $F$($\chi_p=2$) & 隣接 $Z_\up Z_\up$($\chi_p=2$) & 隣接 $S^zS^z$($\chi_p=2$) & オンサイト $ZZ$($\chi_p=16$) \\
+\midrule
+8  & 0.35   & 11.1 & 7.5  & 50.9 \\
+16 & 0.097  & 13.3 & 10.3 & 50.6 \\
+32 & 0.0069 & 14.0 & 12.5 & 50.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$\chi_p=2$ の prior の大域的な忠実度は $L$ とともに指数的に下がり、$L=32$ では $0.0069$ と、参照状態とほとんど直交している。それでも局所観測量の利得は下がらない。オンサイト $ZZ$ は $\chi_p\ge8$ で天井 $G_{\max}=50.7$ に張り付き、$L$ によらない。
+
+\todo{図:crm\_fig2\_locality.png はモンテカルロの値で描いている。厳密な値で描き直す}
+
+この性質は 256 量子ビット($L=128$)まで、また厳密な参照を持つ 80 系の総当たりでも成り立つ。$U=12$ で $L=8$ から $64$ に広げると、切断 MPS prior の大域的な忠実度は約 2 万分の 1 に下がる一方、観測量の台に縮約した忠実度の変化は $3\times10^{-5}$、利得の変化は 2\% にとどまった。
+
+\paragraph{なぜか.}忠実度は系全体の量で、サイトごとにわずかな誤差 $f<1$ があれば $F\sim f^{N}$ と系の大きさについて指数的に下がる。一方、利得を決める外れ $\Delta=\Tr[P(\rho-\sigma)]$ は観測量の台 $A$ に縮約した密度行列 $\rho_A,\sigma_A$ だけで決まる:
+\begin{equation}
+  \Delta=\Tr\bigl[P(\rho_A-\sigma_A)\bigr].
+\end{equation}
+系の大きさが効くのは台の周りの縮約密度行列を通してだけで、それは局所的な性質である。
+
+\section{台に縮約した距離}
+\label{sec:tracedist}
+
+\subsection{トレース距離が最良の上界であること}
+$\lVert P\rVert_\infty=1$ なので、H\"older の不等式から
+\begin{equation}
+  \lvert\Delta\rvert\le\lVert\rho_A-\sigma_A\rVert_1=2D_A,\qquad D_A\equiv\tfrac12\lVert\rho_A-\sigma_A\rVert_1
+  \label{eq:holder}
+\end{equation}
+が成り立つ。さらにトレースノルムは作用素ノルムの双対ノルム $\lVert X\rVert_1=\sup_{\lVert O\rVert_\infty\le1}\Tr[OX]$ なので、「$P$ の固有値が $\pm1$ である」という情報だけを使う限り、これより良い上界はない。等号が成り立つのは、$P$ の固有値の符号のパターンが $\rho_A-\sigma_A$ のそれと一致するときである。
+
+\subsection{半充填では等号が成り立つ}
+半充填でスピンの $z$ 成分を保つ状態では、サイト $i$ の 2 量子ビットの縮約密度行列は占有数の基底で
+\begin{equation}
+  \rho_A=\mathrm{diag}\bigl(d,\ \tfrac12-d,\ \tfrac12-d,\ d\bigr)
+\end{equation}
+と二重占有率 $d$ だけで決まる。差は $\rho_A-\sigma_A=\mathrm{diag}(u,-u,-u,u)$ の形になり、オンサイトの $Z_\up Z_\dn=\mathrm{diag}(+1,-1,-1,+1)$ と符号のパターンが一致する。したがって
+\begin{equation}
+  \lvert\Delta_{ZZ}\rvert=2D_A
+\end{equation}
+が厳密に成り立つ。オンサイト $ZZ$ の 588 点で $\lvert\Delta\rvert/(2D_A)$ を調べると、中央値も最大値も $1.0000$ だった。
+
+prior がスピンの $z$ 成分を破ると、差は $\mathrm{diag}(u,-u+s,-u-s,u)$ の 2 つのパラメータを持つ。$r\equiv\lvert\Delta(S^z)\rvert/\lvert\Delta_{ZZ}\rvert=s/(4u)$ とおくと
+\begin{equation}
+  \frac{\lvert\Delta_{ZZ}\rvert}{2D_A}=\min\Bigl(1,\ \frac{2}{1+4r}\Bigr)
+\end{equation}
+で、$r\le1/4$ なら等号が保たれる。
+
+\subsection{忠実度ではうまくいかない理由}
+台に縮約した prior $\sigma_A$ は、大域的には純粋な prior であっても、台の外とのエンタングルメントのため一般に混合状態になる。このとき忠実度 $F(\rho_A,\sigma_A)=\bigl(\Tr\sqrt{\sqrt{\rho_A}\sigma_A\sqrt{\rho_A}}\bigr)^2$ について次のことが言える。
+\begin{itemize}
+  \item 差 $\rho_A-\sigma_A$ の関数ではなく、ノルムでもない。
+  \item $\rho_A=\sigma_A$ の周りで $1-F$ は差の 2 次から始まる。一方 $\Delta$ は 1 次なので、$1-F$ から $\Delta$ を予測する定数は存在しない(実データで $\lvert\Delta\rvert/(2(1-F_A))$ は 4 桁以上ばらつく)。
+  \item Fuchs--van de Graaf の不等式 $1-\sqrt F\le D\le\sqrt{1-F}$ で $D$ を挟んでも、粗い prior($\chi_p=2,4$)では利得の予測が 5〜14 倍の幅を持つ。
+\end{itemize}
+実際、$L=16$、$U=4$ の鎖のサイト 2 では、UHF の台の忠実度は $0.700$ で $\chi_p=2$ の切断 MPS($0.802$)より低いのに、オンサイト $ZZ$ の利得は $48.6$ 対 $2.25$ と 22 倍良い。UHF の距離はスピンの向きを選ぶこと(上の $s$ の方向)に費やされていて、$ZZ$ の外れには効かないからである。
+
+なお、元論文が忠実度を prior の目安に使うのは、多コピー観測量と純粋な prior の文脈である。純粋な prior では $\lVert\rho-\sigma\rVert_2^2\le2(1-F)$ が成り立ち、分散の上界(Hilbert--Schmidt 距離の 2 乗)と次数も合う。本章の結果はそれと矛盾しない。
+
+\subsection{台に縮約した量の限界}
+台の上の量(忠実度でもトレース距離でも)は、台を決めた時点で 1 つの数になる。2 量子ビットの台には恒等でないパウリ文字列が 15 個あり、それぞれ別の利得を持つ。例えば同じサイトの上のオンサイト $ZZ$・二重占有・$n_i$・$S^z_i$ は同じ $D_A$ を共有するが、$\chi_p=4$ の prior で利得はそれぞれ $43.8$、$26.9$、$1.00$、$1.00$ である。トレース距離が与えるのは台の上の全観測量に共通の最悪値であり、観測量ごとの利得を決めるのは結局 $\Delta$ そのものである。
+
+\section{まとめ}
+\begin{itemize}
+  \item prior の大域的な忠実度は局所観測量の利得を決めない。系を 256 量子ビットまで広げても利得は保たれる。
+  \item 観測量の台の上で prior の良さを測るなら、トレース距離が $\lvert\Delta\rvert$ の最良の上界で、半充填のオンサイト量では等号が成り立つ。
+  \item ただし観測量ごとの利得は $\Delta$ で決まる。次章では、ハバード模型の現実的な prior について $\Delta$ が観測量ごとにどう振る舞うかを調べる。
+\end{itemize}

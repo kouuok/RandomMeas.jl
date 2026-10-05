@@ -1,0 +1,105 @@
+% =====================================================================
+\chapter{実用上の問題}
+\label{ch:practical}
+% =====================================================================
+
+この章では、CRM を実際の実験に使うときに問題になる点を扱う。ショットの配分、prior が悪いときに損をしない推定量、読み出し誤差、台の長い観測量(matchgate シャドウ)、他の測定法との比較である。
+
+\section{ショットの配分}
+\label{sec:allocation}
+
+総ショット数 $B=n_un_m$ を固定すると、CRM の分散は
+\begin{equation}
+  \Var[\text{CRM}]=\frac1B\Bigl[(3^{\lvert A\rvert}-1)\Delta^2n_m+3^{\lvert A\rvert}(1-x^2)\Bigr]
+\end{equation}
+で、$n_m$ について単調に増える(標準のシャドウも同じ)。すなわち\textbf{分散を最小にするのは $n_m=1$(設定を最大限多く)}である。一方、利得 $G$ は $n_m$ とともに伸びる。$G$ は分散の比なので、$G$ を最大にする配分と分散を最小にする配分は違う。
+
+両者の関係は、ショット雑音が支配的になる境目
+\begin{equation}
+  n_m^\ast=\frac{3^{\lvert A\rvert}(1-x^2)}{(3^{\lvert A\rvert}-1)\Delta^2},\qquad\frac{G}{G_{\max}}=\frac{1}{1+n_m/n_m^\ast}
+\end{equation}
+で整理できる。$n_m\lesssim n_m^\ast$ なら、$n_m$ を増やしても CRM の分散はほとんど悪化せず、$G$ だけが伸びる。つまり設定の数を減らしてよい。$n_m\gg n_m^\ast$ では分散が線形に悪化する。
+
+例えば $\chi_p=2$ の粗い prior では、$n_m=100$ は最適の 20 倍以上大きく、分散で 10.9 倍(標準偏差で 3.3 倍)損をしている。\textbf{粗い prior ほど $n_m$ を小さくすべきである}。CRM の価値が最も高いのは、設定の切り替えにコストがかかり、大きな $n_m$ を取らざるを得ない実験である。
+
+\section{損をしない推定量:制御変量法としての一般化}
+\label{sec:optbeta}
+
+CRM を係数 $\beta$ 付きの制御変量法
+\begin{equation}
+  \hat o(\beta)=\bar m_\rho-\beta\bigl(\bar Y-\Tr[O\sigma]\bigr),\qquad Y(u)=\mathbb E[X_\sigma\mid u]
+\end{equation}
+と見る。$\mathbb E[\bar Y]=\Tr[O\sigma]$ なので任意の $\beta$ で不偏であり、通常の CRM は $\beta=1$ の場合である。分散は $\beta$ の 2 次式で、最適な $\beta^\ast=\Cov(\bar m_\rho,\bar Y)/\Var(\bar Y)$ では
+\begin{equation}
+  G_{\rm opt}=\frac{1}{1-\mathrm{corr}^2(\bar m_\rho,\bar Y)}\ge1
+\end{equation}
+となり、prior がどれほど悪くても損をしない。
+
+実際には $\beta^\ast$ を同じデータから推定する必要があり、次の問題が出る。
+\begin{itemize}
+  \item \textbf{$\Var(Y)$ が 0 に近いと推定が発散する。} 例えば $\chi_p=2$ の prior は二重占有を厳密に 0 と予言するので $Y\equiv0$ となる。$\Var(Y)$ は prior の期待値だけから閉じた形で計算できるので、標本で推定する必要はない。
+  \item \textbf{推定した係数は推定量に偏りを入れる。} 分散の比だけで比べると、偏りのある推定量を不当に有利に評価する。平均二乗誤差で比べる必要がある。
+  \item \textbf{単一のパウリ文字列では prior が約分される。} $Y(u)=\mathbf 1[\text{一致}]\,3^{\lvert A\rvert}y$ なので、最適係数の推定量は prior によらず、「基底が一致したかどうか」という既知の指標だけを制御変量に使う。
+  \item \textbf{良い prior では $\beta=1$ の方が良い。} 係数を推定する誤差がなくなる分だけ有利である。
+\end{itemize}
+\todo{crm\_optbeta\_results\_nrep400.tsv(反復 400 回の再計算)の値で、$\beta=1$ と最適 $\beta$ の比較、多 prior 回帰の表を入れる}
+
+\section{読み出し誤差}
+\label{sec:readout}
+
+各量子ビットの読み出しが独立に確率 $p$ で反転すると、台 $\lvert A\rvert$ のパウリ文字列の 1 ショットの平均は $f\equiv(1-2p)^{\lvert A\rvert}$ 倍に縮む。比べる推定量は、どれも同じ量 $fx$ を推定する(最後に $f$ で割る補正は共通なので、分散の比は変わらない):
+\begin{itemize}
+  \item 標準:$3^{\lvert A\rvert}\bar m$
+  \item CRM(そのまま):$3^{\lvert A\rvert}(\bar m-y)+y$ — 誤差のないシミュレーションで作った prior の値を引く。
+  \item CRM(誤差込み):$3^{\lvert A\rvert}(\bar m-fy)+fy$ — prior にも同じ誤差モデルを掛ける。
+\end{itemize}
+利得は式\eqref{eq:gain}で $x\to fx$ とし、外れを $\Delta'=fx-y$(そのまま)または $f(x-y)$(誤差込み)に置き換えたものになる。ビット反転を直接まねたモンテカルロと 1〜2\% で一致することを確かめた。
+
+\begin{table}[t]
+\centering\small
+\caption{読み出し誤差と利得(1 次元 $L=64$、$U=12$、UHF prior、$n_m=100$)。各セルは「そのまま / 誤差込み」。$P_\ell$ はサイト 17 から $\ell$ サイトのブロックの電荷の偶奇(台 $2\ell$)。}
+\label{tab:readout}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+観測量 & $\lvert A\rvert$ & $p=0$ & $p=0.002$ & $p=0.005$ & $p=0.01$ & $p=0.02$ \\
+\midrule
+オンサイト $ZZ$ & 2 & 472 & 372 / 430 & 262 / 377 & 154 / 312 & 67 / 226 \\
+$P_4$ & 8 & 597 & 225 / 411 & 76 / 273 & 23.6 / 166 & 5.7 / 82.5 \\
+$P_{16}$ & 32 & 591 & 35.6 / 199 & 5.9 / 83.9 & 1.1 / 32.2 & 0.1 / 7.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+結果を表\ref{tab:readout}に示す。
+\begin{itemize}
+  \item \textbf{そのままの prior は、台の大きい観測量で損に転じる。} 損得の境目 $\lvert fx-y\rvert=\lvert fx\rvert$ は、prior がほぼ正しいとき $f=1/2$、すなわち
+  \begin{equation}
+    p^\ast\approx\frac{\ln2}{2\lvert A\rvert}\approx\frac{0.35}{\lvert A\rvert}
+  \end{equation}
+  で、台 32 では $p\approx1\%$ で利得が消える。
+  \item \textbf{誤差込みの prior なら損はしないが、天井が下がる。} 測った値が $fx$ に縮むので、基底のくじの揺らぎ $\propto f^2x^2$ が小さくなり、ショット雑音 $\propto1-f^2x^2$ が大きくなる。
+  \item 誤差込みの prior には誤差率の推定値 $\hat p$ が要り、台 32 では $\hat p$ が 20\% ずれると利得が 3〜4 割落ちる。必要な較正の精度は台の大きさに比例する。
+\end{itemize}
+扱ったのは対称で独立なビット反転だけで、非対称な読み出し誤差(混同行列)や状態の用意の誤差は今後の課題である。
+
+\section{台の長い観測量と matchgate シャドウ}
+\label{sec:matchgate}
+
+2 次元のシリンダーを蛇行の順に並べると、$x$ 方向のホッピングは JW 弦のため台が $2W+1$ になる($W=4$ で 9)。基底が台の上で全部一致する確率は $3^{-9}\approx1/2$ 万で、50 設定(5000 ショット)の間に一度もサンプルされなかった。CRM を付けても prior の値をそのまま返すだけである。
+
+matchgate(フェルミオンの Gauss 変換)シャドウ\cite{zhao2021,wan2023}は、ランダムな $Q\in SO(2n)$ で表されるフェルミオンの線形変換を掛けてから占有数を測る。ホッピングは Majorana 演算子の 2 次式なので、空間的な距離によらず同じ精度で測れる。prior が Slater 行列式なら、CRM の prior 側の値は Pfaffian で厳密に計算できる。$W=4$、$L_x=2$ のシリンダー(16 量子ビット)で、全エネルギーの推定誤差は標準のパウリシャドウの 11.5 に対し matchgate では 0.87 と約 13 分の 1 になった。
+
+一方、matchgate シャドウに CRM を加えても利得は小さかった($n_m$ を 3000 まで増やしても $G\lesssim1.9$)。Gauss 変換は全モードを混ぜるので、どの設定もすべての 2 次の観測量を少しずつ測り、設定の間の揺らぎ(CRM が打ち消す量)が最初から小さいためである。\textbf{CRM の利得は測定のアンサンブルに依存する。} JW 弦の問題は matchgate で、ランダムなパウリ測定の設定の間の揺らぎは CRM で、と別々の問題に対する道具である。
+
+\section{固定した観測量の組に対する比較}
+\label{sec:derand}
+
+あらかじめ決まった観測量の組を測るだけなら、ランダムに基底を選ぶ必要はなく、観測量に合わせて基底を選ぶ方法(derandomization\cite{huang2021})の方が強い。1 次元 $L=16$、$U=4$ で同じ総ショット数で比べると、構造のある 23 個の観測量では誤差の中央値/最悪値が、標準のシャドウ $0.059/0.351$、シャドウ + CRM $0.012/0.054$、derandomization $0.0085/0.028$ だった。ランダムに選んだ 150 個の観測量では、CRM の中央値の改善は消えるが最悪値は半分になる($0.208\to0.096$)。期待値がほぼ 0 の観測量には CRM で減らせる揺らぎがもともとなく、誤差を支配する期待値の大きい少数の観測量で CRM が効くためである。ランダムな測定の利点(測定の後で観測量を選べること)が必要な場面で、CRM はその弱点を補う。
+
+\section{まとめ}
+\begin{itemize}
+  \item 利得を最大にする配分と分散を最小にする配分は違う。粗い prior ほど 1 設定あたりのショットを減らすべきである。
+  \item 制御変量法として係数を最適化すると原理的には損をしないが、推定の誤差と偏りに注意が要る。
+  \item 読み出し誤差は台の大きい観測量で CRM を標準より悪くしうる。誤差モデルを prior に掛ける必要がある。
+  \item 台の長い観測量には matchgate シャドウが要るが、そこでは CRM の利得は小さい。
+\end{itemize}

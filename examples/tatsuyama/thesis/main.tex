@@ -1,0 +1,64 @@
+% 修士論文 本体(lualatex でビルドする: latexmk -lualatex main.tex、または lualatex main.tex を 2 回)
+\documentclass[11pt,a4paper,openany]{ltjsreport}
+\usepackage[haranoaji]{luatexja-preset}
+\usepackage{amsmath,amssymb,amsthm,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=25mm]{geometry}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{../}{figures/}}
+\captionsetup{font=small,labelfont=bf}
+\allowdisplaybreaks
+
+% ---- 記号 ----
+\newcommand{\bra}[1]{\langle #1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\ev}[1]{\langle #1\rangle}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\cd}{c^\dagger}
+\newcommand{\up}{\uparrow}
+\newcommand{\dn}{\downarrow}
+\newcommand{\Sv}{\mathbf S}
+
+% ---- 執筆中の印(提出前にすべて消す) ----
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+\newtheorem{proposition}{命題}[chapter]
+
+\title{\bfseries 共通ランダム測定によるハバード模型の局所観測量の推定\\[4pt]
+\large — 古典計算による近似状態(prior)の選び方と、その物理 —}
+\author{龍山 昊平}
+\date{\todo{提出年月}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{chapters/abstract}
+\end{abstract}
+
+\tableofcontents
+
+\input{chapters/ch1_intro}
+\input{chapters/ch2_background}
+\input{chapters/ch3_methods}
+\input{chapters/ch4_locality}
+\input{chapters/ch5_priors}
+\input{chapters/ch6_2d}
+\input{chapters/ch7_practical}
+\input{chapters/ch8_conclusion}
+
+\appendix
+\input{chapters/appA_particle_hole}
+\input{chapters/appB_sum_variance}
+\input{chapters/appC_reproducibility}
+
+\input{chapters/references}
+
+\end{document}

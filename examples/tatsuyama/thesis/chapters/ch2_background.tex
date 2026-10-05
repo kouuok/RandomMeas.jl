@@ -1,0 +1,129 @@
+% =====================================================================
+\chapter{背景}
+\label{ch:background}
+% =====================================================================
+
+\section{ハバード模型}
+\label{sec:hubbard}
+
+\subsection{模型}
+本研究で扱うのは、格子上の電子のハバード模型
+\begin{equation}
+  H=-t\sum_{\langle ij\rangle,\sigma}\bigl(\cd_{i\sigma}c_{j\sigma}+\mathrm{h.c.}\bigr)+U\sum_i n_{i\up}n_{i\dn}-\mu\sum_{i}n_i
+  \label{eq:hubbard}
+\end{equation}
+である。$c_{i\sigma}$ はサイト $i$、スピン $\sigma\in\{\up,\dn\}$ の電子の消滅演算子、$n_{i\sigma}=\cd_{i\sigma}c_{i\sigma}$、$n_i=n_{i\up}+n_{i\dn}$ で、$\langle ij\rangle$ は隣接するサイトの組を表す。第 1 項は電子が隣のサイトへ飛び移る運動エネルギー、第 2 項は同じサイトに 2 個の電子がいるときのクーロン反発である。全体を通じて $t=1$ とする。$\mu=U/2$ のとき、二部格子上で粒子数がサイト数に等しい\emph{半充填}になる。
+
+格子は 1 次元の鎖(開放端・周期境界)と、幅 $W$ のシリンダー(円周方向に周期、軸方向に開放)、および小さな 2 次元トーラスを使う。
+
+\subsection{強結合の極限と超交換}
+半充填で $U\gg t$ のとき、二重占有はエネルギー $U$ を要するので抑えられ、各サイトにほぼ 1 個の電子が局在する(Mott 絶縁体)。残ったスピンの自由度の間には、2 次の摂動で
+\begin{equation}
+  H_{\rm eff}=J\sum_{\langle ij\rangle}\Bigl(\Sv_i\cdot\Sv_j-\tfrac14n_in_j\Bigr),\qquad J=\frac{4t^2}{U}
+  \label{eq:heisenberg}
+\end{equation}
+の反強磁性的な相互作用(超交換)が働く。Hellmann--Feynman の定理 $\partial E_0/\partial U=\sum_i\ev{n_{i\up}n_{i\dn}}$ を式\eqref{eq:heisenberg}のエネルギーに当てはめると、強結合での二重占有率は
+\begin{equation}
+  d\equiv\ev{n_{i\up}n_{i\dn}}\simeq\frac{4t^2}{U^2}\sum_{j\in\partial i}\frac12\Bigl(\frac14-\ev{\Sv_i\cdot\Sv_j}\Bigr)
+  \label{eq:d-strong}
+\end{equation}
+となる($\partial i$ はサイト $i$ の隣、1 次元では $\tfrac12\sum_{j\in\partial i}$ が 1 本分の結合になる)。\textbf{二重占有は隣どうしのスピンがどれだけ一重項を組んでいるかを測っている}。この関係は第\ref{ch:priors}章で平均場 prior の誤差を解析するときに中心的な役割を果たす。
+
+\subsection{Jordan--Wigner 変換}
+\label{sec:jw}
+電子の模型を量子ビットで扱うため、軌道(サイトとスピンの組)に一列に番号を振り、Jordan--Wigner 変換
+\begin{equation}
+  c_q=\Bigl(\prod_{k<q}Z_k\Bigr)\frac{X_q+iY_q}{2}
+\end{equation}
+で写す。占有数は $n_q=(1-Z_q)/2$、すなわち $Z_q=1-2n_q$ である。本研究では各サイトの $\up$ と $\dn$ を隣り合う量子ビットに置き、2 次元格子はシリンダーの円周方向に沿って蛇行するように並べる。
+
+この写像のもとで、密度やスピンの $z$ 成分の観測量は $Z$ だけの短いパウリ文字列になる。例えば
+\begin{equation}
+  Z_{i\up}Z_{i\dn}=1-2n_i+4n_{i\up}n_{i\dn},\qquad
+  n_{i\up}n_{i\dn}=\tfrac14\bigl(1-Z_{i\up}-Z_{i\dn}+Z_{i\up}Z_{i\dn}\bigr)
+  \label{eq:docc-pauli}
+\end{equation}
+である。半充填では $\ev{n_i}=1$ なので(付録\ref{app:ph})、オンサイトの $ZZ$ 相関と二重占有率は $\ev{Z_{i\up}Z_{i\dn}}=4d-1$ で 1 対 1 に対応する。一方ホッピングは、2 つの軌道の間にある量子ビットの $Z$ の列(JW 弦)を伴い、台が長くなる。
+
+\section{古典シャドウ}
+\label{sec:shadow}
+
+\subsection{プロトコル}
+$N$ 量子ビットの状態 $\rho$ の各量子ビットについて、基底 $b_q\in\{X,Y,Z\}$ を独立に一様に選んで測る。基底の組 $u=(b_1,\dots,b_N)$ を\emph{設定}と呼ぶ。設定を $n_u$ 通り選び、それぞれで $n_m$ 回測る。
+
+台 $A$($\lvert A\rvert$ 個の量子ビット)のパウリ文字列 $P=\bigotimes_{q\in A}\sigma_{a_q}$ の推定値は、1 つの設定 $u$ と測定結果 $s_q\in\{\pm1\}$ について
+\begin{equation}
+  X(P;u,s)=3^{\lvert A\rvert}\Bigl(\prod_{q\in A}s_q\Bigr)\,\mathbf 1[\forall q\in A:\ b_q=a_q]
+  \label{eq:snapshot}
+\end{equation}
+である。基底が台の上ですべて一致したとき(確率 $3^{-\lvert A\rvert}$)だけ $3^{\lvert A\rvert}$ 倍された値を返し、それ以外は $0$ を返す。
+
+\subsection{分散}
+1 つの設定での $n_m$ ショットの平均を $\bar X(u)$ と書く。基底が一致した設定では $\prod_q s_q$ は平均 $x\equiv\Tr[P\rho]$、分散 $1-x^2$ の $\pm1$ の確率変数である。全分散の公式で、設定の選び方による揺らぎとショットの揺らぎに分けると
+\begin{equation}
+  n_u\Var[\text{標準}]=\underbrace{(3^{\lvert A\rvert}-1)x^2}_{\text{基底のくじ}}+\underbrace{\frac{3^{\lvert A\rvert}(1-x^2)}{n_m}}_{\text{ショット雑音 }v_s}
+  \label{eq:var-std}
+\end{equation}
+となる。第 1 項は、基底が当たるか外れるかで推定値が $3^{\lvert A\rvert}x$ と $0$ の間を行き来することによる。これが古典シャドウの分散の大部分を占め、台が大きいほど指数的に大きくなる。
+
+\section{共通ランダム測定(CRM)}
+\label{sec:crm}
+
+\subsection{定義と不偏性}
+CRM\cite{vermersch2024}は、古典計算で作った近似状態 $\sigma$(prior)を使って、実験の影 $\hat\rho^{(r)}$ から「同じ設定 $u^{(r)}$ で $\sigma$ を測ったときの影」$\sigma^{(r)}$ を引き、$\sigma$ を足し戻す:
+\begin{equation}
+  \hat\rho^{(r)}_\sigma=\hat\rho^{(r)}-\sigma^{(r)}+\sigma .
+  \label{eq:crm}
+\end{equation}
+$\sigma^{(r)}$ は prior を\emph{標本にせず}、古典計算で求めた厳密な出力確率から作る(元論文の式(3))。設定について平均すると $\mathbb E[\hat\rho^{(r)}]=\rho$、$\mathbb E[\sigma^{(r)}]=\sigma$ なので、$\sigma$ をどう選んでも推定は偏らない。
+
+パウリ文字列 $P$ について書けば、1 つの設定での CRM の推定値は
+\begin{equation}
+  3^{\lvert A\rvert}\,\mathbf 1[\text{一致}]\,\bigl(\bar m-y\bigr)+y,\qquad y\equiv\Tr[P\sigma]
+\end{equation}
+である($\bar m$ は一致した設定での $\pm1$ の出力の積の平均)。実装に必要なのは prior の期待値 $y$ だけで、$\sigma$ が混合状態でも構わない。
+
+\subsection{分散と利得}
+\label{sec:gain}
+CRM では、基底のくじの揺らぎが $x$ ではなく外れ $\Delta\equiv x-y$ に比例するようになり、ショット雑音はそのまま残る:
+\begin{equation}
+  n_u\Var[\text{CRM}]=(3^{\lvert A\rvert}-1)\Delta^2+\frac{3^{\lvert A\rvert}(1-x^2)}{n_m}.
+  \label{eq:var-crm}
+\end{equation}
+これは元論文の単一パウリ文字列の厳密な分散(arXiv 版の付録 B.1 の式(25)、PRX Quantum 版の付録 C.1 の式(C7))である\cite{vermersch2024}。標準の古典シャドウとの分散の比を\emph{利得}と呼ぶ:
+\begin{equation}
+  \boxed{\ G\equiv\frac{\Var[\text{標準}]}{\Var[\text{CRM}]}=\frac{(3^{\lvert A\rvert}-1)x^2+v_s}{(3^{\lvert A\rvert}-1)\Delta^2+v_s},\qquad v_s=\frac{3^{\lvert A\rvert}(1-x^2)}{n_m}\ }
+  \label{eq:gain}
+\end{equation}
+本論文ではこの比を「利得の式」と呼ぶ。新しい法則ではなく、元論文の式の比である。
+
+利得の式から次のことが読み取れる。
+\begin{enumerate}
+  \item \textbf{利得を決めるのは観測量ごとの外れ $\Delta$ である。} prior の大域的な忠実度は式に現れない。
+  \item \textbf{損得の境目は $\lvert\Delta\rvert=\lvert x\rvert$ である}(元論文 II.C 節)。$y/x$ で言えば $0<y/x<2$ なら得をし、prior の値が真の値の 2 倍を超えるか符号が逆なら損をする。
+  \item \textbf{天井がある。} prior が完全($\Delta=0$)でもショット雑音は消えないので
+  \begin{equation}
+    G_{\max}=1+n_m\frac{(3^{\lvert A\rvert}-1)x^2}{3^{\lvert A\rvert}(1-x^2)}
+    \label{eq:gmax}
+  \end{equation}
+  で頭打ちになる。$\lvert x\rvert\to1$ で天井は発散する。
+  \item \textbf{設定の数 $n_u$ は比で約分される。} したがって $G$ は「同じ精度を得るのに必要な設定の数を何分の 1 にできるか」を表す。本論文の数値は特に断らない限り $n_m=100$ での値である。
+  \item \textbf{1 設定 1 ショット($n_m=1$)では天井が低い。} 総ショット数を固定すると分散を最小にするのは $n_m=1$ だが、そのときの天井は
+  \begin{equation}
+    G_{\max}(n_m=1)=\frac{1-x^2/3^{\lvert A\rvert}}{1-x^2}\approx\frac{1}{1-x^2}
+  \end{equation}
+  にとどまる。CRM の利点は、設定の切り替えにコストがかかり 1 設定あたり多くのショットを取る実験で大きい。元論文も、CRM を有限の設定数による誤差を減らす手法と位置づけている。
+\end{enumerate}
+
+相対誤差 $\varepsilon\equiv\Delta/x$ と、基底のくじとショット雑音の比 $g\equiv(3^{\lvert A\rvert}-1)x^2/v_s$ を使うと
+\begin{equation}
+  G=\frac{g+1}{\varepsilon^2g+1},\qquad\frac1G\simeq\varepsilon^2+\frac1{G_{\max}}
+  \label{eq:two-regime}
+\end{equation}
+と書ける。利得は prior の相対誤差で決まる部分($\varepsilon^2$)と、ショット雑音で決まる部分($1/G_{\max}$)の小さい方に支配される。
+
+\subsection{元論文における忠実度の役割}
+元論文は、多コピー観測量(例えば純度やエントロピーの多項式近似)について、Hilbert--Schmidt 距離で書いた分散の上界を与え、純粋な prior $\ket\phi$ なら忠実度 $F=\bra\phi\rho\ket\phi\ge1/2$ を prior の良し悪しの目安に使っている。本研究が扱うのは単一コピーの局所観測量で、観測量の台に縮約した prior は一般に混合状態になる。この設定では忠実度は利得を決めない(第\ref{ch:locality}章)。両者は扱う対象が違うだけで、矛盾しない。
+
+\subsection{和の観測量}
+二重占有\eqref{eq:docc-pauli}やスピン相関 $\ev{S^z_iS^z_j}$ のように、複数のパウリ項の和で書かれる観測量では、同じ設定で同時に当たる項の組が分散に寄与する。この場合の厳密な分散は第\ref{ch:methods}章と付録\ref{app:sumvar}で与える。

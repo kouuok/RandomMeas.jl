@@ -1,0 +1,113 @@
+% =====================================================================
+\chapter{手法}
+\label{ch:methods}
+% =====================================================================
+
+\section{和の観測量の厳密な分散}
+\label{sec:sumvar}
+
+単一パウリ文字列の分散\eqref{eq:var-crm}を、パウリ項の和
+\begin{equation}
+  O=\sum_k c_kP_k,\qquad x_k=\Tr[P_k\rho],\quad y_k=\Tr[P_k\sigma],\quad \Delta_k=x_k-y_k
+\end{equation}
+に拡張する。2 つの項 $P_k,P_l$ が\emph{両立する}とは、共通の量子ビットの上でパウリ文字が等しいことをいう。両立する項は同じ設定で同時に「当たる」ことができ、その確率は $3^{-\lvert A_k\cup A_l\rvert}$ である。両立しない項は同時には当たらない。
+
+\begin{proposition}\label{prop:sumvar}
+1 つの設定と $n_m$ ショットからなる推定量について、
+\begin{align}
+  n_u\Var[\text{標準}]&=\sum_{k,l\ \text{両立}}c_kc_l\,3^{\lvert A_k\cap A_l\rvert}\Bigl[\frac{\ev{P_kP_l}}{n_m}+\Bigl(1-\frac1{n_m}\Bigr)x_kx_l\Bigr]-\Bigl(\sum_kc_kx_k\Bigr)^2,\label{eq:sumvar-std}\\
+  n_u\Var[\text{CRM}]&=\sum_{k,l\ \text{両立}}c_kc_l\,3^{\lvert A_k\cap A_l\rvert}\Bigl[\frac{\ev{P_kP_l}-x_kx_l}{n_m}+\Delta_k\Delta_l\Bigr]-\Bigl(\sum_kc_k\Delta_k\Bigr)^2.\label{eq:sumvar-crm}
+\end{align}
+ここで $\ev{P_kP_l}=\Tr[P_kP_l\rho]$ で、両立する項の積は共通の量子ビットで恒等になるので、それ自体が台 $A_k\triangle A_l$ のパウリ文字列である。
+\end{proposition}
+導出は付録\ref{app:sumvar}に示す。単一の項では式\eqref{eq:var-std}・\eqref{eq:var-crm}に戻る。
+
+この式から次のことが分かる。
+\begin{itemize}
+  \item CRM の分散には、合計の外れ $\sum_kc_k\Delta_k$ ではなく\emph{項ごとの外れ} $\Delta_k\Delta_l$ が入る。合計が同じでも、項ごとの誤差が打ち消し合っている prior は損をする(第\ref{ch:priors}章の二重占有の例)。
+  \item 必要なのは真の状態の $\ev{P_kP_l}$ と prior の項ごとの値 $y_k$ だけで、prior の $\ev{P_kP_l}$ は要らない。
+  \item ホッピング $\tfrac12(XZ\cdots ZX+YZ\cdots ZY)$ の 2 項は端の量子ビットで文字が違うので両立しない。粒子数を保つ状態では $\ev{XZ\cdots ZX}=\ev{YZ\cdots ZY}$ なので、分散はホッピングの期待値と $\Delta$ だけで書ける。
+\end{itemize}
+本研究では、この式を Python(\texttt{crm\_pauli\_sum\_variance.py})と Julia(\texttt{crm\_exact\_gain.jl})で実装した。単一パウリ文字列では式\eqref{eq:gain}と機械精度で一致する。和の観測量では、1 次元の $n_m$ 掃引と相図の全 223 点でモンテカルロの模擬と比べ、差が分散の比の標本誤差の範囲に収まることを確かめた(標準化した差の平均 $0.02$ 〜 $0.09$、標準偏差 $0.88$ 〜 $0.99$)。
+
+\section{prior}
+\label{sec:priors}
+
+本研究で比べる prior を表\ref{tab:priors}にまとめる。
+
+\begin{table}[t]
+\centering\small
+\caption{本研究で比べる prior。「厳密な状態」は、作るのに真の基底状態が要るかどうか。}
+\label{tab:priors}
+\begin{tabular}{@{}llll@{}}
+\toprule
+prior & 中身 & 厳密な状態 & 対称性 \\
+\midrule
+UHF & 非制限 Hartree--Fock の Slater 行列式 & 不要 & スピンの向きを選ぶ \\
+UHF-sym & UHF をスピン回転で平均した混合状態 & 不要 & 回転不変 \\
+PHF & UHF を全スピン 0 に射影した状態 & 不要 & 回転不変 \\
+切断 MPS & 厳密な状態を結合次元 $\chi$ に切り詰めたもの & 必要 & 保つことが多い \\
+変分 MPS & 結合次元を $\chi$ に制限した DMRG の基底状態 & 不要 & 破ることがある \\
+変分 MPS-sym & 変分 MPS をスピン回転で平均した混合状態 & 不要 & 回転不変 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{UHF と Wick の定理}
+UHF は、相互作用を平均場 $n_{i\up}n_{i\dn}\to\ev{n_{i\up}}n_{i\dn}+n_{i\up}\ev{n_{i\dn}}-\ev{n_{i\up}}\ev{n_{i\dn}}$ で置き換えた 1 体ハミルトニアンを自己無撞着に解いて得る。初期値を Néel 配置にとると、副格子ごとに磁化を持つ解に落ちる。UHF の状態はスピンごとの Slater 行列式なので、期待値はスピンごとの相関行列 $C^{\sigma}_{pq}=\ev{\cd_{p\sigma}c_{q\sigma}}$ から Wick の定理で求まる。例えば
+\begin{align}
+  \ev{Z_{p}}&=1-2C_{pp},\\
+  \ev{Z_{p}Z_{q}}&=1-2C_{pp}-2C_{qq}+4\bigl(C_{pp}C_{qq}-C_{pq}C_{qp}\bigr)\quad(\text{同じスピン}),\\
+  \bigl\langle\tfrac12(XZ\cdots ZX+YZ\cdots ZY)\bigr\rangle&=C_{pq}+C_{qp}
+\end{align}
+で、行列積状態を経由せずに任意の大きさの系で $O(N^3)$ の計算量で扱える。2 次元の大きな系でも厳密に prior の値を計算できることが、平均場 prior の利点である。
+
+\subsection{スピン回転で平均した prior}
+\label{sec:rotavg}
+真の基底状態はスピン回転で不変だが、UHF はスピンの向きを 1 つ選んでいる。そこで、全スピンを一様に回して平均した混合状態
+\begin{equation}
+  \bar\sigma=\int d\Omega\,R(\Omega)\,\sigma\,R(\Omega)^\dagger
+\end{equation}
+を prior にする。CRM に必要なのは期待値だけなので、混合状態でも構わない。観測量の側を回して平均すればよく、スピン $\Sv_i$ はベクトルとして回るので
+\begin{equation}
+  \overline{\ev{S^z_i}}=0,\qquad\overline{\ev{S^z_iS^z_j}}=\tfrac13\ev{\Sv_i\cdot\Sv_j}
+\end{equation}
+となり、$n_i$、$n_in_j$、$n_{i\up}n_{i\dn}$、$\Sv_i\cdot\Sv_j$ は変わらない。$Z_{i\up}=1-n_i-2S^z_i$ を使うと
+\begin{equation}
+  \ev{Z_{i\up}}_{\bar\sigma}=1-\ev{n_i},\qquad
+  \ev{Z_{i\up}Z_{j\up}}_{\bar\sigma}=\bigl\langle(1-n_i)(1-n_j)\bigr\rangle+\tfrac43\ev{\Sv_i\cdot\Sv_j}
+  \label{eq:rotavg}
+\end{equation}
+で、オンサイトの $Z_{i\up}Z_{i\dn}$ は回転で変わらない。UHF に当てはめたものを UHF-sym、変分 MPS に当てはめたものを変分 MPS-sym と呼ぶ。2 次元の計算では、UHF-sym を回転した(非共線の)一般化 Slater 行列式の Wick の定理と極角についての数値積分で求めた。
+
+\subsection{スピン射影 HF(PHF)}
+UHF を全スピン $S=0$ の部分空間に射影した状態 $P_{S=0}\ket{\rm UHF}$ である。射影は回転について積分した形 $P_{S=0}\propto\int d\Omega\,R(\Omega)$ に書けるので、期待値は回転した Slater 行列式どうしの重なりの積分(一般化 Wick の定理)で計算できる。回転平均(UHF-sym)が状態の混合であるのに対し、PHF は純粋状態の重ね合わせである。
+
+\subsection{切断 MPS と変分 MPS}
+\begin{itemize}
+  \item \textbf{切断 MPS}:厳密な(または十分大きな結合次元の)基底状態を、正準形で結合次元 $\chi$ に切り詰めて規格化したもの。$\chi$ が prior の質のつまみになる。厳密な状態が要るので、実用の prior というより「結合次元 $\chi$ で表せるほぼ最良の近似」の目安である。元論文の数値例の prior もこの作り方である。
+  \item \textbf{変分 MPS}:結合次元の上限を $\chi$ にした DMRG の基底状態。厳密な状態は要らない。低い $\chi$ の DMRG は局所解に落ちやすいので、Néel の積状態と乱数の MPS の複数の出発点から始め、エネルギーの最も低いものを採った。
+\end{itemize}
+
+\section{参照状態}
+\label{sec:reference}
+
+量子計算機で用意する状態 $\rho$ の代わりに、ハバード模型の基底状態を古典計算で作り、それを「擬似実験」の状態とした。
+\begin{itemize}
+  \item \textbf{厳密な参照(80 系)}:1 次元の鎖(開放端 $L=8,10,12,14,16,24,32,48,64$、周期境界 $L=8,\dots,16$)、2 次元の小さな系($2\times4$、$2\times6$ のシリンダーとトーラス、$4\times3$ のシリンダーとトーラス)の 20 通りの格子に、$U=2,4,8,12$ を掛けた 80 系。小さな系は厳密対角化、大きな系は DMRG で作り、エネルギーの分散 $\ev{H^2}-\ev{H}^2$ がすべての系で $10^{-8}$ 以下であることを確かめた。$4\times3$ のトーラスだけは二部格子でない。
+  \item \textbf{大きな系}:1 次元 $L=128$(256 量子ビット)、2 次元の $W=4$ と $W=6$ のシリンダー($L_x=8$、64 と 96 量子ビット)は、DMRG(結合次元 \todo{$\chi_{\rm exp}$ の値を章ごとに確認}) の基底状態を使う。2 次元の DMRG の状態は完全には収束しておらず、スピン回転の対称性を破っている(第\ref{ch:2d}章で注意する)。
+\end{itemize}
+DMRG は ITensorMPS\cite{itensor}で行い、大きな計算は研究室の計算機クラスターで実行した。
+
+\section{測定の模擬と利得の評価}
+\label{sec:simulation}
+
+利得は 2 通りで評価した。
+\begin{enumerate}
+  \item \textbf{厳密な式}:単一パウリ文字列は式\eqref{eq:gain}、和の観測量は命題\ref{prop:sumvar}。統計誤差がないので、本論文の表の数値は特に断らない限りこちらである。
+  \item \textbf{モンテカルロの模擬}:参照状態の MPS からランダムな基底での測定を実際に標本として引き、標準の推定量と CRM の推定量を同じデータで計算する。$n_u$ 設定・$n_m$ ショットの実験を $n_{\rm rep}$ 回繰り返し、推定値の分散の比を取る。prior 側は標本にせず、各設定での条件付き期待値を厳密に計算する。
+\end{enumerate}
+
+\paragraph{窓サンプリング.}観測量の台が連続した量子ビットの窓 $[q_1,q_2]$ に収まるとき、窓の外の量子ビットの測定結果は推定値に現れない。MPS の直交中心を $q_1$ に置くと、窓の左端の Schmidt 指標を基底によらない確率で先に引き、窓の中だけを逐次サンプリングすればよい。これにより、計算量は窓の幅だけで決まり、系の大きさによらない。
+
+\paragraph{モンテカルロの精度についての注意.}分散の比の推定値は、対数で約 $\sqrt{4/(n_{\rm rep}-1)}$ の標準偏差を持つ。$n_{\rm rep}=30$〜$50$ ではこれが $0.28$〜$0.37$ になり、利得が 1.5 倍以上外れることも珍しくない。さらに、同じ測定データで複数の prior を比べると、標準の推定量の分散が全 prior の共通の分子になるので、その標本の偶然で全 prior の値が一緒に膨らむ(または縮む)。本研究の初期の表にはこの影響を受けた値があり、すべて厳密な式の値に置き換えた。
