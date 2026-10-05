@@ -434,25 +434,25 @@ $U=4$ doped ($n{=}7/8$) & 0.80 & 20.1 & 20.0 & 38.6 \\
 \label{sec:2d}
 $4\times8$ シリンダー(64 量子ビット、half-filling、$\rho=$ DMRG $\chi=192$)で、$O(N^3)$ の UHF/UHF-sym prior(第\ref{sec:wick}節)と $\chi$ 切断 MPS prior を\emph{同一の測定データ}で比較した。前提として 2 次元では MPS prior が急劣化する($U=4$: $\chi{=}8$ で $F=0.055$、1 次元 $L=16$ の同 $\chi$ は $0.95$)。結果(表\ref{tab:2d}、図\ref{fig:2d})は次の通り。
 \begin{itemize}
-  \item オンサイト量と運動項では\textbf{タダの UHF が $\chi=32$--$64$ の MPS prior と同等}($U=8$ の onsite $ZZ$ で $G(\text{UHF})=241$ vs $\chi{=}64$ の $243$)。
-  \item サイト間スピン相関では素の共線 UHF は失敗($G\le3$、時に $<1$):凍結 Néel 秩序が $|\ev{S^zS^z}|$ を過大評価する($\Delta\approx0.2$--$0.4$)。
+  \item onsite $ZZ$ と運動項では\textbf{タダの UHF が $\chi=32$--$64$ の MPS prior と同等}($U=8$ の onsite $ZZ$ で $G(\text{UHF})=141$ vs $\chi{=}64$ の $143$、天井 $145$)。
+  \item サイト間スピン相関では素の共線 UHF は失敗($G\le4$、時に $<1$):凍結 Néel 秩序がスピン相関を過大評価する(隣接 $Z_\uparrow Z_\uparrow$ で $\Delta\approx0.2$--$0.4$、$S^zS^z$ で $0.04$--$0.09$)。
   \item スピン回転平均した混合状態 prior(UHF-sym)がこの弱点を全て修復する。回転不変な観測量は厳密に不変のまま(理論予言と一致)。
-  \item 例外は二重占有の退行($6.6\to3.4$)。演算子は SU(2) 不変で合計 $\Delta$ は両 prior で同一なのに $G$ が変わるのは、$\chi=192$ 参照自体が Néel 対称性を破っており項ごとの $\ev{Z_q}$ は共線 UHF の方が合うため(第\ref{sec:variance}節の「項ごと $\Delta$」)。
+  \item 例外は二重占有の退行($6.9\to3.4$、$U=8$ では $10.5\to5.1$)。演算子は SU(2) 不変で合計 $\Delta$ は両 prior で同一なのに $G$ が変わるのは、$\chi=192$ 参照自体が Néel 対称性を破っており項ごとの $\ev{Z_q}$ は共線 UHF の方が合うため(第\ref{sec:variance}節の「項ごと $\Delta$」)。
 \end{itemize}
 
 \begin{table}[t]
 \centering\small
-\caption{$W=4$ シリンダー($U=4$)での prior 比較($G$)。太字は同一観測量での最良に近い安価 prior。}
+\caption{$W=4$ シリンダー($U=4$)での prior 比較($G$、分散の厳密な式、$n_m=100$)。太字は同一観測量での最良に近い安価 prior。以前の版はモンテカルロ($n_{\rm repeat}=50$)の値で、onsite $ZZ$ が $44.0$ と天井 $28.9$ を超えていた。}
 \label{tab:2d}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 観測量 & $G$(UHF 共線) & $G$(UHF-sym) & $G$($\chi{=}16$) & $G$($\chi{=}64$) \\
 \midrule
-onsite $ZZ$ & \textbf{44.0} & 44.0 & 13.9 & 44.5 \\
-二重占有 & 6.6 & 3.4 & 10.5 & 34.2 \\
-ホッピング & \textbf{11.8} & 11.8 & 15.4 & 15.4 \\
-$ZZ$ $x$隣 & 0.83 & \textbf{8.69} & 5.8 & 8.6 \\
-$S^zS^z$ $x$ & 0.81 & \textbf{6.11} & 3.9 & 6.9 \\
+onsite $ZZ$ & \textbf{27.0} & 27.0 & 13.0 & 28.6 \\
+二重占有 & 6.9 & 3.4 & 9.7 & 23.8 \\
+ホッピング & \textbf{12.9} & 12.9 & 16.5 & 16.5 \\
+$ZZ$ $x$隣 & 0.97 & \textbf{8.68} & 6.8 & 8.9 \\
+$S^zS^z$ $x$ & 0.88 & \textbf{6.59} & 4.5 & 7.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -475,7 +475,7 @@ $S^zS^z$ $x$ & 0.81 & \textbf{6.11} & 3.9 & 6.9 \\
 
 \subsection{損をしない CRM: 最適係数と多 prior 回帰}
 \label{sec:optbeta}
-第\ref{sec:cv-method}節の最適係数化を $W=4$ シリンダー(第\ref{sec:2d}節と同一データ)で検証した(図\ref{fig:optbeta})。$\beta=1$ で損をしていた全ケースが修復され($U=8$ の UHF で $ZZ$ $y$距離2: $0.70\to13.95$、$ZZ$ $x$隣: $1.14\to18.59$)、達成利得は理論 $1/(1-\mathrm{corr}^2)$ と対角線上で一致、プラグインバイアスは検出限界以下であった。理論的副産物として、単一 Pauli 列では $Y_p=\mathbf{1}[\text{一致}]\cdot3^{|A|}\ev{P}_{\sigma_p}$ が prior ごとにスカラー倍しか違わず $\beta$ に吸収されるため、最適 $\beta$ 利得は\emph{prior 非依存}になる — すなわち「一致インジケータを制御変量とする prior フリーの自己校正推定器」が定義できる。一方 prior が優秀なら $\beta=1$ が勝つ(onsite $ZZ$: $241$ vs $141$)。多 prior 回帰では、無料の prior 2 つ $\{$UHF, UHF-sym$\}$ の回帰が二重占有で $G=98$($U=8$)に達し、$\chi=32$ MPS($101$)と同等となった — \textbf{MPS なしで MPS 級}。
+第\ref{sec:cv-method}節の最適係数化を $W=4$ シリンダー(第\ref{sec:2d}節と同一データ)で検証した(図\ref{fig:optbeta})。$\beta=1$ で損をしていた全ケースが修復され($U=8$ の UHF で $ZZ$ $y$距離2: $0.70\to10.7$、$ZZ$ $x$隣: $1.35\to17.1$。反復 $400$ 回)、達成利得は理論 $1/(1-\mathrm{corr}^2)$ と対角線上で一致、プラグインバイアスは検出限界以下であった。理論的副産物として、単一 Pauli 列では $Y_p=\mathbf{1}[\text{一致}]\cdot3^{|A|}\ev{P}_{\sigma_p}$ が prior ごとにスカラー倍しか違わず $\beta$ に吸収されるため、最適 $\beta$ 利得は\emph{prior 非依存}になる — すなわち「一致インジケータを制御変量とする prior フリーの自己校正推定器」が定義できる。一方 prior が優秀なら $\beta=1$ が勝つ(onsite $ZZ$: $169$ vs $117$。反復 $400$ 回のモンテカルロ。$\beta=1$ の厳密な値は $141$)。多 prior 回帰では、無料の prior 2 つ $\{$UHF, UHF-sym$\}$ の回帰が二重占有で $G=82$($U=8$、反復 $400$ 回)に達し、$\chi=32$ MPS($82$)と同等となった — \textbf{MPS なしで MPS 級}。
 
 \begin{figure}[t]
 \centering
