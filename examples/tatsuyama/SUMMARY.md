@@ -91,7 +91,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 
 ## わかっている限界
 
-- **擬似実験である。** 参照状態 $\rho$ は DMRG(または ED)で作ったもので、実機のノイズ・読み出し誤差は入っていない。
+- **擬似実験である。** 参照状態 $\rho$ は DMRG(または ED)で作ったもので、実機のノイズ・読み出し誤差は入っていない。読み出し誤差だけは式で見積もった。台の大きい観測量では、誤差モデルを prior に掛けないと標準の方法より悪くなりうる([README_readout_noise.md](README_readout_noise.md))。
 - **ED による直接確認は $L\le14$(28量子ビット)まで。** §2 は $L=32$、§2b は $L=128$ を扱うので、そこは $\chi$ 収束チェックでの代替になる。
 - **2D は $W=4,6$ のシリンダーのみ。** 本物の2次元極限は取れていない。
 - **粗い prior の損は、境界条件・系の大きさ・次元・結合の強さで変わる。** $\chi_p=2$ は1次元開放端でも半充填の $L\ge64$ で損が出( $L=128$ で 5.7%)、ドープ系では $L=8$ から出る。周期境界では $L\le14$ でも約8%で損をする。 $\chi_p=4,8$ は1次元開放端( $U=4$ )では損ゼロだが、2次元・周期境界・弱結合( $U=2,4$ )では損をする系がある(厳密な80系で $\chi_p=4$ が160点中8点、 $\chi_p=8$ が3点。 $\chi_p\ge16$ は0点)。
@@ -119,6 +119,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | スピン射影 HF と低い結合次元の MPS の比較 | [README_phf_mps.md](README_phf_mps.md) |
 | 元論文(Vermersch ら 2024)のうち、この研究に関係する部分の解説 | [README_crm_paper.md](README_crm_paper.md) |
 | 半充填で ⟨n_i⟩ = 1 がサイトごとに厳密な理由(粒子正孔対称性) | [README_particle_hole.md](README_particle_hole.md) |
+| 読み出し誤差に対する利得の崩れ方と、prior 側での補正 | [README_readout_noise.md](README_readout_noise.md) |
 | 二重占有の物理 | [paper/crm_double_occupancy.pdf](paper/crm_double_occupancy.pdf) |
 | 全実験の詳細な記録 | [README.md](README.md) |
 | 確立した主張と未解決問題 | [ROADMAP.md](ROADMAP.md) |
