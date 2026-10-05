@@ -1,6 +1,8 @@
 # 要約 — ハバード模型に対する CRM シャドウ
 
 > 詳細は [README.md](README.md)(全実験の記録、1,549行)、[ROADMAP.md](ROADMAP.md)(確立した主張と未解決問題)、[CRM_RESEARCH_NOTES.md](CRM_RESEARCH_NOTES.md)(論文化用ノート)、[paper/](paper/)(論文4本)。**この文書はそれらへの入口**である。
+>
+> **久しぶりに読み返すなら、まず [README_overview.md](README_overview.md)(これまでの研究のまとめ)から。**
 
 ## 一行でいうと
 
