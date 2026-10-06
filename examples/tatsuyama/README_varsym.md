@@ -93,7 +93,13 @@ Z_{i\uparrow}=1-2n_{i\uparrow}=1-n_i-2S^z_i
 
 ### 1.4 計算
 
-[crm_mps_lowchi_sym.jl](crm_mps_lowchi_sym.jl) は、clara に保存済みの変分 MPS(20 通りの格子 × 4 つの $U$ × $\chi=2,4,8,16$ の 320 個)について、中央のサイトとその隣のこれらの量を MPO で求める。 $\mathbf S_i\cdot\mathbf S_j=S^z_iS^z_j+\tfrac12(S^+_iS^-_j+S^-_iS^+_j)$ の $S^\pm_i$ ( $S^+_i=c^\dagger_{i\uparrow}c_{i\downarrow}$ など)は同じサイトの中で電子を移す演算子なので、Jordan–Wigner の符号は付かない。
+[crm_mps_lowchi_sym.jl](crm_mps_lowchi_sym.jl) は、clara に保存済みの変分 MPS(20 通りの格子 × 4 つの $U$ × $\chi=2,4,8,16$ の 320 個)について、中央のサイトとその隣のこれらの量を MPO で求める。スピンの内積は
+
+```math
+\mathbf S_i\cdot\mathbf S_j=S^z_iS^z_j+\tfrac12\bigl(S^+_iS^-_j+S^-_iS^+_j\bigr),\qquad S^+_i=c^\dagger_{i\uparrow}c_{i\downarrow},\quad S^-_i=c^\dagger_{i\downarrow}c_{i\uparrow}
+```
+
+で計算する。 $S^{\pm}$ は同じサイトの中で電子のスピンを入れ替える演算子なので、Jordan–Wigner の符号は付かない。
 
 **照合**: 同じ出力に入れた、平均する前のオンサイト ZZ・隣接 $Z_\uparrow Z_\uparrow$ ・ $S^z$ ・ $\mathbf S\cdot\mathbf S$ が、以前の計算(`crm_mpslow_*.tsv`)と最大 $10^{-12}$ で一致した。
 
