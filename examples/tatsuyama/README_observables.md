@@ -13,19 +13,38 @@
 5. **利得が大きい観測量の条件は、真の状態が固有空間から漏れる確率 $\eta_\rho$ と、HF によるその見積もりの相対誤差 $\delta$ の2つで書ける。** $R=K'\eta_\rho\delta^2/(1-\eta_\rho)$ なので、漏れが稀な量では HF が漏れを 20〜30% 外していても天井に届く(4.1)。
 6. **電荷の量が理想的なのは、二重占有が隣の結合の一重項の強さの「こだま」だからである。** HF の誤差は漏れと同じ速さで小さくなり、 $R\propto(t/U)^2\to0$ となる(4.3)。
 7. **揺らぎが内部で打ち消し合う量は、台を広げても天井が下がらない。** ブロック内の電荷の偶奇は 64 量子ビットに広げても UHF で利得約 600 のまま(4.5)。
-8. **物理的に自然な量の多くはパウリ文字列の和で、和では「項ごとの誤差」が効く。** 二重占有を4項の和として測ると共線 UHF の利得は 1.8 しかなく(対称化すると 124)、局所エネルギーでは共線 UHF 1.7 に対し対称化した UHF で 51(MPS $\chi_p=32$ と同程度)になる(5)。
+8. **物理的に自然な量の多くはパウリ文字列の和で、和では「項ごとの誤差」が効く。** 二重占有を4項の和として測ると共線 UHF の利得は 1.8 しかなく(対称化すると 123)、局所エネルギーでは共線 UHF 1.7 に対し対称化した UHF で 51(MPS $\chi_p=32$ と同程度)になる(5)。
+
+## 前提として知っておくこと
+
+| 記号 | 意味 |
+|---|---|
+| $P$ 、 $\lvert A\rvert$ | 測るパウリ文字列と、その台(恒等でない量子ビット)の数 |
+| $x$ 、 $y$ 、 $\Delta$ | 真の値 $\langle P\rangle_\rho$ 、prior の値 $\langle P\rangle_\sigma$ 、外れ $x-y$ |
+| $\varepsilon=\Delta/x$ | prior の相対誤差 |
+| $K=3^{\lvert A\rvert}-1$ 、 $v_s=3^{\lvert A\rvert}(1-x^2)/n_m$ | 基底のくじの係数と、ショットの揺らぎ( $n_m=100$ ) |
+| $G=\dfrac{Kx^2+v_s}{K\Delta^2+v_s}$ | 利得(元論文の式(25) [PRX: (C7)] の比) |
+| $G_{\max}=1+Kx^2/v_s$ | 天井( $\Delta=0$ のときの利得) |
+| UHF、RHF | スピンの向きを選ぶ平均場と、選ばない平均場(上下のスピンに同じ軌道を使う) |
+| UHF-sym | UHF をあらゆるスピンの向きに回して平均した prior([README_uhfsym.md](README_uhfsym.md)) |
 
 ---
 
 ## 1. 利得を「天井」と「外れ具合」に分ける
 
-$1/G=\varepsilon^2(1-1/G_{\max})+1/G_{\max}$ を書き直すと
+利得の式の分子と分母を $v_s$ で割ると
+
+```math
+G=\frac{Kx^2/v_s+1}{K\Delta^2/v_s+1}=\frac{G_{\max}}{1+K\Delta^2/v_s}
+```
+
+である。分母の $K\Delta^2/v_s$ は、 $\Delta=\varepsilon x$ を入れると $\varepsilon^2\,Kx^2/v_s=\varepsilon^2(G_{\max}-1)$ になる。したがって
 
 ```math
 G=\frac{G_{\max}}{1+R},\qquad R=\varepsilon^2\,(G_{\max}-1)
 ```
 
-である。 $R\ll1$ なら利得はほぼ天井で決まり、 $R\gg1$ なら $G\approx1/\varepsilon^2$ で prior の外れで決まる。1次元 $L=64$ 、UHF の場合:
+と書ける。 $R\ll1$ なら利得はほぼ天井で決まり、 $R\gg1$ なら $G\approx1/\varepsilon^2$ で prior の外れで決まる。1次元 $L=64$ 、UHF の場合:
 
 | $U$ | オンサイト ZZ: $G_{\max}$ | $R$ | $G$ | 隣接 $Z_\uparrow Z_\uparrow$ : $G_{\max}$ | $R$ | $G$ | 単一サイト $Z_\uparrow$ : $G_{\max}$ | $G$ |
 |---|---|---|---|---|---|---|---|---|
@@ -43,7 +62,17 @@ G=\frac{G_{\max}}{1+R},\qquad R=\varepsilon^2\,(G_{\max}-1)
 強結合の Hubbard 模型を $U$ の項から見る。
 
 - **$U$ が最も小さくなる状態は「全サイトに電子が1個ずつ」** で、スピンの並べ方が $2^L$ 通り縮退している。
-- **オンサイト ZZ は、この縮退した状態のどれに対してもちょうど $-1$ (固有状態)** である。真の状態がここからずれるのは、ホッピングで一瞬だけ二重占有ができる仮想過程の分 $d\propto(t/U)^2$ だけで、 $\eta_\rho=2d$ なので **天井は $(U/t)^2$ に比例して伸びる**。
+- **オンサイト ZZ は、この縮退した状態のどれに対してもちょうど $-1$ (固有状態)** である。真の状態がここからずれるのは、ホッピングで一瞬だけ二重占有ができる仮想過程の分 $d\propto(t/U)^2$ だけである。
+
+  ここで、固有値 $\pm1$ の観測量について、**真の状態が固有空間から漏れる確率** $\eta_\rho$ を定義する。 $x$ が $-1$ に近いとき、 $+1$ が出る確率が $\eta_\rho$ で、 $x=(1-\eta_\rho)\cdot(-1)+\eta_\rho\cdot(+1)=-1+2\eta_\rho$ 、すなわち $\eta_\rho=(1+x)/2=(1-\lvert x\rvert)/2$ である。オンサイト ZZ は $x=4d-1$ なので $\eta_\rho=2d$ である(二重占有と、同じ数だけある空のサイトが $+1$ を出す)。
+
+  天井は $\eta_\rho$ で書ける。 $1-x^2=(1-\lvert x\rvert)(1+\lvert x\rvert)=2\eta_\rho\,(2-2\eta_\rho)=4\eta_\rho(1-\eta_\rho)$ なので
+
+```math
+G_{\max}-1=\frac{Kx^2}{v_s}=\frac{K'\,x^2}{4\eta_\rho(1-\eta_\rho)}\approx\frac{K'}{4\eta_\rho},\qquad K'=\frac{(3^{\lvert A\rvert}-1)\,n_m}{3^{\lvert A\rvert}}
+```
+
+  ( $\eta_\rho\ll1$ で $x^2\approx1$ 、 $1-\eta_\rho\approx1$ )。 $\eta_\rho=2d\propto(t/U)^2$ なので、**天井は $(U/t)^2$ に比例して伸びる**。
 - **スピンの量は、縮退した状態どうしを区別する量**である。どの並べ方になるかは $J=4t^2/U$ のハイゼンベルク模型が決め、その基底状態は一重項の重ね合わせなので、スピンの向きは量子的に揺らぐ。 $U$ をいくら上げてもこの揺らぎは消えない。
 - **単一サイト $Z_\uparrow$ は、スピン一重項では期待値が必ず 0** (Wigner–Eckart の定理)で、天井は 1 である。
 
@@ -70,7 +99,13 @@ G=\frac{G_{\max}}{1+R},\qquad R=\varepsilon^2\,(G_{\max}-1)
 d_i=\frac{n_i^2}{4}-\bigl\lvert\langle\mathbf S_i\rangle\bigr\rvert^2
 ```
 
-が厳密に成り立つ(二部格子の UHF 76 系で最大差 $2.7\times10^{-9}$ )。**半充填で二重占有を 1/4 より減らすには、サイトのスピンの期待値を 0 でなくするしかない。**
+が厳密に成り立つ。導出は次のとおりである( $n_\sigma=\langle n_{i\sigma}\rangle$ 、 $\kappa=\langle c^\dagger_{i\uparrow}c_{i\downarrow}\rangle$ と書く)。
+
+1. Wick の定理で $d_i=\langle c^\dagger_{i\uparrow}c_{i\uparrow}c^\dagger_{i\downarrow}c_{i\downarrow}\rangle=n_\uparrow n_\downarrow-\lvert\kappa\rvert^2$ (2つの縮約の取り方のうち、交差する方が負号を持つ)。
+2. スピンの期待値は $\langle S^z_i\rangle=\tfrac12(n_\uparrow-n_\downarrow)$ 、 $\langle S^+_i\rangle=\kappa$ なので、 $\lvert\langle\mathbf S_i\rangle\rvert^2=\tfrac14(n_\uparrow-n_\downarrow)^2+\lvert\kappa\rvert^2$ 。
+3. $\tfrac14(n_\uparrow+n_\downarrow)^2-\tfrac14(n_\uparrow-n_\downarrow)^2=n_\uparrow n_\downarrow$ なので、2つを合わせると上の式になる。
+
+数値でも確かめた(二部格子の UHF 76 系で最大差 $2.7\times10^{-9}$ )。**半充填で二重占有を 1/4 より減らすには、サイトのスピンの期待値を 0 でなくするしかない。**
 
 | $U=12$ | $\lvert\langle\mathbf S_i\rangle\rvert$ | $d$ | オンサイト ZZ の利得 |
 |---|---|---|---|
@@ -82,7 +117,7 @@ d_i=\frac{n_i^2}{4}-\bigl\lvert\langle\mathbf S_i\rangle\bigr\rvert^2
 
 ### 3.2 誤差を「破れの誤差」と「相関の誤差」に分ける
 
-観測量を、スピン回転で変わらない部分(階数 0)と変わる部分(階数 1、2、…)に分ける。真の状態(一重項)では、変わる部分の期待値はすべて 0 である。群平均した UHF(UHF-sym、UHF をあらゆるスピンの向きに回して平均した混合状態。詳しくは [README_uhfsym.md](README_uhfsym.md))は、変わらない部分だけを残した prior になる。したがって UHF の外れは厳密に
+観測量を、スピン回転で変わらない部分(階数 0)と変わる部分(階数 1、2、…)に分ける。階数 1 はベクトルのように回る部分(例えば $S^z_i$ )、階数 2 は2つのベクトルの積から内積を引いた部分(例えば $S^z_iS^z_j-\tfrac13\mathbf S_i\cdot\mathbf S_j$ )である。真の状態(一重項)は回転で変わらないので、回転で変わる部分の期待値はすべて 0 である(回転で平均すると 0 になる量の期待値が、回転で不変な状態では 0 でなければならないから)。群平均した UHF(UHF-sym、UHF をあらゆるスピンの向きに回して平均した混合状態。詳しくは [README_uhfsym.md](README_uhfsym.md))は、変わらない部分だけを残した prior になる。したがって UHF の外れは厳密に
 
 ```math
 \Delta=\underbrace{(x-y_{\rm sym})}_{\text{相関の誤差}}+\underbrace{(y_{\rm sym}-y)}_{\text{破れの誤差}}
@@ -139,7 +174,7 @@ d_i=\frac{n_i^2}{4}-\bigl\lvert\langle\mathbf S_i\rangle\bigr\rvert^2
 
 ### 4.1 利得を決める2つの数
 
-真の状態が $P$ の固有空間から漏れる確率を $\eta_\rho$ 、prior によるその見積もりの相対誤差を $\delta=(\eta_\sigma-\eta_\rho)/\eta_\rho$ とすると、同符号なら $\lvert\Delta\rvert=2\lvert\eta_\sigma-\eta_\rho\rvert$ から厳密に
+真の状態が $P$ の固有空間から漏れる確率を $\eta_\rho$ 、prior によるその見積もりの相対誤差を $\delta=(\eta_\sigma-\eta_\rho)/\eta_\rho$ とする。 $x$ と $y$ が同符号なら、2 章のとおり $x=\mp(1-2\eta_\rho)$ 、 $y=\mp(1-2\eta_\sigma)$ なので $\lvert\Delta\rvert=2\lvert\eta_\sigma-\eta_\rho\rvert=2\eta_\rho\lvert\delta\rvert$ である。1 章の $R=K\Delta^2/v_s$ に、2 章の $v_s=3^{\lvert A\rvert}\cdot4\eta_\rho(1-\eta_\rho)/n_m$ と合わせて入れると $R=K'\cdot4\eta_\rho^2\delta^2/(4\eta_\rho(1-\eta_\rho))$ となり、厳密に
 
 ```math
 G=\frac{G_{\max}}{1+R},\qquad G_{\max}\approx\frac{K'}{4\eta_\rho},\qquad R=\frac{K'\,\eta_\rho\,\delta^2}{1-\eta_\rho},\qquad K'=\frac{(3^{\lvert A\rvert}-1)\,n_m}{3^{\lvert A\rvert}}
