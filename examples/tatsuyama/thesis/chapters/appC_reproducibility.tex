@@ -19,9 +19,26 @@ PHF・MPS の比較 & \texttt{crm\_phf.py}、\texttt{crm\_phf\_compare.py}、\te
 2 次元 $W=6$、ドープ系 & \texttt{crm\_2d\_w6.jl}、\texttt{crm\_2d\_doped.jl}、\texttt{crm\_2d\_w6\_doped.jl} \\
 相図とショット配分 & \texttt{crm\_param\_sweep.jl} / \texttt{crm\_sweep\_U.tsv}、\texttt{crm\_sweep\_nm.tsv} \\
 読み出し誤差 & \texttt{crm\_readout\_noise.py} / \texttt{crm\_readout\_noise.out} \\
+回転平均した prior の距離依存 & \texttt{crm\_varsym\_pairs.jl}、\texttt{crm\_varsym\_distance.py} \\
+図\ref{fig:locality} & \texttt{crm\_fig\_locality\_exact.py} \\
 粒子正孔対称性の確認 & \texttt{crm\_particle\_hole\_check.py} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\todo{使ったソフトウェアの版(Julia、ITensors、ITensorMPS、Python、NumPy)を書く}
+\section*{ソフトウェアの版}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+用途 & ソフトウェア & 版 \\
+\midrule
+DMRG、MPS、測定の模擬(クラスター) & Julia & 1.12.1 \\
+ & ITensors.jl / ITensorMPS.jl & 0.9.30 / 0.4.1 \\
+ & NDTensors.jl / KrylovKit.jl & 0.4.28 / 0.10.4 \\
+平均場、表の集計(主にクラスター) & Python / NumPy & 3.13.13 / 2.5.1 \\
+図(手元) & Python / NumPy / Matplotlib & 3.13.5 / 2.1.3 / 3.10.0 \\
+本文 & Lua\LaTeX(TeX Live 2025) & LuaHBTeX 1.21.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Julia のパッケージの版は、クラスター上の環境 \texttt{Hubbard\_MPS\_Env\_v2} の \texttt{Manifest.toml} による。

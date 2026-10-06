@@ -658,5 +658,5 @@ JULIA_LOAD_PATH="@:@v#.#:@stdlib" julia --project=Hubbard_MPS_Env_v2 <script>.jl
 - B. Vermersch et al., *Enhanced estimation of quantum observables with common randomized measurements*, PRX Quantum **5**, 010352 (2024) — CRMの原論文
 - H.-Y. Huang, R. Kueng, J. Preskill, *Predicting many properties of a quantum system from very few measurements*, Nat. Phys. **16**, 1050 (2020) — 古典シャドウ
 - H.-Y. Huang, R. Kueng, J. Preskill, PRL **127**, 030503 (2021) — derandomization(比較対象)
-- Z. Zhao, N. C. Rubin, A. Miyake, PRL **127**, 110504 (2021) / K. Wan et al., Commun. Math. Phys. (2023) — フェルミオン/matchgateシャドウ(§3.5で実装)
+- A. Zhao, N. C. Rubin, A. Miyake, PRL **127**, 110504 (2021) / K. Wan et al., Commun. Math. Phys. **404**, 629 (2023) — フェルミオン/matchgateシャドウ(§3.5で実装)
 - M. Fishman, S. R. White, PRB **92**, 075132 (2015) — Slater行列式のMPS変換(UHFをMPS化する場合の標準法)
