@@ -145,11 +145,18 @@ g_\rho(U)=\sum_{\mathbf s}P_\rho(\mathbf s|U)\bigl([\mathcal M^{-1}(O^{(1)})](U,
 - **第1項**: どのユニタリー(基底)が当たるかのくじによるゆらぎ。 $f$ は「 $\rho$ と $\sigma$ の出力分布の差」だけで決まるので、**prior が良ければ小さくなる**。
 - **第2項**: 1つの基底の中でのショット雑音。 $g$ は $\rho$ だけで決まり、**prior では減らせない**。
 
-これはこの研究の [README_eigenstate.md](README_eigenstate.md) 1.6 の「全分散の法則」による分解(基底のくじの雑音 $Kx^2$ と、減らせない床 $v_s$ )と同じものである。単一パウリ文字列で具体的に計算すると、 $f(U)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\,\Delta$ 、 $g(U)=3^{2\lvert A\rvert}\mathbb 1_{\rm 一致}(1-x^2)$ なので
+これはこの研究の [README_eigenstate.md](README_eigenstate.md) 1.6 の「全分散の法則」による分解(基底のくじの雑音 $Kx^2$ と、減らせない床 $v_s$ )と同じものである。
+
+**単一パウリ文字列での具体的な計算。** パウリ文字列 $P$ (台 $A$ )について、 $[\mathcal M^{-1}(P)](U,\mathbf s)$ は「基底が台の上で全部一致したとき $3^{\lvert A\rvert}\times(\text{台の上の測定値の積})$ 、それ以外は 0」である(2.3 節)。基底が一致したとき、台の上の測定値の積は $\rho$ のもとで平均 $x={\rm Tr}(P\rho)$ 、 $\sigma$ のもとで平均 $y={\rm Tr}(P\sigma)$ の $\pm1$ の確率変数である。したがって
+
+- $f(U)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\,(x-y)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\,\Delta$ 。一致する確率は $3^{-\lvert A\rvert}$ なので、 $\mathbb E_U[f]=\Delta$ 、 $\mathbb E_U[f^2]=3^{-\lvert A\rvert}\cdot3^{2\lvert A\rvert}\Delta^2=3^{\lvert A\rvert}\Delta^2$ 。
+- $g(U)$ は1ショットの値の分散で、一致したときは $3^{2\lvert A\rvert}\times(\pm1\text{ の分散})=3^{2\lvert A\rvert}(1-x^2)$ 、一致しないときは 0。
+
+これらから
 
 ```math
-\mathbb V_U[f]=3^{\lvert A\rvert}\Delta^2-\Delta^2=(3^{\lvert A\rvert}-1)\Delta^2,\qquad
-\mathbb E_U[g]=3^{\lvert A\rvert}(1-x^2)
+\mathbb V_U[f]=\mathbb E_U[f^2]-\mathbb E_U[f]^2=3^{\lvert A\rvert}\Delta^2-\Delta^2=(3^{\lvert A\rvert}-1)\Delta^2,\qquad
+\mathbb E_U[g]=3^{-\lvert A\rvert}\cdot3^{2\lvert A\rvert}(1-x^2)=3^{\lvert A\rvert}(1-x^2)
 ```
 
 となり、次の式(25) [PRX: (C7)] がそのまま出る(PRX 版では式(C2)〜(C6)がこの計算に当たる)。
@@ -196,9 +203,9 @@ G=\frac{\mathbb V_{\rm 標準}}{\mathbb V_{\rm CRM}}=\frac{(3^{\lvert A\rvert}-1
 | 実際の測定過程を模擬して式と突き合わせること(288点) | この研究([README_gainlaw.md](README_gainlaw.md)) |
 | Hubbard 模型の具体的な prior(UHF、UHF-sym、PHF、切断・変分 MPS)での $\Delta$ の系統的な評価と、その物理的な説明 | この研究 |
 
-### 5.2 この研究の文書で直すべき書き方
+### 5.2 この研究の文書の書き方(2026年10月に直した)
 
-この研究の文書は、利得の式を「利得法則」と呼び、SUMMARY の主要結論1に「利得法則は約5.9桁で成り立つ」と書いているが、**論文の厳密な式(25) [PRX: (C7)] への帰属が書かれていない**( [README_2m.md](README_2m.md) に「利得法則(元論文 式(4))」と上界の式に触れた箇所が1つあるだけである)。式(25)は厳密な等式なので、実測との一致は「法則が物理として成り立つ」ことではなく、**この研究の実装(量子ビットの割り当て、JW 変換、推定量)が論文の式どおりに動いている**ことの確認である。確認としての価値はあるが、主張としては「元論文の式(25)(の比)を、この研究の実装と Hubbard 模型の系で確認した」と書くのが正確である。この研究の独自の寄与は 5.1 の表の下半分にある。
+この研究の文書は、利得の式を「利得法則」と呼び、SUMMARY の主要結論1に「利得法則は約5.9桁で成り立つ」と書いていたが、**論文の厳密な式(25) [PRX: (C7)] への帰属が書かれていなかった**。式(25)は厳密な等式なので、実測との一致は「法則が物理として成り立つ」ことではなく、**この研究の実装(量子ビットの割り当て、JW 変換、推定量)が論文の式どおりに動いている**ことの確認である。確認としての価値はあるが、主張としては「元論文の式(25)(の比)を、この研究の実装と Hubbard 模型の系で確認した」と書くのが正確である。2026年10月に、SUMMARY・ROADMAP・論文原稿・各文書の書き方をそのように直した。この研究の独自の寄与は 5.1 の表の下半分にある。
 
 ---
 
@@ -243,7 +250,13 @@ G\le G_{\max}=1+\frac{(3^{\lvert A\rvert}-1)\,x^2}{3^{\lvert A\rvert}(1-x^2)}\,n
 
 ### 7.2 忠実度 1/2 という条件
 
-$\rho$ も $\sigma=\lvert\phi\rangle\langle\phi\rvert$ も純粋なら $\lVert\rho-\sigma\rVert_2^2=2(1-F)$ ( $F$ は忠実度)であり、標準のシャドウ( $\sigma$ の項なし)の $\lVert\rho\rVert_2^2=1$ より小さいのは $F>1/2$ のときである。論文の忠実度の例(arXiv 版の例2、PRX 版の III.C 節)の反復手順は、この「忠実度 $1/2$ 以上」を prior の合格ラインにしている(8章)。PRX 版の III.C 節は「式(6)を見れば、 $\mathcal F_\phi\ge1/2$ なら CRM の方が分散が小さい」と明記している。
+$\rho$ も $\sigma=\lvert\phi\rangle\langle\phi\rvert$ も純粋なら、 ${\rm Tr}\rho^2={\rm Tr}\sigma^2=1$ 、 ${\rm Tr}(\rho\sigma)=F$ ( $F$ は忠実度)なので
+
+```math
+\lVert\rho-\sigma\rVert_2^2={\rm Tr}\rho^2-2\,{\rm Tr}(\rho\sigma)+{\rm Tr}\sigma^2=2(1-F)
+```
+
+である。標準のシャドウは $\sigma$ の項を落とした( $\sigma\to0$ )ものなので、対応する量は $\lVert\rho\rVert_2^2=1$ である。式(6)の第1項が標準より小さくなる条件 $2(1-F)<1$ は、 $F>1/2$ である。論文の忠実度の例(arXiv 版の例2、PRX 版の III.C 節)の反復手順は、この「忠実度 $1/2$ 以上」を prior の合格ラインにしている(8章)。PRX 版の III.C 節は「式(6)を見れば、 $\mathcal F_\phi\ge1/2$ なら CRM の方が分散が小さい」と明記している。
 
 ### 7.3 この研究との関係 — 矛盾しない
 
@@ -302,11 +315,12 @@ prior $\sigma$ を古典計算で作る代わりに、**$\rho$ に近い状態�
 
 | テーマ | 論文 | この研究 |
 |---|---|---|
-| prior の種類 | 切り詰めた MPS、目標の純粋状態、別の実験 | UHF、UHF-sym(群平均)、RHF、PHF、切断 MPS、変分 MPS |
+| prior の種類 | 切り詰めた MPS、目標の純粋状態、別の実験 | UHF、UHF-sym(群平均)、RHF、PHF、切断 MPS、変分 MPS、変分 MPS の群平均 |
 | 対称性を破った prior | 扱っていない | UHF はスピンの向きを選ぶので、スピンの量で損をする。群平均(UHF-sym)で損が消える([README_uhfsym.md](README_uhfsym.md)) |
 | 観測量による違い | 扱っていない | 電荷の量は強結合で $\varepsilon\propto(t/U)^2$ で良くなり、スピンの量は飽和する([README_prior_survey.md](README_prior_survey.md) 結果2、[README_observables.md](README_observables.md)) |
-| 和の観測量 | 一般の多コピー観測量の上界(arXiv 版の付録 B.2、PRX 版の付録 C.2) | 厳密な分散と、項ごとの誤差が効くこと(二重占有を4項の和で測ると UHF の利得は 1.8、群平均で 124) |
-| 距離依存 | 扱っていない | 長距離秩序を持つ prior は遠くの相関で必ず損をする([README_eigenstate.md](README_eigenstate.md)) |
+| 和の観測量 | 一般の多コピー観測量の上界(arXiv 版の付録 B.2、PRX 版の付録 C.2) | 厳密な分散と、項ごとの誤差が効くこと(二重占有を4項の和で測ると UHF の利得は 1.8、群平均で 123) |
+| 距離依存 | 扱っていない | 長距離秩序を持つ prior は遠くの相関で必ず損をし、群平均しても直らない([README_eigenstate.md](README_eigenstate.md)、[README_varsym_distance.md](README_varsym_distance.md)) |
+| 量子的な相関を持つ prior の対称性の回復 | 扱っていない | 変分 MPS を群平均すると、電荷とスピンの両方で損をしない([README_varsym.md](README_varsym.md)) |
 | 系の大きさと大域的な忠実度 | 例は16〜30量子ビット | 大域的な忠実度が指数的に落ちても局所観測量の利得は残る(128量子ビットまで) |
 | 測定の誤差 | 忠実度の例は状態の用意に脱分極雑音を入れている。実験データの例(PRX 版)は実機のデコヒーレンスを含む | 読み出し誤差に対して prior を補正しないと、台の大きい観測量で CRM が標準より悪くなりうる([README_readout_noise.md](README_readout_noise.md)) |
 
