@@ -42,7 +42,7 @@ CRM を係数 $\beta$ 付きの制御変量法
   \item \textbf{単一のパウリ文字列では prior が約分される。} $Y(u)=\mathbf 1[\text{一致}]\,3^{\lvert A\rvert}y$ なので、最適係数の推定量は prior によらず、「基底が一致したかどうか」という既知の指標だけを制御変量に使う。
   \item \textbf{良い prior では $\beta=1$ の方が良い。} 係数を推定する誤差がなくなる分だけ有利である。
 \end{itemize}
-\todo{crm\_optbeta\_results\_nrep400.tsv(反復 400 回の再計算)の値で、$\beta=1$ と最適 $\beta$ の比較、多 prior 回帰の表を入れる}
+$W=4$、$U=8$ のシリンダー(反復 400 回のモンテカルロ)では、$\beta=1$ で損をしていた観測量がすべて直った(UHF prior の $Z_\up Z_\up$ で、$y$ 方向の距離 2 が $0.70\to10.7$、$x$ 方向の隣が $1.35\to17.1$)。一方、prior の良いオンサイト $ZZ$ では $\beta=1$ の方が良かった(分散の比で $169$ 対 $117$)。UHF と UHF-sym の 2 つの prior を回帰で組み合わせると、二重占有で $G=82$ に達し、$\chi=32$ の MPS(82)と並んだ。MPS を作らずに MPS と同じ利得が得られる。
 
 \section{読み出し誤差}
 \label{sec:readout}
