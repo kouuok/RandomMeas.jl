@@ -23,7 +23,7 @@
 |---|---|
 | UHF | 非制限 Hartree–Fock。上向きと下向きの電子を別々の Slater 行列式で表す平均場で、半充填では副格子ごとにスピンが上下に傾いたネール解になる |
 | UHF-sym | UHF をあらゆるスピンの向きに回して確率的に混ぜた混合状態([README_uhfsym.md](README_uhfsym.md)) |
-| $m$ | UHF の各サイトの磁化 $\lvert\langle S^z_ianglevert$ |
+| $m$ | UHF の各サイトの磁化 $\lvert\langle S^z_i\rangle\rvert$ |
 | $J$ | 強結合での隣どうしのスピンの結合(超交換) $J=4t^2/U$ ( $t=1$ ) |
 | 結合次元 $\chi$ | MPS の各結合で保持する状態の数。大きいほど表せる量子的な相関が多い |
 | 相関エネルギーの回収率 | UHF のエネルギー $E_{\rm UHF}$ から厳密なエネルギー $E_{\rm 厳密}$ までの差のうち、その prior が取り戻した割合 $(E_{\rm UHF}-E)/(E_{\rm UHF}-E_{\rm 厳密})$ 。100% で厳密、負は UHF より高いエネルギー |
