@@ -17,6 +17,18 @@
 5. **2つの MPS の違いは、各結合で使える少ない状態を何に使うかで決まる**(4)。中央の結合を量子数ごとに Schmidt 分解すると、切断 MPS( $\chi=4$ )は重みの大きいスピンの成分だけを上下対称に残し、電荷がゆらいだ成分(厳密な状態では重み 1.7%)を捨てていた。変分 MPS( $\chi=4$ )は、電荷がゆらいだ成分を残してその重み(1.8%)を正しく再現する代わりに、スピンの成分を一方の向きだけにしていた。PHF はどちらも作らず、系全体の回転の対称性を1つ回復するだけである。
 6. **実用上**: 数十〜数百量子ビットの系で PHF を使う意味はない。変分 MPS は電荷の量には最良の prior だが、スピンの量ではその対称性の破れを別に取り除く必要がある(UHF-sym と同じ回転平均が使える。試した結果は [README_varsym.md](README_varsym.md) にあり、 $\chi\ge8$ では厳密な 80 系のすべてで損がなく、隣接スピン相関で UHF-sym の 2〜3 倍得をした)。
 
+## 前提として知っておくこと
+
+| 用語・記号 | 意味 |
+|---|---|
+| UHF | 非制限 Hartree–Fock。上向きと下向きの電子を別々の Slater 行列式で表す平均場で、半充填では副格子ごとにスピンが上下に傾いたネール解になる |
+| UHF-sym | UHF をあらゆるスピンの向きに回して確率的に混ぜた混合状態([README_uhfsym.md](README_uhfsym.md)) |
+| $m$ | UHF の各サイトの磁化 $\lvert\langle S^z_ianglevert$ |
+| $J$ | 強結合での隣どうしのスピンの結合(超交換) $J=4t^2/U$ ( $t=1$ ) |
+| 結合次元 $\chi$ | MPS の各結合で保持する状態の数。大きいほど表せる量子的な相関が多い |
+| 相関エネルギーの回収率 | UHF のエネルギー $E_{\rm UHF}$ から厳密なエネルギー $E_{\rm 厳密}$ までの差のうち、その prior が取り戻した割合 $(E_{\rm UHF}-E)/(E_{\rm UHF}-E_{\rm 厳密})$ 。100% で厳密、負は UHF より高いエネルギー |
+| 利得 $G$ | 標準の古典シャドウの分散 ÷ CRM の分散( $n_m=100$ )。1.2 節 |
+
 ---
 
 ## 1. 何を確かめたか
@@ -56,13 +68,26 @@ G=\frac{Kx^2+v_s}{K\Delta^2+v_s},\qquad K=3^{\lvert A\rvert}-1,\quad v_s=\frac{3
 
 ### 2.1 スピン射影 HF(PHF)
 
-UHF の行列式 $\lvert\Phi\rangle$ は全スピンの $z$ 成分が 0 である。このような状態を全スピン 0 に射影するには、 $z$ 軸から傾ける角 $\beta$ についての積分だけでよい:
+全スピン 0 への射影演算子は、すべての回転について平均したもの
 
 ```math
-\hat P\lvert\Phi\rangle=\frac12\int_0^\pi\sin\beta\;e^{-i\beta S_y}\lvert\Phi\rangle\,d\beta
+\hat P=\int dR\;R=\frac{1}{8\pi^2}\int_0^{2\pi}\!d\alpha\int_0^\pi\!\sin\beta\,d\beta\int_0^{2\pi}\!d\gamma\;e^{-i\alpha S_z}e^{-i\beta S_y}e^{-i\gamma S_z}
 ```
 
-(一般の射影は3つのオイラー角の積分だが、 $z$ 軸まわりの回転は $S^z=0$ の状態を変えないので、残るのは $\beta$ だけになる。)回転で変わらない観測量 $O$ は $\hat P$ と交換し、 $\hat P^2=\hat P$ なので、期待値は1本の積分の比になる:
+である( $\alpha,\beta,\gamma$ はオイラー角、 $S_y$ 、 $S_z$ は全スピンの成分)。全スピン $S$ の状態に回転の平均を掛けると、 $S=0$ の成分だけが残り、 $S>0$ の成分は打ち消し合って消えるからである。
+
+UHF の行列式 $\lvert\Phi\rangle$ は上向きと下向きの電子数が等しいので、全スピンの $z$ 成分が 0 である( $S_z\lvert\Phi\rangle=0$ )。したがって次の2つが成り立つ。
+
+1. 右端の $e^{-i\gamma S_z}$ は $\lvert\Phi\rangle$ を変えないので、 $\gamma$ の積分は $2\pi$ になるだけである。
+2. 期待値で必要になる $\langle\Phi\rvert O\hat P\lvert\Phi\rangle$ ( $O$ は回転で変わらない観測量)では、 $O$ と $e^{-i\alpha S_z}$ が交換するので、 $e^{-i\alpha S_z}$ を左へ移して $\langle\Phi\rvert e^{-i\alpha S_z}=\langle\Phi\rvert$ とでき、 $\alpha$ の積分も $2\pi$ になるだけである。
+
+残るのは $z$ 軸から傾ける角 $\beta$ の積分だけで、期待値の計算では
+
+```math
+\hat P\lvert\Phi\rangle\;\to\;\frac12\int_0^\pi\sin\beta\;e^{-i\beta S_y}\lvert\Phi\rangle\,d\beta
+```
+
+と置き換えてよい( $\tfrac{1}{8\pi^2}\cdot2\pi\cdot2\pi=\tfrac12$ )。回転で変わらない観測量 $O$ は $\hat P$ と交換し、 $\hat P^2=\hat P$ なので、 $\langle O\rangle_{\rm PHF}=\langle\Phi\rvert\hat PO\hat P\lvert\Phi\rangle/\langle\Phi\rvert\hat P\lvert\Phi\rangle=\langle\Phi\rvert O\hat P\lvert\Phi\rangle/\langle\Phi\rvert\hat P\lvert\Phi\rangle$ となり、期待値は1本の積分の比になる:
 
 ```math
 \langle O\rangle_{\rm PHF}=\frac{\langle\Phi\rvert O\hat P\lvert\Phi\rangle}{\langle\Phi\rvert\hat P\lvert\Phi\rangle}=\frac{\int_0^\pi\sin\beta\,\langle\Phi\rvert O\,e^{-i\beta S_y}\lvert\Phi\rangle\,d\beta}{\int_0^\pi\sin\beta\,\langle\Phi\rvert e^{-i\beta S_y}\lvert\Phi\rangle\,d\beta}
@@ -122,7 +147,7 @@ Hubbard 模型の強結合でのエネルギーは、ほぼすべてが**電子�
 
 ### 3.2 PHF の効果が $1/L$ で消える理由 — 回転子の描像
 
-**描像**: 反強磁性の UHF 解は、副格子 A のスピンがすべて上、B がすべて下を向いた状態に近い。そこで、副格子ごとのスピンの和 $\mathbf S_A=\sum_{i\in A}\mathbf S_i$ 、 $\mathbf S_B=\sum_{j\in B}\mathbf S_j$ を、それぞれ長さ $S=Nm/2$ の**1つの大きなスピン**とみなす( $N$ はサイト数、 $N/2$ は副格子のサイト数、 $m$ は UHF の各サイトの磁化)。UHF は $\mathbf S_A$ が $+z$ 、 $\mathbf S_B$ が $-z$ を向いた積の状態で、
+**描像**: 反強磁性の UHF 解は、副格子 A のスピンがすべて上、B がすべて下を向いた状態に近い。そこで、副格子ごとのスピンの和 $\mathbf S_A=\sum_{i\in A}\mathbf S_i$ 、 $\mathbf S_B=\sum_{j\in B}\mathbf S_j$ を、それぞれ**1つの大きなスピン**とみなす。副格子には $N/2$ 個のサイト( $N$ はサイト数)があり、それぞれ磁化 $m$ を持つので、大きなスピンの長さは $S=(N/2)\times m=Nm/2$ である。UHF は $\mathbf S_A$ が $+z$ 、 $\mathbf S_B$ が $-z$ を向いた積の状態で、
 
 ```math
 \langle\mathbf S_A\cdot\mathbf S_B\rangle_{\rm UHF}\approx-S^2
@@ -134,7 +159,7 @@ Hubbard 模型の強結合でのエネルギーは、ほぼすべてが**電子�
 \langle\mathbf S_A\cdot\mathbf S_B\rangle_{S_{\rm tot}=0}=\frac{S_{\rm tot}(S_{\rm tot}+1)-S_A(S_A+1)-S_B(S_B+1)}{2}=-S(S+1)
 ```
 
-となる。**射影で変わるのは $\langle\mathbf S_A\cdot\mathbf S_B\rangle$ の $-S$ だけ**で、同じ副格子の相関の和 $\langle\mathbf S_A^2\rangle$ は変わらない。 $\mathbf S_A\cdot\mathbf S_B=\sum_{i\in A,\,j\in B}\mathbf S_i\cdot\mathbf S_j$ には $(N/2)^2$ 個の対があり、大きなスピンの中の構造は射影で変わらないので、この変化は全部の対に均等に配られる:
+となる。1行目の等号は $\mathbf S_{\rm tot}^2=(\mathbf S_A+\mathbf S_B)^2=\mathbf S_A^2+\mathbf S_B^2+2\mathbf S_A\cdot\mathbf S_B$ を $\mathbf S_A\cdot\mathbf S_B$ について解いたもので、2つ目は $S_{\rm tot}=0$ 、 $S_A=S_B=S$ を入れたものである。UHF の $-S^2$ と比べると、**射影で変わるのは $\langle\mathbf S_A\cdot\mathbf S_B\rangle$ の $-S(S+1)-(-S^2)=-S$ だけ**で、同じ副格子の相関の和 $\langle\mathbf S_A^2\rangle$ は変わらない。 $\mathbf S_A\cdot\mathbf S_B=\sum_{i\in A,\,j\in B}\mathbf S_i\cdot\mathbf S_j$ には $(N/2)^2$ 個の対があり、大きなスピンの中の構造は射影で変わらないので、この変化は全部の対に均等に配られる。1つの対あたり $-S/(N/2)^2=-(Nm/2)\cdot(4/N^2)=-2m/N$ である:
 
 ```math
 \Delta\langle\mathbf S_i\cdot\mathbf S_j\rangle\approx\frac{-S}{(N/2)^2}=-\frac{2m}{N}\quad(\text{副格子が違う対、距離によらない}),\qquad\Delta\langle\mathbf S_i\cdot\mathbf S_j\rangle\approx0\quad(\text{同じ副格子の対})
@@ -316,7 +341,7 @@ VAP では、射影したエネルギーを軌道(上向きと下向きの電子
 
 1. **数十〜数百量子ビットでは PHF を使う意味はない。** 射影は系全体の回転を1つ回復するだけで、その効果は $1/L$ で消える(3.2)。十数サイト以下では隣接スピン相関の利得が UHF-sym の約2倍になるが、行き過ぎることがある。
 2. **UHF-sym で直せない古典的な相関の不足は、結合ごとの量子的な相関を持つ MPS なら直せる。** 切断 MPS が示すとおり、 $\chi=8$ で表せる状態の中に、ほぼすべての観測量で HF 系と同等以上の prior がある(隣接スピン相関は2倍以上、下回るのは $U=4$ のオンサイト ZZ の 49.5 対 50.3 だけ)。
-3. **ただし実際に作れる変分 MPS は、低い $\chi$ でスピンの向きを選ぶ。** 電荷の量には最良だが、スピンの量では UHF と同じ種類の損をする。対称性を戻せる大きさの $\chi$ ( $U\ge8$ の1次元開放端なら $L=64$ まで $\chi=16$ )を使うか、UHF-sym と同じように変分 MPS をスピンの向きについて平均することが考えられる。後者は、 $Z_{i\uparrow}Z_{j\uparrow}\to\langle c_ic_j\rangle+\tfrac43\langle\mathbf S_i\cdot\mathbf S_j\rangle$ などの置き換えで計算できるはずだが、まだ試していない。
+3. **ただし実際に作れる変分 MPS は、低い $\chi$ でスピンの向きを選ぶ。** 電荷の量には最良だが、スピンの量では UHF と同じ種類の損をする。対策は2つある。対称性を戻せる大きさの $\chi$ ( $U\ge8$ の1次元開放端なら $L=64$ まで $\chi=16$ )を使うか、UHF-sym と同じように変分 MPS をスピンの向きについて平均するかである。後者は、 $Z_{i\uparrow}Z_{j\uparrow}\to\langle c_ic_j\rangle+\tfrac43\langle\mathbf S_i\cdot\mathbf S_j\rangle$ などの置き換えで計算できる。試した結果、 $\chi\ge8$ では中央のサイトとその隣の観測量で、厳密な 80 系のすべてで損がなかった([README_varsym.md](README_varsym.md))。ただし遠い距離のスピン相関では、 $\chi$ が小さいと回転平均でも損が残る([README_varsym_distance.md](README_varsym_distance.md))。
 
 ---
 
