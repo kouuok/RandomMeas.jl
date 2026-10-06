@@ -116,6 +116,7 @@ $U=12$ 、厳密な 80 系のうち 20 系の中央値( $n_m=100$ ):
 | 粒子正孔対称性と $\langle n_i\rangle=1$ | [README_particle_hole.md](README_particle_hole.md) |
 | 読み出し誤差に対する利得 | [README_readout_noise.md](README_readout_noise.md) |
 | 変分 MPS の回転平均 | [README_varsym.md](README_varsym.md) |
+| 回転平均した prior の距離依存 | [README_varsym_distance.md](README_varsym_distance.md) |
 | 修士論文の原稿(執筆中、LaTeX) | [thesis/main.tex](thesis/main.tex)、[thesis/main.pdf](thesis/main.pdf) |
 | 全実験の記録 | [README.md](README.md)、[README_experiments.md](README_experiments.md) |
 

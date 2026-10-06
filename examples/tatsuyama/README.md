@@ -1300,6 +1300,10 @@ UHF をあらゆるスピンの向きに回して平均した混合状態の pri
 
 変分 MPS(結合次元を制限した DMRG)は電荷の量では最良だが、スピンの向きを選んでしまう。UHF-sym と同じ回転平均を掛けると、 $\chi\ge8$ で厳密な 80 系 × 4 観測量のすべてで損がなくなり、隣接 $Z_\uparrow Z_\uparrow$ では UHF-sym の 2〜3 倍( $U=12$ で 19.8〜26.7 対 6.95)得をした。回転平均は $\langle\mathbf S_i\cdot\mathbf S_j\rangle$ を変えないので、変分 MPS の量子的なスピン相関の正確さがそのまま利得に出る。厳密な状態は要らない。
 
+## 回転平均した prior は遠いスピン相関でも効くか → **[README_varsym_distance.md](README_varsym_distance.md)**
+
+スピンの向きを選んだ prior は $\langle\mathbf S_i\rangle\cdot\langle\mathbf S_j\rangle=\pm m^2$ という距離によらない偽の秩序を持ち、 $\mathbf S_i\cdot\mathbf S_j$ は回転で変わらないので回転平均でも残る。そのため UHF-sym は隣では得をするが、 $r\ge4$ の対ではすべて損をする( $U\ge4$ )。偽の秩序を引いた「連結相関の prior」(状態の期待値ではないが、CRM は偏らない)は損をしない代わりに遠い対で得もしない。全距離で得をするのは、切断 MPS や $\chi$ の十分大きい変分 MPS の回転平均のように、対称性を保つ量子的な prior である。
+
 ## 読み出し誤差に対する CRM の利得 → **[README_readout_noise.md](README_readout_noise.md)**
 
 各量子ビットの読み出しが確率 $p$ で反転すると、台 $\lvert A\rvert$ のパウリ文字列の値は $f=(1-2p)^{\lvert A\rvert}$ 倍に縮む。prior を誤差なしの値のまま引くと、外れが $fx-y$ になり、台の大きい観測量では prior が完全でも損に転じる(境目は $p^*\approx0.35/\lvert A\rvert$ 。電荷の偶奇 $P_{16}$ (台 32)で $p=0.01$ なら $G$ は 591 から 1.1)。同じ誤差モデルを prior にも掛ければ損はしないが、測った値が縮むぶん天井が下がる( $P_{16}$ で 32)。ビット反転を直接まねたモンテカルロで式を確かめた。
