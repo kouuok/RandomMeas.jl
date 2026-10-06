@@ -49,7 +49,7 @@
 
 ### 1.1 ランダム測定のプロトコル
 
-(PRX 版の II.A 節)$N$ 量子ビットの状態 $\rho$ に局所ランダムユニタリー $U=\bigotimes_{i=1}^NU_i$ を掛けて計算基底で測る。各 $U_i$ は
+(PRX 版の II.A 節) $N$ 量子ビットの状態 $\rho$ に局所ランダムユニタリー $U=\bigotimes_{i=1}^NU_i$ を掛けて計算基底で測る。各 $U_i$ は
 
 ```math
 U_i\in\Bigl\{\ \mathbb 1_2,\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix},\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&-i\\1&+i\end{pmatrix}\ \Bigr\}
