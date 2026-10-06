@@ -102,7 +102,13 @@ d_i=\frac{n_i^2}{4}-\bigl\lvert\langle\mathbf S_i\rangle\bigr\rvert^2
 が厳密に成り立つ。導出は次のとおりである( $n_\sigma=\langle n_{i\sigma}\rangle$ 、 $\kappa=\langle c^\dagger_{i\uparrow}c_{i\downarrow}\rangle$ と書く)。
 
 1. Wick の定理で $d_i=\langle c^\dagger_{i\uparrow}c_{i\uparrow}c^\dagger_{i\downarrow}c_{i\downarrow}\rangle=n_\uparrow n_\downarrow-\lvert\kappa\rvert^2$ (2つの縮約の取り方のうち、交差する方が負号を持つ)。
-2. スピンの期待値は $\langle S^z_i\rangle=\tfrac12(n_\uparrow-n_\downarrow)$ 、 $\langle S^+_i\rangle=\kappa$ なので、 $\lvert\langle\mathbf S_i\rangle\rvert^2=\tfrac14(n_\uparrow-n_\downarrow)^2+\lvert\kappa\rvert^2$ 。
+2. スピンの期待値は次のとおりである( $S^{\pm}$ はスピンの上げ下げの演算子):
+
+```math
+\langle S^z_i\rangle=\tfrac12(n_\uparrow-n_\downarrow),\qquad\langle S^{+}_{i}\rangle=\kappa,\qquad
+\lvert\langle\mathbf S_i\rangle\rvert^2=\langle S^z_i\rangle^2+\lvert\langle S^{+}_{i}\rangle\rvert^2=\tfrac14(n_\uparrow-n_\downarrow)^2+\lvert\kappa\rvert^2
+```
+
 3. $\tfrac14(n_\uparrow+n_\downarrow)^2-\tfrac14(n_\uparrow-n_\downarrow)^2=n_\uparrow n_\downarrow$ なので、2つを合わせると上の式になる。
 
 数値でも確かめた(二部格子の UHF 76 系で最大差 $2.7\times10^{-9}$ )。**半充填で二重占有を 1/4 より減らすには、サイトのスピンの期待値を 0 でなくするしかない。**
