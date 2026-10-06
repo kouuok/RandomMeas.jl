@@ -789,7 +789,7 @@ G=\frac{(3^{\lvert A\rvert}-1)+w}{(3^{\lvert A\rvert}-1)\,\varepsilon^2+w},
 
 対称性から $\Delta$ が厳密にゼロになる(§2g)ので、 $\varepsilon$ は $10^{-9}$ 以下、 $G$ はすべての prior で $1.00$ である( $\Delta=0$ でも $\langle P\rangle$ が小さいため利得は出ない)。 $S^z$ の UHF だけは $\Delta=0.381$ と大きく破れる。
 
-> $G$ の「—」は、多項観測量の実測利得を持つデータセット([crm_site_resolved_results.tsv](crm_site_resolved_results.tsv))が MPS prior だけを含み、UHF を含まないためである。単一 Pauli 列((a)(b))では利得法則が厳密なので全 prior で $G$ が出る。
+> $G$ の「—」は、多項観測量の実測利得を持つデータセット([crm_site_resolved_results.tsv](crm_site_resolved_results.tsv))が MPS prior だけを含み、UHF を含まないためである。単一 Pauli 列((a)(b))では利得法則が厳密なので全 prior で $G$ が出る。 多項観測量の分散はその後、同時に測れる項どうしの積の期待値と項ごとの外れから厳密に書けるようにした([README_observables.md](README_observables.md) 5.1)ので、参照状態の $\langle P_kP_l\rangle$ を出し直せば UHF の行も埋められる(まだ行っていない)。
 
 #### 忠実度のより根本的な限界: 台あたり1つの数しかない(セットアップ A・B)
 
