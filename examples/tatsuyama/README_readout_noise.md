@@ -11,7 +11,7 @@
 - 各量子ビットの読み出しが確率 $p$ で反転すると、台 $\lvert A\rvert$ のパウリ文字列の値は $f=(1-2p)^{\lvert A\rvert}$ 倍に縮む。
 - **prior を誤差なしの値のまま引くと(以下「そのまま」)、prior の外れが $\Delta'=fx-y$ に変わる。** 台が大きいと $f$ が 1 から大きく離れるので、prior が完全でも利得が消え、損にもなる。
   - 電荷の偶奇 $P_{16}$ (台 32、 $U=12$ 、UHF): $p=0$ で $G=591$ 、 $p=0.002$ で 36、 $p=0.01$ で 1.1、 $p=0.02$ で 0.1(標準の 10 倍悪い)。
-  - 損に転じる誤差率は、prior がほぼ正しい( $y\approx x$ )とき $p^*\approx\ln2/(2\lvert A\rvert)\approx0.35/\lvert A\rvert$ である。
+  - 損に転じる誤差率は、prior がほぼ正しい( $y\approx x$ )とき $p^{\ast}\approx\ln2/(2\lvert A\rvert)\approx0.35/\lvert A\rvert$ である。
 - **同じ誤差モデルを prior にも掛ければ(以下「誤差込み」)損はしない。** ただし、測った値が縮むぶん CRM で消せる揺らぎが減り、消せない揺らぎが増えるので、天井そのものが下がる( $P_{16}$ で $p=0.01$ なら 591 → 32)。
 - 誤差込みの prior には誤差率の見積もり $\hat p$ が要る。台 32 では $\hat p$ が 20% ずれると利得が 3〜4 割落ちる。
 - 台 2 の観測量(オンサイト ZZ、隣接 $Z_\uparrow Z_\uparrow$ )は、 $p=0.01$ 程度ならそのままの prior でも大きくは崩れない。
@@ -200,15 +200,15 @@ G<1\iff\Delta'^2>f^2x^2\iff\lvert fx-y\rvert>\lvert fx\rvert
 G<1\iff f<\frac r2=\frac{y}{2x}
 ```
 
-である。prior がほぼ正しい( $r\approx1$ )とき、境目は $f=1/2$ 、つまり $(1-2p^*)^{\lvert A\rvert}=\tfrac12$ である。両辺の対数を取って $\lvert A\rvert\ln(1-2p^*)=-\ln2$ 、 $p^*$ が小さいので $\ln(1-2p^*)\approx-2p^*$ と近似すると
+である。prior がほぼ正しい( $r\approx1$ )とき、境目は $f=1/2$ 、つまり $(1-2p^{\ast})^{\lvert A\rvert}=\tfrac12$ である。両辺の対数を取って $\lvert A\rvert\ln(1-2p^{\ast})=-\ln2$ 、 $p^{\ast}$ が小さいので $\ln(1-2p^{\ast})\approx-2p^{\ast}$ と近似すると
 
 ```math
-p^*\approx\frac{\ln2}{2\lvert A\rvert}\approx\frac{0.35}{\lvert A\rvert}
+p^{\ast}\approx\frac{\ln2}{2\lvert A\rvert}\approx\frac{0.35}{\lvert A\rvert}
 ```
 
 になる。この境目は $\lvert\Delta'\rvert=\lvert fx\rvert$ そのものなので、 $n_m$ によらない。出力の [2] 節で、 $n_m=100$ での $G=1$ の数値解(格子の刻み $10^{-4}$ )と比べた。
 
-| 観測量 (UHF, $U=12$ ) | $\lvert A\rvert$ | $y/x$ | $p^*$ 数値解 | 式 $(1-2p)^{\lvert A\rvert}=y/(2x)$ の解 |
+| 観測量 (UHF, $U=12$ ) | $\lvert A\rvert$ | $y/x$ | $p^{\ast}$ 数値解 | 式 $(1-2p)^{\lvert A\rvert}=y/(2x)$ の解 |
 |---|---|---|---|---|
 | オンサイト ZZ | 2 | 1.018 | 0.143 | 0.143 |
 | 隣接 $Z_\uparrow Z_\uparrow$ | 2 | 1.848 | 0.0195 | 0.0194 |
@@ -217,7 +217,7 @@ p^*\approx\frac{\ln2}{2\lvert A\rvert}\approx\frac{0.35}{\lvert A\rvert}
 | $P_{16}$ | 32 | 1.014 | 0.0105 | 0.0105 |
 
 - 台 32 では、読み出し誤差 1% で利得がちょうど消える。読み出し誤差が 1% 前後の装置は珍しくないので、この規模の観測量では実際に問題になる。
-- 隣接 $Z_\uparrow Z_\uparrow$ の UHF は、prior がもともと外れている( $y/x=1.85$ 、境目の $f$ は $1.85/2=0.92$ )ので、台 2 でも $p^*=2\%$ と低い。
+- 隣接 $Z_\uparrow Z_\uparrow$ の UHF は、prior がもともと外れている( $y/x=1.85$ 、境目の $f$ は $1.85/2=0.92$ )ので、台 2 でも $p^{\ast}=2\%$ と低い。
 
 ### 3.2 誤差込みの prior: 天井が下がる理由
 
