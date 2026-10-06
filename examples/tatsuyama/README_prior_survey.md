@@ -208,7 +208,7 @@ v_s\equiv\frac{3^{\lvert A\rvert}(1-\langle P\rangle^2)}{n_m}
 G=\frac{(3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s}{(3^{\lvert A\rvert}-1)\Delta^2+v_s}
 ```
 
-が得られる([crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) の `gain(P, Δ, nA)` がこれである)。**これは漸近形でも上界でもなく、任意の $n_u\ge1$ 、 $n_m\ge1$ で成り立つ厳密な恒等式**である(元論文の Eq. 4 は一般の観測量に対する不等式だが、単一パウリ文字列では等号になる)。したがって $n_u$ には決めるべき値が存在しない。
+が得られる([crm_2d_ed_fid_table.jl](crm_2d_ed_fid_table.jl) の `gain(P, Δ, nA)` がこれである)。**これは漸近形でも上界でもなく、任意の $n_u\ge1$ 、 $n_m\ge1$ で成り立つ厳密な恒等式**である。元論文では、この分散そのものが付録の式(25) [PRX: (C7)] に厳密な等式として書かれている。本文の式(4)は、そのショット雑音の項の $1-\langle P\rangle^2$ を $1$ で置き換えた上界である([README_crm_paper.md](README_crm_paper.md) 4章)。したがって $n_u$ には決めるべき値が存在しない。
 
 > **$n_u=1$ でも厳密である。** 「基底が1つも当たらなかったらどうなるのか」と思うかもしれないが、その場合も含めて正しい。 $h_u=0$ という事象は $\hat o_1$ の分布の中に最初から入っており、 $\mathrm{Var}[\hat o_1]$ はそれを込みで計算した値だからである。当たり外れの揺らぎこそが $(3^{\lvert A\rvert}-1)\langle P\rangle^2$ という主要項の正体である。
 
@@ -246,9 +246,9 @@ G=\frac{(3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s}{(3^{\lvert A\rvert}-1)\Del
 
 つまり**「法則を実測で検証 → 検証済みの法則を総当たりに適用」**という構成である。 $n_u$ が約分で消えることも、式の上だけでなく上表の1行目で実測確認されている。**$n_u$ が決めるのは推定値の絶対精度( $\mathrm{Var}\propto1/n_u$ )だけである。** 一方 $n_m$ はショットノイズ床 $v_s$ に入るので $G$ の値そのものを変える — ただし prior の順位は変えないことを結果2で確認しており、**以下の比較の結論は $n_m=100$ という選択に依存しない**。
 
-#### 適用範囲の限界 — 利得が定義できるのは7観測量のうち2つだけ
+#### 適用範囲の限界 — この表で利得を出したのは7観測量のうち2つだけ
 
-等号が成り立つのは単一パウリ文字列に限るので、残りの観測量では $G$ を出していない:
+上の式は単一パウリ文字列のものなので、この総当たりでは残りの観測量の $G$ を出していない:
 
 | 観測量 | 単一パウリ | $G$ | 行数 |
 |---|---|---|---|
@@ -256,9 +256,9 @@ G=\frac{(3^{\lvert A\rvert}-1)\langle P\rangle^2+v_s}{(3^{\lvert A\rvert}-1)\Del
 | ZZ up-up nb | はい | **あり** | 790 |
 | SzSz nb / SxSx nb / 二重占有 / $n$ / $S^z$ | いいえ | NaN | 各790 |
 
-パウリ文字列の和になる観測量では法則が不等式に戻るので、[crm_edfid_merge.py](crm_edfid_merge.py) が意図的に NaN を入れている(理由の詳細は下記「表1」の注を参照。恒等成分が分散に寄与しないため、法則に入れるべきは $\langle O\rangle$ ではなく $\langle O\rangle-c_0$ である)。
+パウリ文字列の和になる観測量では、分散に「同じ設定で同時に当たる2つの項の積の期待値 $\langle P_kP_l\rangle$ 」と「項ごとの外れ」が入り、上の単一パウリの式はそのままでは使えない。そのため [crm_edfid_merge.py](crm_edfid_merge.py) が意図的に NaN を入れている(恒等成分は分散に寄与しないので、外れの比較に使うべきは $\langle O\rangle$ ではなく $\langle O\rangle-c_0$ である。下記「表1」の注)。
 
-**この文書の利得に関する結論は全て ZZ 系2観測量(5530行中1580行)のものである。** 残り5観測量については $\varepsilon=\lvert\Delta\rvert/\lvert\langle O\rangle-c_0\rvert$ までしか出しておらず、そこから先(和の観測量で法則の限界を詰める)は未着手の課題として残っている。
+**この文書の利得に関する結論は全て ZZ 系2観測量(5530行中1580行)のものである。** 残り5観測量については $\varepsilon=\lvert\Delta\rvert/\lvert\langle O\rangle-c_0\rvert$ までしか出していない。和の観測量の厳密な分散の式はその後に実装した([README_observables.md](README_observables.md) 5.1、[crm_exact_gain.jl](crm_exact_gain.jl))が、この総当たりの表への適用はまだである。
 
 #### $\rho$ の厳密性をどう保証したか
 
