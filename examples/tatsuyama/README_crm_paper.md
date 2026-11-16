@@ -1,10 +1,10 @@
 # 元論文の解説 — この研究が使っている部分、広げた部分、食い違って見える部分
 
-[README.md](README.md) に戻る / 論文全体の入門: [crm_shadow_kaisetsu.pdf](crm_shadow_kaisetsu.pdf)(CRMシャドウ入門)
+[README.md](README.md) に戻る / 論文全体の詳しい解説(導出つき): [README_crm_paper_full.md](README_crm_paper_full.md) / 論文全体の入門: [crm_shadow_kaisetsu.pdf](crm_shadow_kaisetsu.pdf)(CRMシャドウ入門)
 
 **元論文**: B. Vermersch, A. Rath, B. Sundar, C. Branciard, J. Preskill, A. Elben, "Enhanced estimation of quantum properties with common randomized measurements", *PRX Quantum* **5**, 010352 (2024). [doi:10.1103/PRXQuantum.5.010352](https://doi.org/10.1103/PRXQuantum.5.010352) / [arXiv:2304.12292](https://arxiv.org/abs/2304.12292)
 
-この文書は論文全体の紹介ではない(それは上の入門にある)。**この研究が論文のどの式・どの主張を使っているか、どこを広げたか、どこが食い違って見えるか**に絞って対応を付ける。
+この文書は論文全体の紹介ではない(それは上の詳しい解説と入門にある)。**この研究が論文のどの式・どの主張を使っているか、どこを広げたか、どこが食い違って見えるか**に絞って対応を付ける。
 
 **式番号は2つの版を併記する。** arXiv 版(v1、2023年4月24日投稿)と PRX Quantum 版(2024年3月28日出版)では、付録の並びと式番号が違い、PRX 版には実験データの応用例が1つ加わっている(0章)。本文では「式(25) [PRX: (C7)]」のように、先に arXiv 版、角括弧の中に PRX 版の番号を書く。本文の式(1)〜(6)は両方の版で同じ番号である。
 

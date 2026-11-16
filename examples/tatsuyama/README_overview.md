@@ -141,6 +141,7 @@ $U=12$ 、厳密な参照状態を持つ 80 系のうち 20 系の中央値( $n_
 | 知りたいこと | 文書 |
 |---|---|
 | 全体の入口 | [SUMMARY.md](SUMMARY.md) |
+| 元論文そのものの詳しい解説(全節・全付録、導出つき) | [README_crm_paper_full.md](README_crm_paper_full.md) |
 | 元論文との対応 | [README_crm_paper.md](README_crm_paper.md) |
 | 利得の式と模擬の一致(128量子ビットまで) | [README_gainlaw.md](README_gainlaw.md) |
 | 厳密な状態を参照にした prior の総当たり、 $U$ 依存の導出 | [README_prior_survey.md](README_prior_survey.md) |

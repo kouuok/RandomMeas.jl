@@ -117,6 +117,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
 | UHF-sym(対称性回復した UHF)の説明 | [README_uhfsym.md](README_uhfsym.md) |
 | スピン射影 HF と低い結合次元の MPS の比較 | [README_phf_mps.md](README_phf_mps.md) |
+| 元論文(Vermersch ら 2024)そのものの詳しい解説(全節・全付録、導出つき) | [README_crm_paper_full.md](README_crm_paper_full.md) |
 | 元論文(Vermersch ら 2024)のうち、この研究に関係する部分の解説 | [README_crm_paper.md](README_crm_paper.md) |
 | 半充填で ⟨n_i⟩ = 1 がサイトごとに厳密な理由(粒子正孔対称性) | [README_particle_hole.md](README_particle_hole.md) |
 | 読み出し誤差に対する利得の崩れ方と、prior 側での補正 | [README_readout_noise.md](README_readout_noise.md) |
