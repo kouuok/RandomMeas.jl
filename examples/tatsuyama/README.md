@@ -1422,6 +1422,20 @@ qsub -v UVAL=8.0 crm_2d_w6.pbs
 | [crm_new_fig_hf_locality_2d.png](crm_new_fig_hf_locality_2d.png) | §2k, §4 | **上の図の2次元版(4×4、32量子ビット、シリンダーとトーラス、いずれも二部格子)。** (a) UHF は大域忠実度 0.10〜0.12 なのに onsite ZZ の利得はシリンダーで 135(= $\chi=64$ 相当、忠実度は9分の1)、**トーラスでは 145 で $\chi=128$($F=0.930$)すら上回り全 prior 中で最良**。 (b) 同じ prior が $S^z$ では 0.05 まで落ちる — 損をするのはすべて対称性を破った方向。 (c) 機構: 周期境界にすると MPS の忠実度は落ちる($\chi=128$ で 0.987→0.930)が、**結合次元を持たない平均場は代金を払わない**(0.102→0.116)。これがトーラスでの逆転の理由 |
 | [crm_new_fig_globalshadow.png](crm_new_fig_globalshadow.png) | §2L | 1つのシャドウを全観測量で共有すると、 $\chi_p=2$ で個々の項は全て得なのに84項の和である全エネルギーは損をする |
 
+## 図: 論文向けの追加図(既存データの再作図)
+
+スクリプト: [crm_paper_figures2.jl](crm_paper_figures2.jl)(新しい計算はしていない。既存の TSV だけを読む)
+
+| 図 | 元の節 | 何を示すか |
+|---|---|---|
+| [crm_new_fig_collapse.png](crm_new_fig_collapse.png) | §0.5b, §3 | **利得法則の普遍曲線。** (a) 生の $G(n_m)$ は prior と観測量ごとにばらばらな20本の曲線。 (b) 横軸を $`x=n_m/n_m^\ast`$ 、縦軸を $`(G-1)/(G_{\max}-1)`$ に取り直すと、**調整パラメータなしで1本の曲線 $`x/(1+x)`$ に乗る**(163点、横軸12.4桁、曲線からのずれは中央値で1.19倍)。別実験である $L=32$ の固定予算配分も同じ線上に乗る |
+| [crm_new_fig_designmap.png](crm_new_fig_designmap.png) | §0.5b | **設計図。** (a) prior の相対誤差 $\lvert\Delta/\langle P\rangle\rvert$ と $n_m$ の平面での $\log_{10}G$ 。破線 $n_m^\ast$ より下では $n_m$ を増やす価値があり、上では頭打ち。縦線 $\lvert\Delta\rvert=\lvert\langle P\rangle\rvert$ の右は $n_m$ によらず損。星印は実際の MPS prior の位置。 (b) 設定の切替コスト $c$(ショット換算)があるときの固定予算分散。最小点は $`n_m=\sqrt{c\,n_m^\ast}`$ (丸印)で、標準シャドウ(破線)との差が利得 |
+| [crm_new_fig_bc_prior.png](crm_new_fig_bc_prior.png) | §2h | **境界条件で prior の序列が変わる**($L=14$、ED参照、全サイト×3シード)。周期境界では同じ $\chi_p$ の利得が下がり(onsite ZZ、 $\chi_p=4$ : 15.8 → 7.5)、 $\chi_p=2$ は SzSz で損に転じる(5.0 → 0.61)。UHF と UHF-sym の優劣も SzSz で入れ替わる(開放端 10.5 対 4.5、周期 2.6 対 7.2) |
+| [crm_new_fig_chistar.png](crm_new_fig_chistar.png) | §2e | **局所性の適用条件。** (a) 相対誤差1%に必要な結合次元 $\chi^\ast$ は、ギャップのある系( $U=4$ 半充填)では $L\ge 32$ で動かず、ドープ系では $L^p$ で伸び続ける。 (b) 伸びの指数 $p$ は、エンタングルメントから独立に読んだ中心電荷 $c$ と相関 0.95。破線はエントロピーだけから期待される $p=c/6$ で、実測はその上にある |
+| [crm_new_fig_derand.png](crm_new_fig_derand.png) | §7 | **貪欲 derandomization との比較(誤差の累積分布)。** (a) 物理的な観測量23個では CRM がランダムシャドウの誤差を中央値で 0.059 → 0.012 に下げ、derandomization(0.008)に迫る。 (b) ランダムな Pauli 列150個では CRM はほぼ効かず(0.058 → 0.057)、derandomization が勝つ(0.044)。CRM が効くのは prior が当てられる観測量に限る |
+| [crm_new_fig_nu.png](crm_new_fig_nu.png) | §0.5b | ** $n_u$ を64倍にしても利得は偏らない**(8シード)。 (a) 各観測量の $G$ を全体平均で割った値。 (b) シード間のばらつきと予測式の比較。8シードで求めた標準偏差には ±27% の不確かさがある |
+| [crm_new_fig_symbreak.png](crm_new_fig_symbreak.png) | §2k | **4×4 トーラスでは $\chi=1024$ の DMRG が SU(2) を自発的に破る。** (a) 厳密解では $\langle S^z_i\rangle=0$ 。 (b) DMRG は市松模様の $\pm 1.9\times10^{-2}$ を持つ。 (c) その結果、最近接スピン相関が等方的でなくなる(DMRG: SzSz $=-0.0999$ 、SxSx $=-0.0987$ 、厳密解はどちらも $-0.0951$ )。参照状態に ED を使う理由 |
+
 ## 付録: GitHub で数式を正しく表示させるための書式規則
 
 この文書群は一度、**インライン数式のほとんどが GitHub 上で数式として認識されていなかった**。原因を `gh api /markdown`(GitHub 実物のレンダラ)に通して実測で特定したので、規則として残しておく。編集時はこれを守ること。検査は下記スクリプトで自動化できる。
