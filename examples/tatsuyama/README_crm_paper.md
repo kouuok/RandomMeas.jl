@@ -8,6 +8,21 @@
 
 **式番号は2つの版を併記する。** arXiv 版(v1、2023年4月24日投稿)と PRX Quantum 版(2024年3月28日出版)では、付録の並びと式番号が違い、PRX 版には実験データの応用例が1つ加わっている(0章)。本文では「式(25) [PRX: (C7)]」のように、先に arXiv 版、角括弧の中に PRX 版の番号を書く。本文の式(1)〜(6)は両方の版で同じ番号である。
 
+**前提知識について。** この文書は、論文の式をこの研究の記号に結びつけることが目的なので、式の導出は短くしか書いていない。途中を省かない導出は [README_crm_paper_full.md](README_crm_paper_full.md) に、量子力学の記法からの説明は [README_basics.md](README_basics.md) の1〜4章にある。この文書に出てくる言葉を先にまとめておく。
+
+| 言葉 | 意味 |
+|---|---|
+| 古典的な影(classical shadow、古典シャドウ) | ランダムな基底で測った1つの設定のデータから作る、状態 $\rho$ の推定値。1個ずつは荒れているが、平均すれば $\rho$ になる |
+| 設定、ショット | 全量子ビット分の基底(ユニタリー)の組が設定。同じ設定での1回の測定がショット |
+| ユニタリー $U$ | 測る前に量子ビットに掛ける回転。これで $X$ 、 $Y$ 、 $Z$ のどの基底で測るかが決まる |
+| 測定チャネルの逆 $\mathcal M^{-1}$ | 測定の記録から状態の推定値を作るための線形の変換。パウリ文字列に対しては $3^{\lvert A\rvert}$ 倍するだけである |
+| prior $\sigma$ | 測りたい状態 $\rho$ の、古典計算で作った近似 |
+| 不偏 | 推定値の平均が、知りたい値に一致すること |
+| 台 $A$ | 観測量が実際に触る量子ビットの集まり。その数が $\lvert A\rvert$ ( 論文では $N_A$ ) |
+| 単一コピーの観測量 | $\mathrm{Tr}(O\rho)$ の形の、普通の期待値 |
+| 多コピー観測量 | 純度 $\mathrm{Tr}(\rho^2)$ のように、 $\rho$ を2回以上掛けた形の量 |
+| 上界、等式 | 「これ以下である」という保証が上界、ちょうどの値を与えるのが等式。上界どうしを比べても、実際の大小はわからないことがある |
+
 ---
 
 ## 0. arXiv 版と PRX Quantum 版の対応
@@ -61,7 +76,9 @@ U_i\in\Bigl\{\ \mathbb 1_2,\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatr
 \hat\rho^{(r)}=\sum_{\mathbf s}\widehat P_\rho(\mathbf s\,|\,U^{(r)})\ \mathcal M^{-1}\bigl(U^{(r)\dagger}\lvert\mathbf s\rangle\langle\mathbf s\rvert U^{(r)}\bigr)\qquad(\text{式(1)})
 ```
 
-で、 $\widehat P_\rho(\mathbf s\,|\,U)$ は $N_M$ 回の測定から数えた出力 $\mathbf s$ の頻度、 $\mathcal M^{-1}$ は測定チャネルの逆である。
+で、 $\widehat P_\rho(\mathbf s|U)$ は $N_M$ 回の測定から数えた出力 $\mathbf s$ の頻度、 $\mathcal M^{-1}$ は測定チャネルの逆である。
+
+式(1)を言葉で読むと、「出たビット列 $\mathbf s$ ごとに、それに対応する状態 $U^\dagger\lvert\mathbf s\rangle\langle\mathbf s\rvert U$ を、出た頻度の重みで足し、最後に $\mathcal M^{-1}$ で補正する」である。補正が要るのは、ランダムな基底で測って記録した状態を平均すると、元の $\rho$ そのものではなく、決まった仕方でぼけたものになるからである。 $\mathcal M^{-1}$ はそのぼけを元に戻す。1量子ビットでの導出は [README_crm_paper_full.md](README_crm_paper_full.md) の 3.2 節にある。
 
 ### 1.2 記号の対応
 
@@ -70,7 +87,7 @@ U_i\in\Bigl\{\ \mathbb 1_2,\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatr
 | $N_U$ | $n_u$ | 測定の設定(ランダムユニタリー)の数 |
 | $N_M$ | $n_m$ | 1つの設定で測るショット数 |
 | $N_A$ | $\lvert A\rvert$ | 観測量の台の量子ビット数 |
-| $O=\gamma=\bigotimes_i\gamma_i$ ( $\gamma_i\in\{\mathbb 1,X,Y,Z\}$ ) | $P$ | パウリ文字列 |
+| $O=\gamma=\bigotimes_i\gamma_i$ ( $\gamma_i\in\lbrace\mathbb 1,X,Y,Z\rbrace$ ) | $P$ | パウリ文字列 |
 | ${\rm Tr}(\rho\gamma)$ | $x=\langle P\rangle_\rho$ | 真の値 |
 | ${\rm Tr}(O\sigma)$ | $y=\langle P\rangle_\sigma$ | prior の値 |
 | ${\rm Tr}(O(\rho-\sigma))$ | $\Delta=x-y$ | prior の外れ |
@@ -90,7 +107,7 @@ U_i\in\Bigl\{\ \mathbb 1_2,\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatr
 ```
 
 - $\hat\rho^{(r)}$ : 実験で得た影(式(1))。
-- $\sigma^{(r)}$ : **同じユニタリー $U^{(r)}$ で prior $\sigma$ を測ったときの影**。ただし $P_\sigma(\mathbf s\,|\,U)$ は頻度ではなく、**古典計算で厳密に求めた出力の確率**である(ハットが付いていない)。
+- $\sigma^{(r)}$ : **同じユニタリー $U^{(r)}$ で prior $\sigma$ を測ったときの影**。ただし $P_\sigma(\mathbf s|U)$ は頻度ではなく、**古典計算で厳密に求めた出力の確率**である(ハットが付いていない)。
 - $\sigma$ : prior そのもの。
 
 **実験と同じくじ(同じユニタリー)を prior にも引かせて、その結果を差し引く**のが「共通の乱数(common random numbers)」という名前の由来である。
@@ -107,7 +124,7 @@ U_i\in\Bigl\{\ \mathbb 1_2,\ \ \tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatr
 
 ### 2.3 この研究の実装との対応 — prior 側は標本にしない
 
-$\sigma^{(r)}$ は厳密な確率 $P_\sigma$ で作る。これを prior のサンプリングで代用すると、prior 側にもショット雑音が乗って分散が増える。この研究の指針「**prior 側は絶対に標本推定しない**」([SUMMARY.md](SUMMARY.md) 実務上の指針3)は、この定義をそのまま守るということである。
+$\sigma^{(r)}$ は厳密な確率 $P_\sigma$ で作る。prior は古典計算機の中にあるので、「この基底で測ったら各結果が確率いくらで出るか」を計算でちょうど求められる。乱数を振って測定を真似る必要はない。これを prior のサンプリング(乱数で測定を真似て頻度を数えること)で代用すると、prior 側にもショット雑音が乗って分散が増える。この研究の指針「**prior 側は絶対に標本推定しない**」([SUMMARY.md](SUMMARY.md) 実務上の指針3)は、この定義をそのまま守るということである。
 
 単一パウリ文字列 $P$ (台 $A$ )では、1つの設定での推定値は次のように書ける。基底が $P$ の各因子と一致したとき( $P$ の台のすべての量子ビットで基底が合ったとき、確率 $3^{-\lvert A\rvert}$ )だけ値を持ち、
 
@@ -116,7 +133,7 @@ $\sigma^{(r)}$ は厳密な確率 $P_\sigma$ で作る。これを prior のサ�
 {\rm Tr}\bigl(P\sigma^{(r)}\bigr)=3^{\lvert A\rvert}\,\mathbb 1_{\rm 一致}\,y
 ```
 
-( $\overline m$ は $N_M$ 回の測定での $\pm1$ の出力の積の平均)。したがって CRM の推定値は
+( $\overline m$ は $N_M$ 回の測定での $\pm1$ の出力の積の平均、 $\mathbb 1_{\rm 一致}$ は基底が台の上で全部一致したとき 1、そうでないとき 0 を取る記号)。 $3^{\lvert A\rvert}$ 倍は、一致する確率が $3^{-\lvert A\rvert}$ しかないことを補うためのものである。prior の側は、ショットの平均 $\overline m$ の代わりに厳密な値 $y$ が入る。したがって CRM の推定値は
 
 ```math
 {\rm Tr}\bigl(P\hat\rho_\sigma^{(r)}\bigr)=3^{\lvert A\rvert}\,\mathbb 1_{\rm 一致}\,(\overline m-y)+y
@@ -128,7 +145,9 @@ $\sigma^{(r)}$ は厳密な確率 $P_\sigma$ で作る。これを prior のサ�
 
 ## 3. 分散の一般形 — 「基底のくじ」と「ショット雑音」
 
-付録の「General variance formula」(arXiv 版の付録 A.1、PRX 版の付録 B)は、1つの設定の分散を2つに分ける:
+推定値がばらつく原因は2つある。1つは「どの設定(基底)を引いたか」、もう1つは「設定を固定した中で、ショットごとに測定値が違うこと」である。2段階のくじの分散は、「1段階目の結果ごとの平均の分散」と「1段階目の結果ごとの分散の平均」の和になる(全分散の法則。[README_basics.md](README_basics.md) の 1.5 節)。
+
+付録の「General variance formula」(arXiv 版の付録 A.1、PRX 版の付録 B)は、この法則に沿って1つの設定の分散を2つに分ける:
 
 ```math
 \mathbb V_1=\mathbb V_U\bigl[f_{\rho,\sigma}(U)\bigr]+\frac{\mathbb E_U\bigl[g_\rho(U)\bigr]}{N_M}\qquad(\text{式(15) [PRX: (B8)]})
@@ -142,6 +161,8 @@ f_{\rho,\sigma}(U)=\sum_{\mathbf s}\bigl(P_\rho(\mathbf s|U)-P_\sigma(\mathbf s|
 g_\rho(U)=\sum_{\mathbf s}P_\rho(\mathbf s|U)\bigl([\mathcal M^{-1}(O^{(1)})](U,\mathbf s)\bigr)^2-\Bigl(\sum_{\mathbf s}P_\rho(\mathbf s|U)[\mathcal M^{-1}(O^{(1)})](U,\mathbf s)\Bigr)^2\qquad(\text{式(17) [PRX: (B10)]})
 ```
 
+記号の意味は次のとおり。 $[\mathcal M^{-1}(O^{(1)})](U,\mathbf s)$ は、設定 $U$ で結果 $\mathbf s$ が出たときに、その1ショットが推定値に寄与する値である。 $f_{\rho,\sigma}(U)$ は、設定 $U$ を固定したときの推定値の平均(定数を除く)。 $g_\rho(U)$ は、設定 $U$ を固定したときの1ショットの値の分散である。 $\mathbb V_U$ と $\mathbb E_U$ は、設定の選び方についての分散と平均を表す。
+
 - **第1項**: どのユニタリー(基底)が当たるかのくじによるゆらぎ。 $f$ は「 $\rho$ と $\sigma$ の出力分布の差」だけで決まるので、**prior が良ければ小さくなる**。
 - **第2項**: 1つの基底の中でのショット雑音。 $g$ は $\rho$ だけで決まり、**prior では減らせない**。
 
@@ -149,7 +170,7 @@ g_\rho(U)=\sum_{\mathbf s}P_\rho(\mathbf s|U)\bigl([\mathcal M^{-1}(O^{(1)})](U,
 
 **単一パウリ文字列での具体的な計算。** パウリ文字列 $P$ (台 $A$ )について、 $[\mathcal M^{-1}(P)](U,\mathbf s)$ は「基底が台の上で全部一致したとき $3^{\lvert A\rvert}\times(\text{台の上の測定値の積})$ 、それ以外は 0」である(2.3 節)。基底が一致したとき、台の上の測定値の積は $\rho$ のもとで平均 $x={\rm Tr}(P\rho)$ 、 $\sigma$ のもとで平均 $y={\rm Tr}(P\sigma)$ の $\pm1$ の確率変数である。したがって
 
-- $f(U)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\,(x-y)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\,\Delta$ 。一致する確率は $3^{-\lvert A\rvert}$ なので、 $\mathbb E_U[f]=\Delta$ 、 $\mathbb E_U[f^2]=3^{-\lvert A\rvert}\cdot3^{2\lvert A\rvert}\Delta^2=3^{\lvert A\rvert}\Delta^2$ 。
+- $f(U)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}(x-y)=3^{\lvert A\rvert}\mathbb 1_{\rm 一致}\Delta$ 。一致する確率は $3^{-\lvert A\rvert}$ なので、 $\mathbb E_U[f]=\Delta$ 、 $\mathbb E_U[f^2]=3^{-\lvert A\rvert}\cdot3^{2\lvert A\rvert}\Delta^2=3^{\lvert A\rvert}\Delta^2$ 。
 - $g(U)$ は1ショットの値の分散で、一致したときは $3^{2\lvert A\rvert}\times(\pm1\text{ の分散})=3^{2\lvert A\rvert}(1-x^2)$ 、一致しないときは 0。
 
 これらから
@@ -190,7 +211,17 @@ G=\frac{\mathbb V_{\rm 標準}}{\mathbb V_{\rm CRM}}=\frac{(3^{\lvert A\rvert}-1
 
 となる。これがこの研究の [SUMMARY.md](SUMMARY.md) 「中心にある式」そのものである。
 
+「 $\sigma$ の項を落とす」とは、prior を使わない( $y=0$ とする)ことで、このとき外れ $\Delta=x-y$ は $x$ そのものになる。分子が標準の方法の分散、分母が CRM の分散である。 $G$ が 10 なら、同じ精度に必要な設定の数が 10 分の1で済む。
+
 ### 5.1 どこまでが論文の結果で、どこからがこの研究の結果か
+
+表に出てくる記号を先に説明する。 $K=3^{\lvert A\rvert}-1$ 、 $\varepsilon=\lvert\Delta\rvert/\lvert x\rvert$ (相対的な外れ)と置く。**天井** $G_{\max}$ は完全な prior( $\Delta=0$ )での利得で、式から $G_{\max}=(Kx^2+v_s)/v_s=1+Kx^2/v_s$ である。一般の利得は、分子と分母を $v_s$ で割ると
+
+```math
+G=\frac{Kx^2/v_s+1}{K\Delta^2/v_s+1}=\frac{G_{\max}}{1+\varepsilon^2(G_{\max}-1)}=\frac{G_{\max}}{1+R},\qquad R=\varepsilon^2(G_{\max}-1)
+```
+
+と書ける( $K\Delta^2/v_s=\varepsilon^2Kx^2/v_s=\varepsilon^2(G_{\max}-1)$ を使った)。 $R$ は「CRM に残ったくじの揺らぎ ÷ ショットの揺らぎ」で、 $R\ll1$ なら天井に届き、 $R\gg1$ なら $G\approx1/\varepsilon^2$ になる。
 
 | 内容 | 出どころ |
 |---|---|
@@ -217,7 +248,7 @@ G=\frac{\mathbb V_{\rm 標準}}{\mathbb V_{\rm CRM}}=\frac{(3^{\lvert A\rvert}-1
 G\le G_{\max}=1+\frac{(3^{\lvert A\rvert}-1)\,x^2}{3^{\lvert A\rvert}(1-x^2)}\,n_m
 ```
 
-で、**天井は $n_m$ にほぼ比例する**。論文の例も $N_M=150$ (実験データ、PRX 版のみ)、 $N_M=1000$ (エントロピー)、 $N_M=10^5$ (忠実度)と、1設定あたりのショットを多く取っている。
+で、**天井は $n_m$ にほぼ比例する**。同じ設定で測る回数を増やすほどショット雑音は小さくなり、標準の方法ではくじの揺らぎだけが残る。CRM はそのくじの揺らぎを消すので、 $n_m$ が大きいほど差が開く。論文の例も $N_M=150$ (実験データ、PRX 版のみ)、 $N_M=1000$ (エントロピー)、 $N_M=10^5$ (忠実度)と、1設定あたりのショットを多く取っている。
 
 この研究の見出しの利得は $n_m=100$ での値で、 $n_m$ を変えると次のようになる( $U=12$ ):
 
@@ -226,11 +257,23 @@ G\le G_{\max}=1+\frac{(3^{\lvert A\rvert}-1)\,x^2}{3^{\lvert A\rvert}(1-x^2)}\,n
 | オンサイト ZZ(UHF prior、1次元 $L=12$ 周期境界) | **6.5** | 55 | 464 | 1879 |
 | ブロックの電荷の偶奇 $P_{16}$ (台32、UHF prior、1次元 $L=64$ ) | **7.7** | 67 | 591 | 2862 |
 
+$n_m=1$ の列の値は、上の $G_{\max}$ の式に $n_m=1$ を入れると出る。通分すると
+
+```math
+G_{\max}\Big\vert_{n_m=1}=\frac{3^{\lvert A\rvert}(1-x^2)+(3^{\lvert A\rvert}-1)x^2}{3^{\lvert A\rvert}(1-x^2)}=\frac{1-x^2/3^{\lvert A\rvert}}{1-x^2}
+```
+
+で、台が大きいと分子はほぼ 1 になる。オンサイト ZZ( $\lvert A\rvert=2$ 、 $x\approx-0.93$ )なら $(1-0.096)/0.135\approx6.7$ である。
+
 **1基底1ショットの通常の classical shadow では、どれほど良い prior でも利得は約 $1/(1-x^2)$ (台が大きい極限)で頭打ちになる。** したがって $G=464$ は「測定の設定(回路)の数を約 464 分の1にできる」という意味で、「総ショット数を 464 分の1にできる」という意味ではない。これは論文自身の位置づけ(4章の2つめの点)と同じであり、この研究の見出しの数値にも併記すべきである。基底の切り替えにかかるコストを入れた最適な $n_m$ は [SUMMARY.md](SUMMARY.md) 実務上の指針4にある。
 
 ---
 
 ## 7. 多コピー観測量と忠実度 — 論文が忠実度を使う文脈
+
+この章は、「論文は prior の良さを忠実度で測っているのに、この研究は忠実度では決まらないと言っている。矛盾ではないか」という疑問に答える。答えは「扱っている観測量の種類が違う」である。
+
+言葉を補う。**忠実度** $F$ は2つの状態が全体としてどれだけ重なっているかを表す数(一致すれば 1)。**Hilbert–Schmidt 距離** $\lVert\rho-\sigma\rVert_2=\sqrt{\mathrm{Tr}[(\rho-\sigma)^2]}$ は、2つの行列の成分ごとの差の2乗を全部足して平方根を取ったもので、行列としてどれだけ違うかを表す。**U 統計量**は、互いに異なるデータどうしを掛け合わせて平均する推定量で、同じデータを2回使うことによる偏りを避けるためのものである。
 
 ### 7.1 多コピー観測量の推定と上界
 
@@ -264,11 +307,15 @@ $\rho$ も $\sigma=\lvert\phi\rangle\langle\phi\rvert$ も純粋なら、 ${\rm 
 
 - 論文が忠実度を使うのは、**大域的な(または多コピーの)観測量と、純粋な prior** の文脈である。そこでは忠実度が式(6)の Hilbert–Schmidt 距離を正しく押さえる。
 - この研究が扱うのは**単一コピーの局所観測量**で、効くのは式(25) [PRX: (C7)] の $\Delta$ だけである。
-- さらに、prior を観測量の台に縮約すると一般に**混合状態**になり、純粋な prior で成り立っていた「忠実度が距離を押さえる」関係が崩れる([README_2m.md](README_2m.md) 準備4b〜4d)。
+- さらに、prior を観測量の台に縮約すると一般に**混合状態**になり、純粋な prior で成り立っていた「忠実度が距離を押さえる」関係が崩れる([README_2m.md](README_2m.md) 準備4b〜4d)。縮約とは、台の外の量子ビットを見なかったことにすることである。全体が純粋状態でも、台とその外が量子的に絡み合っていれば、台だけを見た状態は混合状態になる。
+
+身近な言い方をすると、忠実度は「答案全体が模範解答と一字一句同じか」を問う物差しで、 $\Delta$ は「問3の答えが合っているか」を問う物差しである。問3の点数だけが知りたいなら、ほかの問いがどれだけ違っていても関係がない。
 
 ---
 
 ## 8. 論文の応用例と、この研究との対応
+
+応用例に出てくる言葉(イオントラップ、クエンチ、部分転置、臨界イジング鎖、ランダム量子回路、脱分極雑音など)の説明は、[README_crm_paper_full.md](README_crm_paper_full.md) の7〜9章の各節の冒頭にある。
 
 ### 8.0 実験データによるエンタングルメントの検出(PRX 版の III.A 節のみ。arXiv 版にはない)
 
@@ -338,7 +385,7 @@ prior $\sigma$ を古典計算で作る代わりに、**$\rho$ に近い状態�
 
 | 論文の展望 | この研究の方針 |
 |---|---|
-| 重点サンプリング・適応的な手法 | prior の情報で基底の選び方を偏らせる方法(locally biased classical shadows)と CRM の組み合わせ。特に、1基底1ショットでの天井 $1/(1-x^2)$ を超えられるか |
+| 重点サンプリング・適応的な手法(基底を一様にではなく、情報の多そうな基底を高い確率で選ぶ方法) | prior の情報で基底の選び方を偏らせる方法(locally biased classical shadows)と CRM の組み合わせ。特に、1基底1ショットでの天井 $1/(1-x^2)$ を超えられるか |
 | 物質の相の探査 | Hubbard 模型のドープ系(ストライプ)で、平均場が壊れる領域での prior の選び方 |
 | prior を反復で良くする(忠実度の例) | データの半分で prior を合わせ込み、残りで推定する(偏りを生まない分割) |
 | (論文にない) | 読み出し誤差・状態の用意の誤差を prior 側に取り込む |
