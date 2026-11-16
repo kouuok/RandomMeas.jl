@@ -54,6 +54,8 @@ G=\frac{(3^{\lvert A\rvert}-1)x^2+v_s}{(3^{\lvert A\rvert}-1)\Delta^2+v_s},\qqua
 | 変分 MPS | 結合次元を $\chi$ に制限した DMRG の基底状態 | 要らない |
 | 変分 MPS-sym | 変分 MPS をスピンの向きについて平均した混合状態 | 要らない |
 
+prior どうしの比較(どの prior がどの観測量で効くか、図と選び方の手順つき)は [README_prior_comparison.md](README_prior_comparison.md) にまとめた。
+
 ---
 
 ## 2. 主な発見
@@ -141,6 +143,7 @@ $U=12$ 、厳密な参照状態を持つ 80 系のうち 20 系の中央値( $n_
 | 知りたいこと | 文書 |
 |---|---|
 | 全体の入口 | [SUMMARY.md](SUMMARY.md) |
+| prior どうしの比較を1か所にまとめたもの(どの prior をどの観測量に使うか) | [README_prior_comparison.md](README_prior_comparison.md) |
 | 元論文そのものの詳しい解説(全節・全付録、導出つき) | [README_crm_paper_full.md](README_crm_paper_full.md) |
 | 元論文との対応 | [README_crm_paper.md](README_crm_paper.md) |
 | 利得の式と模擬の一致(128量子ビットまで) | [README_gainlaw.md](README_gainlaw.md) |

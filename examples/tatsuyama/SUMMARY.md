@@ -115,6 +115,7 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 | 手法の入門(物理の予備知識が薄い場合) | [paper/crm_tutorial.pdf](paper/crm_tutorial.pdf) |
 | 論文本体 | [paper/crm_hubbard.pdf](paper/crm_hubbard.pdf) |
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
+| prior どうしの比較のまとめ(どの prior をどの観測量に使うか、図と選び方の手順つき) | [README_prior_comparison.md](README_prior_comparison.md) |
 | UHF-sym(対称性回復した UHF)の説明 | [README_uhfsym.md](README_uhfsym.md) |
 | スピン射影 HF と低い結合次元の MPS の比較 | [README_phf_mps.md](README_phf_mps.md) |
 | 元論文(Vermersch ら 2024)そのものの詳しい解説(全節・全付録、導出つき) | [README_crm_paper_full.md](README_crm_paper_full.md) |
