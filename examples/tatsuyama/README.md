@@ -2,6 +2,8 @@
 
 > **これまでの研究のまとめ(久しぶりに読み返すとき用)**: [README_overview.md](README_overview.md)
 >
+> **どこに何が書いてあるか(文書の索引)**: [README_index.md](README_index.md)
+>
 > **前提知識の準備と用語集(初めて読むとき用)**: [README_basics.md](README_basics.md) — 線形代数と確率だけを仮定して、量子ビットの測定、古典シャドウ、CRM、Hubbard 模型、平均場と MPS を順に説明してある。
 
 ## 読む順番の目安

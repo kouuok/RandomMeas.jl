@@ -1,6 +1,6 @@
 # 前提知識の準備 — 線形代数と確率から、この研究の文書を読めるところまで
 
-[README.md](README.md) に戻る / 研究全体の見取り図: [README_overview.md](README_overview.md)
+[README.md](README.md) に戻る / 研究全体の見取り図: [README_overview.md](README_overview.md) / 文書の索引: [README_index.md](README_index.md)
 
 この研究の文書は、量子情報(測定と推定)、物性物理(Hubbard 模型)、数値計算(平均場と MPS)の3つの分野の言葉を混ぜて使っている。この文書は、その3つを**どれも知らない状態から**、ほかの文書を読めるところまで運ぶための準備である。新しい結果は含まない。
 

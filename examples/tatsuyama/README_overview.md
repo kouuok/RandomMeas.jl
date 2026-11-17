@@ -217,6 +217,7 @@ $U=12$ 、厳密な参照状態を持つ 80 系のうち 20 系の中央値( $n_
 
 | 知りたいこと | 文書 |
 |---|---|
+| どの文書に何が書いてあるか(索引、節番号の対応表) | [README_index.md](README_index.md) |
 | 前提知識の準備(量子ビットの測定、Hubbard 模型、平均場、MPS)と用語集 | [README_basics.md](README_basics.md) |
 | 全体の入口 | [SUMMARY.md](SUMMARY.md) |
 | prior どうしの比較を1か所にまとめたもの(どの prior をどの観測量に使うか) | [README_prior_comparison.md](README_prior_comparison.md) |

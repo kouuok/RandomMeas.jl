@@ -202,6 +202,8 @@ $P$ は局所Pauli列、 $A$ はその台、 $\rho$ は実験状態、 $\sigma$ 
 
 | 読みたいもの | 行き先 |
 |---|---|
+| どの文書に何が書いてあるか(索引、節番号の対応表) | [README_index.md](README_index.md) |
+| 前提知識の準備と用語集 | [README_basics.md](README_basics.md) |
 | 手法の入門(物理の予備知識が薄い場合) | [paper/crm_tutorial.pdf](paper/crm_tutorial.pdf) |
 | 論文本体 | [paper/crm_hubbard.pdf](paper/crm_hubbard.pdf) |
 | 観測量ごとの解説 | [paper/crm_observables.pdf](paper/crm_observables.pdf) |
