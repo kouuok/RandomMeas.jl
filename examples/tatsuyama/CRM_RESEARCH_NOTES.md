@@ -5,16 +5,18 @@
 ---
 
 > 1ページの要約は [SUMMARY.md](SUMMARY.md)。この文書は論文化のための詳細ノートである。
+>
+> **読む前に。** この文書は、論文を書くための材料(主張、式、検証の一覧、査読で問われそうな点)を集めたノートで、専門用語を説明なしに使っている。言葉や記号の意味は [README_basics.md](README_basics.md)(線形代数と確率だけを仮定した準備の文書。巻末に用語集がある)で引ける。式の導出を順に追いたい場合は、同じ文書の3〜4章か、[README_crm_paper_full.md](README_crm_paper_full.md) の5章を読むとよい。研究の全体像は [README_overview.md](README_overview.md) にある。
 
 ## 0. 要旨 — 論文の主張の骨子 (main claims)
 
 1. **利得法則**: 局所Pauli観測量 $P$($|A|$量子ビットに台を持つ)に対する CRM (common randomized measurements) の分散削減率は閉形式
 
-   ```math
-   G \;=\; \frac{(3^{|A|}-1)\,\langle P\rangle^2 \;+\; v_s}{(3^{|A|}-1)\,\Delta^2 \;+\; v_s}, \qquad
-   \Delta \equiv \langle P\rangle_\rho - \langle P\rangle_\sigma, \quad
-   v_s = \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}
-   ```
+```math
+G \;=\; \frac{(3^{|A|}-1)\,\langle P\rangle^2 \;+\; v_s}{(3^{|A|}-1)\,\Delta^2 \;+\; v_s}, \qquad
+\Delta \equiv \langle P\rangle_\rho - \langle P\rangle_\sigma, \quad
+v_s = \frac{3^{|A|}(1-\langle P\rangle^2)}{n_m}
+```
 
    **記号の定義**
 
