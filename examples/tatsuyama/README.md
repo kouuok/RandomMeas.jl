@@ -1,6 +1,23 @@
 # CRMシャドウによるハバード模型の測定効率化
 
 > **これまでの研究のまとめ(久しぶりに読み返すとき用)**: [README_overview.md](README_overview.md)
+>
+> **前提知識の準備と用語集(初めて読むとき用)**: [README_basics.md](README_basics.md) — 線形代数と確率だけを仮定して、量子ビットの測定、古典シャドウ、CRM、Hubbard 模型、平均場と MPS を順に説明してある。
+
+## 読む順番の目安
+
+この研究の文書は数が多い。目的に合わせて、次の順に読むとよい。
+
+| 目的 | 読む文書 |
+|---|---|
+| 言葉や記号の意味から知りたい | [README_basics.md](README_basics.md) |
+| 研究の全体像を 10 分で知りたい | [README_overview.md](README_overview.md) |
+| 結論と、その留保を一覧で見たい | [SUMMARY.md](SUMMARY.md) |
+| どの prior を使えばよいか知りたい | [README_prior_comparison.md](README_prior_comparison.md) |
+| 元になった論文の内容を知りたい | [README_crm_paper_full.md](README_crm_paper_full.md) |
+| 個々の実験の設定と数値を確かめたい | この文書の0章(記号と観測量の辞書)と、各節 |
+
+この文書(README.md)は、全実験の詳細な記録である。0章が記号と測定の手順の辞書で、1章以降が個々の実験である。各実験の節の冒頭に「この節を一言でいうと」を置いた。通読する必要はなく、0章を辞書として引きながら、必要な節だけ読めばよい。
 
 古典シャドウ(ランダム測定)に「古典計算で作った近似状態 (prior)」を組み合わせて測定コストを削減する **CRM (common randomized measurements)** [[Vermersch et al., PRX Quantum 5, 010352 (2024)](https://doi.org/10.1103/PRXQuantum.5.010352)] を、ハバード模型に系統的に適用した研究の作業ディレクトリです。
 
@@ -13,6 +30,8 @@
 > **短い要約が欲しい場合は [SUMMARY.md](SUMMARY.md) を先に読むこと。** 主要な結論・実験一覧・撤回した主張・限界を1ページにまとめてある。この README は全実験の詳細な記録である。
 
 ## 0. 全実験に共通するセットアップ
+
+> **この節を一言でいうと。** 以降のすべての節で使う記号、格子、観測量、測定の手順をまとめた辞書である。ここで説明する言葉より手前(量子ビット、パウリ演算子、期待値と分散、Hubbard 模型とは何か)から知りたい場合は、[README_basics.md](README_basics.md) を先に読むとよい。
 
 この節は**以降のすべての節を読むための辞書**である。各実験の「セットアップ」「結果」の表に出てくる記号($L$, $W$, $U$, $\chi$, $n_u$, $n_m$, $G$, $\Delta$, $F$, $|A|$)の意味と、実験がどう組み立てられているかをここで一度だけ説明する。
 
@@ -486,6 +505,8 @@ G = \frac{(3^{|A|}-1)\langle P\rangle^2 + v_s}{(3^{|A|}-1)\Delta^2 + v_s}, \qqua
 
 ## 1. 推定器の修正と利得法則の検証(8量子ビットED系)
 
+> **この節を一言でいうと。** すべてを近似なしで検算できる最小の系(4 サイト、8 量子ビット)で、CRM の計算手順が正しく組めていることと、利得の式が測定の模擬と一致することを確かめた。以前の実装が標準の方法に負けていた原因(prior の側まで乱数で標本を取っていたこと)を直したのもこの節である。**答え**: 式と模擬は、大きく損をする場合から大きく得をする場合まで一致した。
+
 スクリプト: [crm_gain_verification.jl](crm_gain_verification.jl) / 図: [crm_gain_verification.png](crm_gain_verification.png)(一様 $t=1$、本編)、[crm_gain_verification_weak.png](crm_gain_verification_weak.png)(1本弱化、補足) / データ: [crm_gain_verification_results.tsv](crm_gain_verification_results.tsv) / 縮退の確認: [crm_plaquette_degeneracy.jl](crm_plaquette_degeneracy.jl)
 
 ### セットアップ
@@ -639,6 +660,8 @@ $$\mathrm{Var}[\text{CRM}] = \frac{1}{n_u}\Bigl[(3^{|A|}-1)\Delta^2 + \frac{3^{|
 利得法則の検証という本節の目的に対しては、**どちらの配置でも $G$ の実測値は理論値と一致する**(一様: 18点で $1.8\times10^{-3}$– $1.3\times10^3$、弱化版: 18点で $1.7\times10^{-3}$– $9.5\times10^2$)。法則は固定された $\rho,\sigma$ についての恒等式なので、これは当然の結果ではあるが、**ハミルトニアンを変えても成り立つことの直接確認**にはなっている。
 
 ## 2. 局所性: グローバル忠実度が崩壊しても利得は生き残る(1D鎖 L=8–32)
+
+> **この節を一言でいうと。** 系を大きくすると、prior が状態全体としてどれだけ正確か(忠実度)は急速に 0 に近づく。それでも CRM は役に立つのかを、鎖の長さを変えて調べた。**答え**: 役に立つ。利得を決めるのは、測りたい量の値を prior がどれだけ外しているかで、これは観測量の近くの状態だけで決まり、系の大きさにほとんどよらない。
 
 スクリプト: [crm_mps_scaling.jl](crm_mps_scaling.jl) / 図: [crm_mps_scaling.png](crm_mps_scaling.png), 清書 [crm_fig2_locality.png](crm_fig2_locality.png)
 
@@ -992,6 +1015,8 @@ $L=14$、 $\chi_p=8$ で **OBC 0.964 対 PBC 0.659** である。それでも利
 
 ## 2i. 横スピン相関 — Z型だけ測っていては見えない prior の欠陥
 
+> **この節を一言でいうと。** それまで測っていたスピンの量は、UHF が選んだ向き( $z$ )に沿った成分だけだった。本当の状態では、どの向きの成分も等しい。そこで $z$ に垂直な成分(横スピン相関)を測った。**答え**: UHF は縦と横で値が 7 倍も違い(本当は 1 倍)、スピン回転の対称性を破っていることがはっきり見えた。
+
 スクリプト: [crm_transverse.jl](crm_transverse.jl), 一般Wick [crm_wick_pauli.jl](crm_wick_pauli.jl) / データ: [crm_transverse_results.tsv](crm_transverse_results.tsv)
 
 **なぜこれを測る必要があったか。** §2 から §2h まで、測ってきた観測量は**密度・縦スピン(Z型)と運動項1種だけ**だった。ここに構造的な盲点がある。半充填ハバード鎖の基底状態は SU(2) 一重項なので
@@ -1041,6 +1066,8 @@ $\lvert A\rvert=4$ なので基底一致率は $3^{-4}=1/81$ 。§0.5b の指針
 ---
 
 ## 2j. prior の対称性を設計軸にする — 並進対称性の回復
+
+> **この節を一言でいうと。** prior が、本当の状態にある対称性を破っているとき、その対称性の操作すべてについて prior を平均すれば、破れを消せる。これは古典計算の中だけの操作で、測定は増えない。スピン回転に加えて、格子をずらす操作(並進)についても試した。**答え**: 平均は効く。並進の平均では、最も成績の悪いサイトの損が消え、粗い MPS が完全な prior に並ぶ場合がある。
 
 スクリプト: [crm_symmetry_prior.jl](crm_symmetry_prior.jl) / データ: [crm_symmetry_prior_results.tsv](crm_symmetry_prior_results.tsv)
 
@@ -1114,6 +1141,8 @@ $\rho$ が対称群 $S$ を持ち、prior $\sigma$ がそれを破っている�
 ---
 
 ## 2k. 2Dの境界条件 — 幾何を周期にすると平均場 prior が MPS prior を逆転する
+
+> **この節を一言でいうと。** 2次元の格子で、端をつないで環にする(周期境界にする)と、MPS にとっては遠く離れた量子ビットどうしがつながることになり、同じ結合次元で表せる精度が落ちる。平均場にはこの問題がない。境界条件を変えたとき、平均場の prior と MPS の prior の優劣がどう変わるかを、近似なしで解ける 12 サイトの系で調べた。
 
 スクリプト: [crm_2d_torus_ed.jl](crm_2d_torus_ed.jl) / [.pbs](crm_2d_torus_ed.pbs), [ラダー版 .pbs](crm_2d_ladder_ed.pbs) / データ: [4×3](crm_2d_torus_ed_U8p0.tsv), [2×6](crm_2d_ladder_U8p0.tsv)
 
@@ -1221,6 +1250,8 @@ $\langle P\rangle$ はほとんど動いていない(−0.582 → −0.590 な�
 ---
 
 ## 2L. 1つのシャドウを全観測量で共有する(本来のプロトコル)
+
+> **この節を一言でいうと。** それまでの模擬は、観測量ごとに別々の乱数で測定を作っていた。本来の古典シャドウは、1回分の測定データを、すべての観測量に使い回す。そのやり方をそのまま模擬した。**答え**: 個々の観測量の利得は、それまでの結果と同じである。しかし、多数の項の和(全エネルギーなど)の利得は、個々の項の利得からは決まらない。粗い prior では、項がどれも得をしているのに、和は損をすることがある。
 
 スクリプト: [crm_global_shadow.jl](crm_global_shadow.jl) / [.pbs](crm_global_shadow.pbs) / データ: [crm_global_shadow_results.tsv](crm_global_shadow_results.tsv)
 
