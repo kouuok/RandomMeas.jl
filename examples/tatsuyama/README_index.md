@@ -122,7 +122,7 @@ flowchart TD
 「説明の丁寧さ」の列の意味は次のとおりである。
 
 - **丁寧**: 冒頭に読み方の案内と用語表があり、本文でも用語をその場で説明し、式の途中を省いていない。
-- **案内つき**: 冒頭に読み方の案内と用語表がある。本文は専門用語をそのまま使う部分がある。
+- **丁寧(記録)**: 冒頭に読み方の案内と用語表、各節の頭に一言の要約があり、本文でも用語と表の読み方を説明している。実験の記録なので、検証の細部や途中の誤りの経緯も残してある。
 - **専門的**: 研究を進める側の覚え書きで、説明なしに専門用語を使う。
 
 ### A. 入口
@@ -169,16 +169,16 @@ flowchart TD
 
 | 文書 | 内容 | 説明の丁寧さ |
 |---|---|---|
-| [README_prior_survey.md](README_prior_survey.md) | 厳密な基底状態を持つ系での prior の総当たり(§10)。忠実度と利得の関係、 $U$ 依存の導出、 $n_u$ と $n_m$ | 案内つき |
-| [README_2m.md](README_2m.md) | 利得は「台の上の状態の近さ」で決まるか(§2m)。結論が一度ひっくり返った経緯を含む | 案内つき |
-| [README_distance_vs_fidelity.md](README_distance_vs_fidelity.md) | なぜ忠実度ではなくトレース距離か(§2m の理論の部分) | 案内つき(内容は最も数学的) |
+| [README_prior_survey.md](README_prior_survey.md) | 厳密な基底状態を持つ系での prior の総当たり(§10)。忠実度と利得の関係、 $U$ 依存の導出、 $n_u$ と $n_m$ | 丁寧(記録) |
+| [README_2m.md](README_2m.md) | 利得は「台の上の状態の近さ」で決まるか(§2m)。結論が一度ひっくり返った経緯を含む | 丁寧(記録) |
+| [README_distance_vs_fidelity.md](README_distance_vs_fidelity.md) | なぜ忠実度ではなくトレース距離か(§2m の理論の部分) | 丁寧(内容は最も数学的) |
 
 ### F. 実験の記録
 
 | 文書 | 内容 | 説明の丁寧さ |
 |---|---|---|
-| [README.md](README.md) | 0章(記号と測定の辞書)、§1、§2、§2f〜§2L の記録。ファイル一覧、再現方法、図の一覧 | 案内つき |
-| [README_experiments.md](README_experiments.md) | §2b〜§9 の記録(サイトごとの利得、最適係数、2次元、matchgate、ドープ系など) | 案内つき |
+| [README.md](README.md) | 0章(記号と測定の辞書)、§1、§2、§2f〜§2L の記録。ファイル一覧、再現方法、図の一覧 | 丁寧(記録) |
+| [README_experiments.md](README_experiments.md) | §2b〜§9 の記録(サイトごとの利得、最適係数、2次元、matchgate、ドープ系など) | 丁寧(記録) |
 | [crm_edfid_atlas.html](crm_edfid_atlas.html) | §10 の全データを絞り込んで見るためのページ | — |
 
 ### G. 論文と発表のための資料
@@ -190,6 +190,8 @@ flowchart TD
 | [CRM_RESEARCH_NOTES.md](CRM_RESEARCH_NOTES.md) | 論文を書くための材料(主張、式、検証の一覧、査読で問われそうな点) | 専門的。扱う範囲は2026年7月までの結果(数値は10〜11月に厳密な値へ直してある)。9月以降の結果(射影、変分 MPS、読み出し誤差など)は入っていない |
 | [ROADMAP.md](ROADMAP.md) | 確立した主張と未解決問題の覚え書き | 専門的。扱う範囲は2026年7月までの結果で、9月以降の結果は入っていない。新しい状況は [README_overview.md](README_overview.md) を見る |
 | [paper/README.md](paper/README.md) | paper フォルダの原稿の説明と、作り方 | — |
+
+G の文書は、本文を書き直していない。ROADMAP と CRM_RESEARCH_NOTES は2026年7月時点の覚え書きで、その後の結果と見方は A〜F の文書(特に [README_overview.md](README_overview.md) と [SUMMARY.md](SUMMARY.md))に置き換わっている。読み物として丁寧に書き直すより、新しい文書を読む方が早いからである。論文と修士論文の原稿は、書式も目的も別なので対象にしていない。
 
 ### H. 周辺の資料
 
