@@ -34,8 +34,10 @@ def fix_line(line, st):
         new = re.sub(r'\\([{}|])', lambda k: ESC[k.group(1)], body)
         if not body.startswith('$$'):
             new = new.replace('*', r'\ast ')         # 生の * は強調に食われる(空白で次の文字とつながらないようにする)
-            new = re.sub(r'\\[,;:!]', r'\\thinspace ', new)  # \, などは Markdown にバックスラッシュを剥がされるので、剥がされない \thinspace に置き換える。
-            # 以前はここで空文字に置き換えていたが、それだと \gamma\,U が未定義の \gammaU になって表示が壊れた
+        # 1行の $$…$$ も中身が Markdown として処理されるので、以下は両方に当てる
+        new = re.sub(r'\\[,;:!]', r'\\thinspace ', new)  # \, などは Markdown にバックスラッシュを剥がされるので、剥がされない \thinspace に置き換える。
+        # 以前はここで空文字に置き換えていたが、それだと \gamma\,U が未定義の \gammaU になって表示が壊れた
+        new = re.sub(r'(?<!\\)\\%', r'\\\\%', new)   # \% は % になり TeX の注釈記号として式の残りを消すので \\% にする
         if not body.startswith('$$'):
             new = re.sub(r'\s+\$$', '$', new)           # 閉じ $ の直前に空白を残さない
         if new != body: st['esc'] += 1
@@ -115,6 +117,34 @@ def unknown_commands(text):
                 bad.append((c, m.group(0)[:100]))
     return bad
 
+def compare_inline(text, html_out):
+    r"""文中の数式(1行の $$…$$ を含む)を1つずつ、GitHub が数式描画に渡す文字列と突き合わせる。
+    \, が , に、\% が % になるなど、Markdown が式を書き換えた箇所を見つける。
+    < と > が実体参照になる違いは描画に影響しないので無視する。
+    規則の説明のために $…$ をわざと文字として書いた箇所(… を含むもの)は除く。"""
+    import difflib, html as H
+    lines = text.split('\n'); inc = code_lines(text); src = []
+    for i, ln in enumerate(lines):
+        if inc[i]: continue
+        prot = inline_code(ln)
+        for mm in re.finditer(r'\$\$.+?\$\$|\$`.+?`\$|\$[^$\n]+?\$', ln):
+            if any(a <= mm.start() < b for a, b in prot): continue
+            s = mm.group(0).replace('$`', '$').replace('`$', '$')
+            s = s.replace('\\\\%', '\\%')   # \\% が \% になるのは意図どおり
+            if '…' in s: continue
+            src.append((i + 1, s))
+    got = [H.unescape(H.unescape(x)) for x in
+           re.findall(r'<math-renderer[^>]*js-inline-math[^>]*>(.*?)</math-renderer>', html_out, flags=re.S)]
+    sm = difflib.SequenceMatcher(a=[s for _, s in src], b=got, autojunk=False)
+    out = []
+    for op, a1, a2, b1, b2 in sm.get_opcodes():
+        if op == 'equal': continue
+        for k in range(max(a2 - a1, b2 - b1)):
+            ln, s = src[a1 + k] if a1 + k < a2 else (None, '(なし)')
+            g = got[b1 + k] if b1 + k < b2 else None
+            out.append((ln, s, g))
+    return out
+
 def do_verify(path):
     text = open(path, encoding='utf-8').read()
     html = ''.join(_render(c) for c in _chunks(text))
@@ -130,11 +160,14 @@ def do_verify(path):
     print(f'{path}: 数式 {n}個がレンダリング / 未変換の $ を含む行 {len(bad)}個'
           f' / 表示されない math ブロック {len(dead)}個')
     for l in bad[:10]: print('   ', l[:120])
+    mism = compare_inline(text, html)
+    print(f'{path}: 元の式と描画に渡る式の食い違い {len(mism)}個')
+    for ln, s, g in mism[:10]: print(f'    行{ln}\n      元  : {s[:120]}\n      描画: {str(g)[:120]}')
     unk = unknown_commands(text)
     print(f'{path}: 知らない命令名 {len(unk)}個(命令と文字がつながっていないか確認)')
     for c, s in unk[:10]: print(f'    [\\{c}]', s.replace(chr(10), ' '))
     for d in dead[:10]: print('    [math未描画]', d.strip()[:100])
-    return len(bad) + len(dead) + len(unk)
+    return len(bad) + len(dead) + len(unk) + len(mism)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3: sys.exit(__doc__)
