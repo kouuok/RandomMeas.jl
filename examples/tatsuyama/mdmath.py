@@ -11,7 +11,7 @@ import json, re, subprocess, sys
 
 FENCE = re.compile(r'^(\s*)(```|~~~)')
 OK_BEFORE = set(' \t([*_>|~"\'')
-ESC = {'{': r'\lbrace', '}': r'\rbrace', '|': r'\vert'}
+ESC = {'{': r'\lbrace ', '}': r'\rbrace ', '|': r'\vert '}   # 後ろの空白は、次の文字と命令名がつながらないようにするため
 
 def code_lines(text):
     out, inf, fc = [], False, None
@@ -33,8 +33,11 @@ def fix_line(line, st):
         body = m.group(0)
         new = re.sub(r'\\([{}|])', lambda k: ESC[k.group(1)], body)
         if not body.startswith('$$'):
-            new = new.replace('*', r'\ast')          # 生の * は強調に食われる
-            new = re.sub(r'\\[,;:!]', '', new)       # 間隔命令はバックスラッシュを剥がされる
+            new = new.replace('*', r'\ast ')         # 生の * は強調に食われる(空白で次の文字とつながらないようにする)
+            new = re.sub(r'\\[,;:!]', r'\\thinspace ', new)  # \, などは Markdown にバックスラッシュを剥がされるので、剥がされない \thinspace に置き換える。
+            # 以前はここで空文字に置き換えていたが、それだと \gamma\,U が未定義の \gammaU になって表示が壊れた
+        if not body.startswith('$$'):
+            new = re.sub(r'\s+\$$', '$', new)           # 閉じ $ の直前に空白を残さない
         if new != body: st['esc'] += 1
         return new
     out, last = [], 0
@@ -96,6 +99,22 @@ def _chunks(text, limit=350_000):
     if cur: parts.append(''.join(cur))
     return parts
 
+# この研究の文書で使っている LaTeX 命令。ここにない命令名は、命令と次の文字が
+# つながってしまった(例: \gamma\,U を整形して \gammaU になった)可能性が高い。
+# GitHub の API は数式を描画しないので、この確認をしないと見逃す。
+KNOWN_CMDS = set(['Big', 'Bigl', 'Bigr', 'Delta', 'Gamma', 'Longleftrightarrow', 'Longrightarrow', 'Omega', 'Phi', 'Pi', 'Pr', 'Rightarrow', 'Sigma', 'Tr', 'alpha', 'approx', 'arg', 'ast', 'bar', 'begin', 'beta', 'bigl', 'bigotimes', 'bigr', 'binom', 'boxed', 'cap', 'cdot', 'cdots', 'chi', 'cos', 'cup', 'dagger', 'delta', 'det', 'dfrac', 'dots', 'downarrow', 'ell', 'end', 'epsilon', 'equiv', 'eta', 'exp', 'frac', 'gamma', 'ge', 'gg', 'gtrsim', 'hat', 'iff', 'in', 'infty', 'int', 'kappa', 'lVert', 'lambda', 'langle', 'lbrace', 'lceil', 'le', 'left', 'leftrightarrow', 'lesssim', 'll', 'ln', 'log', 'longrightarrow', 'lvert', 'mathbb', 'mathbf', 'mathcal', 'mathrm', 'mathsf', 'max', 'mid', 'min', 'mp', 'mu', 'ne', 'neq', 'nu', 'otimes', 'overline', 'partial', 'phi', 'pi', 'pm', 'pmod', 'prod', 'propto', 'psi', 'qquad', 'quad', 'rVert', 'rangle', 'rbrace', 'rceil', 'rho', 'right', 'rm', 'rvert', 'sigma', 'sim', 'simeq', 'sin', 'sqrt', 'subseteq', 'sum', 'sup', 'tau', 'text', 'tfrac', 'theta', 'thinspace', 'tilde', 'times', 'to', 'underbrace', 'uparrow', 'varepsilon', 'varphi', 'vert', 'wedge', 'widehat', 'xi', 'xrightarrow'])
+
+def unknown_commands(text):
+    t = re.sub(r'```math\n(.*?)```', lambda m: '$$' + m.group(1) + '$$', text, flags=re.S)
+    t = re.sub(r'```.*?```', '', t, flags=re.S)
+    bad = []
+    for m in re.finditer(r'\$\$.+?\$\$|\$[^$\n]+?\$', t, flags=re.S):
+        body = m.group(0).replace('\\\\', ' ')      # 行替えの \\ を除く
+        for c in re.findall(r'\\([A-Za-z]+)', body):
+            if c not in KNOWN_CMDS:
+                bad.append((c, m.group(0)[:100]))
+    return bad
+
 def do_verify(path):
     text = open(path, encoding='utf-8').read()
     html = ''.join(_render(c) for c in _chunks(text))
@@ -111,8 +130,11 @@ def do_verify(path):
     print(f'{path}: 数式 {n}個がレンダリング / 未変換の $ を含む行 {len(bad)}個'
           f' / 表示されない math ブロック {len(dead)}個')
     for l in bad[:10]: print('   ', l[:120])
+    unk = unknown_commands(text)
+    print(f'{path}: 知らない命令名 {len(unk)}個(命令と文字がつながっていないか確認)')
+    for c, s in unk[:10]: print(f'    [\\{c}]', s.replace(chr(10), ' '))
     for d in dead[:10]: print('    [math未描画]', d.strip()[:100])
-    return len(bad) + len(dead)
+    return len(bad) + len(dead) + len(unk)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3: sys.exit(__doc__)

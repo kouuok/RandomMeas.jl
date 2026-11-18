@@ -95,7 +95,7 @@ G=\frac{\mathrm{Var}[\text{標準}]}{\mathrm{Var}[\text{CRM}]}=\frac{(3^{\lvert 
 
 ### 2.1 1つの設定での推定値
 
-ランダム測定では、各量子ビット $q$ について基底 $b_q\in\lbraceX,Y,Z\rbrace$ を独立に等確率で選び、その基底で測って結果 $s_q\in\lbrace\pm1\rbrace$ を得る。パウリ文字列 $P=\bigotimes_{q\in A}P_q$ の、1回の測定からの推定値は(§0.5 の導出)
+ランダム測定では、各量子ビット $q$ について基底 $b_q\in\lbrace X,Y,Z\rbrace$ を独立に等確率で選び、その基底で測って結果 $s_q\in\lbrace\pm1\rbrace$ を得る。パウリ文字列 $P=\bigotimes_{q\in A}P_q$ の、1回の測定からの推定値は(§0.5 の導出)
 
 ```math
 X=3^{\lvert A\rvert}\Bigl(\prod_{q\in A}s_q\Bigr)\,\mathbf 1\bigl[\text{すべての }q\in A\text{ で }b_q=P_q\bigr]

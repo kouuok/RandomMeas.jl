@@ -254,7 +254,7 @@ $r$ 番目の設定のデータから作る古典シャドウは
 
 - $\mathcal M^{-1}$ が自己共役なので、 $\mathrm{Tr}[\gamma\mathcal M^{-1}(X)]=\mathrm{Tr}[\mathcal M^{-1}(\gamma)X]$ である。
 - パウリ行列はトレースが 0 なので $\mathcal M_i^{-1}(\gamma_i)=3\gamma_i$ 、恒等演算子は $\mathcal M_i^{-1}(\mathbb 1)=3\cdot\mathbb 1-2\cdot\mathbb 1=\mathbb 1$ である。したがって $\mathcal M^{-1}(\gamma)=3^{N_A}\gamma$ 。
-- 残るのは $\gamma(U,\mathbf s)\equiv\mathrm{Tr}[\gammaU^\dagger\lvert\mathbf s\rangle\langle\mathbf s\rvert U]=\prod_i\langle s_i\rvert U_i\gamma_iU_i^\dagger\lvert s_i\rangle$ である。台の上の量子ビット $i$ について、 $U_i$ が $\gamma_i$ の基底に当たっていれば( $U_i^\dagger ZU_i=\gamma_i$ )、 $U_i\gamma_iU_i^\dagger=Z$ で因子は $(-1)^{s_i}$ になる。外れていれば $U_i\gamma_iU_i^\dagger$ は $Z$ 以外のパウリ行列(符号を除く)で、対角成分が 0 なので因子は 0 になる。
+- 残るのは $\gamma(U,\mathbf s)\equiv\mathrm{Tr}[\gamma U^\dagger\lvert\mathbf s\rangle\langle\mathbf s\rvert U]=\prod_i\langle s_i\rvert U_i\gamma_iU_i^\dagger\lvert s_i\rangle$ である。台の上の量子ビット $i$ について、 $U_i$ が $\gamma_i$ の基底に当たっていれば( $U_i^\dagger ZU_i=\gamma_i$ )、 $U_i\gamma_iU_i^\dagger=Z$ で因子は $(-1)^{s_i}$ になる。外れていれば $U_i\gamma_iU_i^\dagger$ は $Z$ 以外のパウリ行列(符号を除く)で、対角成分が 0 なので因子は 0 になる。
 
 まとめると、台の上の基底を全部当てるユニタリーを $V_\gamma$ と書いて
 
@@ -437,7 +437,7 @@ f_{\rho,\sigma}(U)=3^{N_A}\,\delta_{U_A,V_\gamma}\,\mathrm{Tr}\bigl((\rho-\sigma
 
 となる。
 
-**第2項。** $\gamma(U,\mathbf s)^2=\delta_{U_A,V_\gamma}$ ( $\pm1$ の2乗は 1)なので、 $\sum_{\mathbf s}P_\rhow^2=9^{N_A}\delta_{U_A,V_\gamma}$ 、 $\bigl(\sum_{\mathbf s}P_\rhow\bigr)^2=9^{N_A}\delta_{U_A,V_\gamma}\mathrm{Tr}(\rho\gamma)^2$ である。したがって
+**第2項。** $\gamma(U,\mathbf s)^2=\delta_{U_A,V_\gamma}$ ( $\pm1$ の2乗は 1)なので、 $\sum_{\mathbf s}P_\rho w^2=9^{N_A}\delta_{U_A,V_\gamma}$ 、 $\bigl(\sum_{\mathbf s}P_\rho w\bigr)^2=9^{N_A}\delta_{U_A,V_\gamma}\mathrm{Tr}(\rho\gamma)^2$ である。したがって
 
 ```math
 g_\rho(U)=9^{N_A}\,\delta_{U_A,V_\gamma}\bigl(1-\mathrm{Tr}(\rho\gamma)^2\bigr),\qquad\mathbb E_U[g_\rho(U)]=3^{N_A}\bigl(1-\mathrm{Tr}(\rho\gamma)^2\bigr)\qquad(\text{式(23)、(24) [PRX: (C5)、(C6)]})
@@ -741,8 +741,8 @@ I_{n_{\max}}=\int_0^1\bigl[f(x)-f_{n_{\max}}(x)\bigr]^2dx\qquad(\text{式(41) [P
 
 である。2乗を展開して積分する。
 
-- (補足) $\int_0^1x^n\cdot x^{n'}dx=\frac1{1+n+n'}$ 。
-- (補足) $\int_0^1x^k\log xdx=-\frac1{(k+1)^2}$ (部分積分)を $k=n+1$ で使うと、 $\int_0^1(-x\log x)x^ndx=\frac1{(n+2)^2}$ 。
+- (補足) $\int_0^1x^n\cdot x^{n'}\thinspace dx=\frac1{1+n+n'}$ 。
+- (補足) $\int_0^1x^k\log x\thinspace dx=-\frac1{(k+1)^2}$ (部分積分)を $k=n+1$ で使うと、 $\int_0^1(-x\log x)\thinspace x^n\thinspace dx=\frac1{(n+2)^2}$ 。
 
 したがって
 
